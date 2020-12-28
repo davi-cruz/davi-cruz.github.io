@@ -1,6 +1,6 @@
 global:
-  portuguese: pt-BR
-  english: en-US
+  portuguese: ":brazil:"
+  english: ":us:"
 pages:
   home: Home
   work: Work

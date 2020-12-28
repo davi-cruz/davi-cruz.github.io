@@ -1,4 +1,4 @@
-name: Build and deploy Jekyll site to GitHub Pages
+name: Build and Deploy GH Pages
 
 on:
   push:
@@ -6,10 +6,18 @@ on:
       - master
 
 jobs:
-  github-pages:
-    runs-on: ubuntu-18.04
+  jekyll:
+    runs-on: ubuntu-16.04
     steps:
       - uses: actions/checkout@v2
-      - uses: helaili/jekyll-action@2.0.1
+      # Use GitHub Actions' cache to shorten build times and decrease load on servers.
+      - uses: actions/cache@v1
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+      - uses: helaili/jekyll-action@2.0.2
         env:
+          # Ideally use GITHUB_TOKEN but it gives error for this action.
           JEKYLL_PAT: ${{ secrets.JEKYLL_PAT }}

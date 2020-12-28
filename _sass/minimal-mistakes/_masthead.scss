@@ -79,29 +79,6 @@
     clear: both;
     list-style-type: none;
   }
-
-  #lang-sel {
-    float: right;
-    margin-left: 0;
-
-    @include breakpoint($small) {
-      float: right;
-    }
-
-	.enabled {
-		font-weight: bold;
-	}
-
-    .lang {
-     float:right;
-     font-size: 13px;
-
-		a {
-			position: relative;
-			color: #40514e;
-		}
-	}
-  }
 }
 
 .masthead__menu-item {

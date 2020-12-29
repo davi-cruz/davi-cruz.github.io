@@ -64,9 +64,8 @@ google:
   instant_search         : # false (default), true
 
 # Multilanguage
-languages: ["br", "en"]
+languages: ["en-US", "pt-BR"]
 exclude_from_localizations: ["javascript", "images", "css"]
-default_locale_in_subfolder: true
 
 # SEO Related
 google_site_verification :
@@ -197,6 +196,7 @@ plugins:
   - jekyll-feed
   - jekyll-include-cache
   - jemoji
+  - jekyll-multiple-languages-plugin
 
 # mimic GitHub Pages with --safe
 whitelist:

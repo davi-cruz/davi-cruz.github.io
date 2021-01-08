@@ -116,6 +116,19 @@ author:
       icon: "fab fa-fw fa-github"
       url: "https://github.com/davi-cruz"
 
+# Footer
+footer:
+  links:
+    - label: "Linkedin"
+      icon: "fab fa-fw fa-linkedin"
+      url: "https://www.linkedin.com/in/davicruz"
+    - label: "Twitter"
+      icon: "fab fa-fw fa-twitter-square"
+      url: "https://twitter.com/zerahzurc"
+    - label: "GitHub"
+      icon: "fab fa-fw fa-github"
+      url: "https://github.com/davi-cruz"
+
 # Reading Files
 include:
   - .htaccess

@@ -1,8 +1,18 @@
 global:
-  portuguese: ":brazil:"
-  english: ":us:"
+  pt-BR:
+    icon: ":brazil:"
+    name: "Portuguese"
+  en-US:
+    icon: ":us:"
+    name: "English"
+  readalsoin: "Leia também em "
+  alsoavailablein: "Disponível também em "
 pages:
-  home: Home
-  work: Work
-titles:
-  pagination: Pagination
+  about: "About"
+navigation:
+  - title: "About"
+    url: /about/
+  - title: "Tags"
+    url: /tags/
+  - title: "Categories"
+    url: /categories/

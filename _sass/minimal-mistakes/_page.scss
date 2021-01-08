@@ -533,6 +533,18 @@ body {
 }
 
 /*
+EDIT: 
+*/
+
+.page__related .grid__wrapper .grid__item .archive__item .page__meta .page__meta-lang {
+  visibility: hidden;
+}
+
+.archive .entries-list .list__item .archive__item .page__meta .page__meta-lang {
+  visibility: hidden;
+}
+
+/*
    Wide Pages
    ========================================================================== */
 

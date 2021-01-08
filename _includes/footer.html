@@ -1,12 +1,9 @@
 <div class="page__footer-follow">
   <ul class="social-icons">
-    <!-- Removing Follow Label on footer
 
-    {% if site.data.ui-text[site.locale].follow_label %}
-      <li><strong>{{ site.data.ui-text[site.locale].follow_label }}</strong></li>
+    {% if site.data.ui-text[site.lang].follow_label %}
+    <li><strong>{{ site.data.ui-text[site.lang].follow_label }}</strong></li>
     {% endif %}
-
-    -->
 
     {% if site.footer.links %}
     {% for link in site.footer.links %}
@@ -19,12 +16,35 @@
 
     <li><a
         href="{% if site.atom_feed.path %}{{ site.atom_feed.path }}{% else %}{{ '/feed.xml' | relative_url }}{% endif %}"><i
-          class="fas fa-fw fa-rss-square" aria-hidden="true"></i> {{ site.data.ui-text[site.locale].feed_label |
+          class="fas fa-fw fa-rss-square" aria-hidden="true"></i> {{ site.data.ui-text[site.lang].feed_label |
         default: "Feed" }}</a></li>
   </ul>
 </div>
 
+<!-- Start Read in other languages-->
+<div class="page__footer-follow">
+  <ul>
+    {% for lang in site.languages %}
+    {% unless site.lang == lang %}
+    {% if lang == site.default_lang and site.default_locale_in_subfolder != true %}
+    <li><a href="{{ site.url }}">{% t global.alsoavailablein %} {% t global.{{ lang }}.icon %}</a></li>
+    {% else %}
+    <li><a href="{{ site.url }}/{{ lang }}">{% t global.alsoavailablein %} {% t global.{{ lang }}.icon %}</a></li>
+    {% endif %}
+
+    {% assign next = forloop.index | plus: 1 %}
+
+    {% if forloop.last != true and site.languages[forloop.index] != site.lang or site.languages[forloop.index] ==
+    site.lang and next < forloop.length %} <li class="separator"> &bull; </li>
+      {% endif %}
+
+      {% endunless %}
+      {% endfor %}
+  </ul>
+</div>
+<!-- End Read in other languages-->
+
 <div class="page__footer-copyright">&copy; {{ site.time | date: '%Y' }} {{ site.name | default: site.title }}. {{
-  site.data.ui-text[site.locale].powered_by | default: "Powered by" }} <a href="https://jekyllrb.com"
+  site.data.ui-text[site.lang].powered_by | default: "Powered by" }} <a href="https://jekyllrb.com"
     rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/"
     rel="nofollow">Minimal Mistakes</a>.</div>

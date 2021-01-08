@@ -1,7 +1,9 @@
-<!--
-  <li>
-    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
-      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
-    </a>
-  </li>
--->
+
+<li>
+  <strong>{% t global.alsoin %}</strong>
+  {% if site.lang == "pt-BR" %}
+  <a class="link-en" href="{% tl root en-US %}">{% t global.english %}</a>
+  {% elsif site.lang == "en-US" %}
+  <a class="link-br" href="{% tl root pt-BR %}">{% t global.portuguese %}</a>
+  {% endif %}
+</li>

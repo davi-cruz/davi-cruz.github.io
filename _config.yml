@@ -64,8 +64,7 @@ google:
   instant_search         : # false (default), true
 
 # Multilanguage
-languages: ["en-US", "pt-BR"]
-exclude_from_localizations: ["javascript", "images", "css"]
+languages: ["pt-BR", "en-US"]
 
 # SEO Related
 google_site_verification :

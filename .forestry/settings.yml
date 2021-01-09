@@ -4,8 +4,7 @@ auto_deploy: false
 admin_path: ''
 webhook_url: 
 sections:
-- type: directory
-  path: _i18n/*/_posts
+- type: jekyll-posts
   label: Posts
   create: all
   match: "**/*"

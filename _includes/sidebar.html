@@ -15,29 +15,5 @@
       {% include nav_list nav=page.sidebar.nav %}
     {% endif %}
   {% endif %}
-
-    <!-- Start Read in other languages
-    <div class="page__footer-follow">
-      <ul>
-        {% for lang in site.languages %}
-        {% unless site.lang == lang %}
-        {% if lang == site.default_lang and site.default_locale_in_subfolder != true %}
-        <li><a href="{{ site.url }}">{% t global.alsoavailablein %} {% t global.{{ lang }}.icon %}</a></li>
-        {% else %}
-        <li><a href="{{ site.url }}/{{ lang }}">{% t global.alsoavailablein %} {% t global.{{ lang }}.icon %}</a></li>
-        {% endif %}
-
-        {% assign next = forloop.index | plus: 1 %}
-
-        {% if forloop.last != true and site.languages[forloop.index] != site.lang or site.languages[forloop.index] ==
-        site.lang and next < forloop.length %} <li class="separator"> &bull; </li>
-          {% endif %}
-
-          {% endunless %}
-          {% endfor %}
-        </ul>
-    </div>
-    <!-- End Read in other languages-->
-
   </div>
 {% endif %}

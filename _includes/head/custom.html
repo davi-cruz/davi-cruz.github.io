@@ -6,4 +6,17 @@
 <!-- Clarity tracking code for http://blog.davicruz.com/ -->
 <script>    (function(c,l,a,r,i,t,y){        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);    })(window, document, "clarity", "script", "4wn0pz29ho");</script>
 
+
+<!-- Multilang tags -->
+
+{% for lang in site.languages %}
+    {% unless site.lang == lang %}
+        {% if lang == site.default_lang and site.default_locale_in_subfolder != true %}
+<link rel="alternate" hreflang="{{ lang }}" href="{{ site.baseurl_root }}{{ page.url }}">
+        {% else %}
+<link rel="alternate" hreflang="{{ lang }}" href="{{ site.baseurl_root }}/{{ lang }}{{ page.url }}">
+        {% endif %}
+    {% endunless %}
+{% endfor %}
+
 <!-- end custom head snippets -->

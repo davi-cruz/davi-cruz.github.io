@@ -10,13 +10,11 @@
 <!-- Multilang tags -->
 
 {% for lang in site.languages %}
-    {% unless site.lang == lang %}
-        {% if lang == site.default_lang and site.default_locale_in_subfolder != true %}
+    {% if lang == site.default_lang and site.default_locale_in_subfolder != true %}
 <link rel="alternate" hreflang="{{ lang }}" href="{{ site.baseurl_root }}{{ page.url }}">
-        {% else %}
+    {% else %}
 <link rel="alternate" hreflang="{{ lang }}" href="{{ site.baseurl_root }}/{{ lang }}{{ page.url }}">
-        {% endif %}
-    {% endunless %}
+    {% endif %}
 {% endfor %}
 
 <!-- end custom head snippets -->

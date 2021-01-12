@@ -12,12 +12,9 @@
           {% if site.subtitle %}<span class="site-subtitle">{{ site.subtitle }}</span>{% endif %}
         </a>
         <ul class="visible-links">
-<!-- first= {{ site.data.navigation.main }} -->
-<!-- secnd= {{ site.translations[site.lang].navigation }} -->
-          {%- for link in site.data.navigation.main -%}
+          {%- for link in site.translations[site.lang].navigation.main -%}
           <li class="masthead__menu-item">
-            <a href="{{ link.url | relative_url }}" {% if link.description %} title="{{ link.description }}" {% endif
-              %}>{{ link.title }}</a>
+            <a href="{{ link.url | relative_url }}" {% if link.description %} title="{{ link.description }}" {% endif %}>{{ link.title }}</a>
           </li>
           {%- endfor -%}
         </ul>

@@ -7,12 +7,12 @@ global:
     name: "Inglês"
   readalsoin: "Read also in "
   alsoavailablein: "Also available in "
-pages:
-  about: "Sobre"
+  bio: "Apenas mais um profissional de Cibersegurança"
 navigation:
-  - title: "Sobre"
-    url: /about/
-  - title: "Tags"
-    url: /tags/
-  - title: "Categorias"
-    url: /categories/
+  main:
+    - title: "Sobre"
+      url: /sobre/
+    - title: "Tags"
+      url: /tags/
+    - title: "Categorias"
+      url: /categorias/

@@ -10,6 +10,8 @@ global:
   bio: "Just another Cybersecurity professional"
 tag_archive:
   path: "/tag/"
+category_archive:
+  path: "/categories/"
 navigation:
   main:
     - title: "About"

@@ -10,6 +10,8 @@ global:
   bio: "Apenas mais um profissional de Cibersegurança"
 tag_archive:
   path: "/tags/"
+category_archive:
+  path: "/categorias/"
 navigation:
   main:
     - title: "Sobre"

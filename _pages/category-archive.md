@@ -1,4 +1,5 @@
 ---
+title: Categories
 layout: categories
 permalink: /categorias/
 permalink_en-US: /categories/

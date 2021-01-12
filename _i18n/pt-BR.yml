@@ -8,6 +8,8 @@ global:
   readalsoin: "Read also in "
   alsoavailablein: "Also available in "
   bio: "Apenas mais um profissional de Cibersegurança"
+tag_archive:
+  path: "/tags/"
 navigation:
   main:
     - title: "Sobre"

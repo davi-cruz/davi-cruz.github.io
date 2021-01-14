@@ -6,7 +6,7 @@
       <nav id="site-nav" class="greedy-nav">
         {% if site.lang == site.default_lang and site.default_locale_in_subfolder != true %}
           {% unless logo_path == empty %}
-          <a class="site-logo" href="{{ site.url }}"><img src="{{ logo_path | relative_url }}" alt=""></a>
+          <a class="site-logo" href="{{ site.url }}"><img src="{{ logo_path | relative_url }}" alt="{{ site.masthead_title | default: site.title }}"></a>
           {% endunless %}
           <a class="site-title" href="{{ site.url }}">
             {{ site.masthead_title | default: site.title }}

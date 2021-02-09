@@ -6,8 +6,9 @@ tags: HackTheBox htb-easy htb-linux
 date: 2021-02-06 12:00:00
 header:
    teaser: https://i.imgur.com/EeJREQG.png
-   image: https://i.imgur.com/EeJREQG.png
 ---
+![image-20210209083728228](https://i.imgur.com/7DBDPWU.png)
+
 Oá pessoal!
 
 Começando a postar sobre alguns write-ups de máquinas estilo CTF, a primeira a ser resolvida será **Doctor**, uma máquina Linux classificada como fácil do [Hack The Box](https://www.hackthebox.eu).

@@ -5,7 +5,8 @@ category: writeup
 tags: HackTheBox htb-easy htb-linux
 date: 2021-02-06 12:00:00
 header:
-   teaser: https://i.imgur.com/RcJphYt.png
+   teaser: https://i.imgur.com/EeJREQG.png
+   image: https://i.imgur.com/EeJREQG.png
 ---
 Hello everyone!
 
@@ -384,6 +385,4 @@ From the reverse shell obtained, was able to get the content from `/root/root.tx
 I hope it was somehow useful! 
 
 See you in the next post! :smile:
-
-
 

@@ -129,8 +129,6 @@ footer:
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/davi-cruz"
-    - label: "Term and Privacy"
-      url: "https://davicruz.com/terms-privacy"
 
 # Reading Files
 include:

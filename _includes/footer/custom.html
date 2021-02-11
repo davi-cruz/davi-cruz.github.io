@@ -2,52 +2,40 @@
 
 <!-- Osano - consent -->
 <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
-{% for lang in site.languages %}
-    {% if lang == site.default_lang and site.default_locale_in_subfolder != true %}
-    <script>
-    window.cookieconsent.initialise({
-    "palette": {
-        "popup": {
-        "background": "#252e39"
-        },
-        "button": {
-        "background": "#14a7d0"
-        }
+
+<!--TODO Change dynamically the content based on site language -->
+
+<script>
+var strMessage = "This website uses cookies to ensure you get the best experience on our website";
+var strDismiss = "Got it!";
+var strAllow = "Allow cookies";
+var strDeny = "No, thanks!";
+var strLink = "Learn More";
+var strHref = "https://davicruz.com/termos-privacidade";
+
+window.cookieconsent.initialise({
+  "palette": {
+    "popup": {
+      "background": "#252e39"
     },
-    "type": "opt-out",
-    "content": {
-        "message": "Este website utiliza cookies para garantir uma melhor experiência em nosso website",
-        "dismiss": "Entendi!",
-        "deny": "Não, obrigado!",
-        "link": "Saiba mais",
-        "href": "https://davicruz.com/termos-privacidade"
+    "button": {
+      "background": "transparent",
+      "text": "#14a7d0",
+      "border": "#14a7d0"
     }
-    });
-    </script>
-    {% else %}
-    <script>
-        window.cookieconsent.initialise({
-          "palette": {
-            "popup": {
-              "background": "#252e39"
-            },
-            "button": {
-              "background": "#14a7d0"
-            }
-          },
-          "type": "opt-out",
-          "content": {
-            "message": "This website uses cookies to ensure you get the best experience on our website",
-            "dismiss": "Got it!",
-            "deny": "No, thanks!",
-            "link": "Learn More",
-            "href": "https://davicruz.com/{{ lang }}/terms-privacy"
-          }
-        });
-    </script>
-    {% endif %}
-{% endfor %}
+  },
+  "position": "bottom-right",
+  "type": "opt-in",
+  "content": {
+    "message": strMessage,
+    "dismiss": strDismiss,
+    "allow": strAllow,
+    "deny": strDeny,
+    "link": strLink,
+    "href": strHref
+  }
+});
+</script>
 <!-- end Osano - consent -->
 
 <!-- end custom footer snippets -->
-

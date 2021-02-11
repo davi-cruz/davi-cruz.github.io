@@ -13,7 +13,11 @@
     {% endif %}
     {% endfor %}
     {% endif %}
-
+    <!-- Terms and Privacy -->
+    <li><a
+        href="{% t global.termsurl %}" rel="nofollow noopener noreferrer"><i
+          class="fas shield-alt" aria-hidden="true"></i>{% t global.terms %}</a></li>
+    <!-- end Terms and Privacy -->
     <li><a
         href="{% if site.atom_feed.path %}{{ site.atom_feed.path }}{% else %}{{ '/feed.xml' | relative_url }}{% endif %}"><i
           class="fas fa-fw fa-rss-square" aria-hidden="true"></i> {{ site.data.ui-text[site.lang].feed_label |

@@ -8,6 +8,8 @@ global:
   readalsoin: "Leia também em "
   alsoavailablein: "Disponível também em "
   bio: "Just another Cybersecurity professional"
+  terms: "Terms and Privacy"
+  termsurl: "https://davicruz.com/en-US/terms-privacy"
 tag_archive:
   path: "/tag/"
 category_archive:

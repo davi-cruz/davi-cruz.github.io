@@ -1,2 +1,53 @@
 <!-- start custom footer snippets -->
+
+<!-- Osano - consent -->
+<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+{% for lang in site.languages %}
+    {% if lang == site.default_lang and site.default_locale_in_subfolder != true %}
+    <script>
+    window.cookieconsent.initialise({
+    "palette": {
+        "popup": {
+        "background": "#252e39"
+        },
+        "button": {
+        "background": "#14a7d0"
+        }
+    },
+    "type": "opt-out",
+    "content": {
+        "message": "Este website utiliza cookies para garantir uma melhor experiência em nosso website",
+        "dismiss": "Entendi!",
+        "deny": "Não, obrigado!",
+        "link": "Saiba mais",
+        "href": "https://davicruz.com/termos-privacidade"
+    }
+    });
+    </script>
+    {% else %}
+    <script>
+        window.cookieconsent.initialise({
+          "palette": {
+            "popup": {
+              "background": "#252e39"
+            },
+            "button": {
+              "background": "#14a7d0"
+            }
+          },
+          "type": "opt-out",
+          "content": {
+            "message": "This website uses cookies to ensure you get the best experience on our website",
+            "dismiss": "Got it!",
+            "deny": "No, thanks!",
+            "link": "Learn More",
+            "href": "https://davicruz.com/{{ lang }}/terms-privacy"
+          }
+        });
+    </script>
+    {% endif %}
+{% endfor %}
+<!-- end Osano - consent -->
+
 <!-- end custom footer snippets -->
+

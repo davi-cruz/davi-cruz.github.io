@@ -6,12 +6,12 @@
 <!--TODO Change dynamically the content based on site language -->
 
 <script>
-var strMessage = "This website uses cookies to ensure you get the best experience on our website";
-var strDismiss = "Got it!";
-var strAllow = "Allow cookies";
-var strDeny = "No, thanks!";
-var strLink = "Learn More";
-var strHref = "https://davicruz.com/termos-privacidade";
+var strMessage = "{% t cookie.strMessage %}";
+var strDismiss = "{% t cookie.strDismiss %}";
+var strAllow = "{% t cookie.strAllow %}";
+var strDeny = "{% t cookie.strDeny %}";
+var strLink = "{% t cookie.strLink %}";
+var strHref = "{% t cookie.strHref %}";
 
 window.cookieconsent.initialise({
   "palette": {

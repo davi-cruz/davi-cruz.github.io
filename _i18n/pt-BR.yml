@@ -10,6 +10,13 @@ global:
   bio: "Apenas mais um profissional de Cibersegurança"
   terms: "Termos e Privacidade"
   termsurl: "https://davicruz.com/termos-privacidade"
+cookie:
+  strMessage: "Este website utiliza cookies para garantir a você uma melhor experiência"
+  strDismiss: "Entendi"
+  strAllow: "Permitir"
+  strDeny: "Não, obrigado!"
+  strLink: "Saiba Mais"
+  strHref: "https://davicruz.com/termos-privacidade"
 tag_archive:
   path: "/tags/"
 category_archive:

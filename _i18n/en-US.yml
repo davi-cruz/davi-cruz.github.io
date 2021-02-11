@@ -10,6 +10,13 @@ global:
   bio: "Just another Cybersecurity professional"
   terms: "Terms and Privacy"
   termsurl: "https://davicruz.com/en-US/terms-privacy"
+cookie:
+  strMessage: "This website uses cookies to ensure you get the best experience on our website"
+  strDismiss: "Got it!"
+  strAllow: "Allow cookies"
+  strDeny: "No, thanks!"
+  strLink: "Learn More"
+  strHref: "https://davicruz.com/en-US/terms-privacy"
 tag_archive:
   path: "/tag/"
 category_archive:

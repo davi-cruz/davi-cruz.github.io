@@ -73,12 +73,6 @@ bing_site_verification   : "60B1FA6CDAF15D226AB529AF30386BD8"
 yandex_site_verification : "1deffc38888c3efb" 
 naver_site_verification  :
 
-# Scripts
-#head_scripts:
-#footer_scripts:
-after_footer_scripts:
-  - /assets/js/cookie-consent.js
-
 # Social Sharing
 twitter:
   username               : &twitter "zerahzurc"

@@ -12,8 +12,8 @@
       },
       "button": {
         "background": "transparent",
-        "text": "#14a7d0",
-        "border": "#14a7d0"
+        "text": "#008288",
+        "border": "#008288"
       }
     },
     "position": "bottom-right",
@@ -26,15 +26,13 @@
       "link": strLink,
       "href": strHref
     },
-    cookie.name: "dc-consent-status",
-    cookie.expiryDays: 120,
-    revokable: true,
     onInitialise: function (status) {
       var type = this.options.type;
       var didConsent = this.hasConsented();
       if (type == 'opt-in' && didConsent) {
         // enable cookies
         EnableMSClarityonConsent();
+        EnableGTAGonConsent();
       }
       if (type == 'opt-out' && !didConsent) {
         // disable cookies
@@ -46,6 +44,7 @@
       if (type == 'opt-in' && didConsent) {
         // enable cookies
         EnableMSClarityonConsent();
+        EnableGTAGonConsent();
       }
       if (type == 'opt-out' && !didConsent) {
         // disable cookies
@@ -59,6 +58,7 @@
       if (type == 'opt-out') {
         // enable cookies
         EnableMSClarityonConsent();
+        EnableGTAGonConsent();
       }
     }
   });

@@ -78,7 +78,6 @@ naver_site_verification  :
 #footer_scripts:
 after_footer_scripts:
   - /assets/js/cookie-consent.js
-  - /assets/js/msclarity.js
 
 # Social Sharing
 twitter:
@@ -100,10 +99,12 @@ social:
 
 # Analytics
 analytics:
-  provider               : google-gtag # false (default), "google", "google-universal", "google-gtag", "custom"
+  provider               : custom # false (default), "google", "google-universal", "google-gtag", "custom"
   google:
     tracking_id          : "UA-54883666-1" 
     anonymize_ip         : true # true, false (default)
+  ms-clarity:
+    project_id           : "5dnbfjo108"
 
 
 # Site Author

@@ -8,15 +8,15 @@ global:
   readalsoin: "Leia também em "
   alsoavailablein: "Disponível também em "
   bio: "Just another Cybersecurity professional"
-  terms: "Terms and Privacy"
+  terms: "Terms of Service and Privacy Policy"
   termsurl: "https://davicruz.com/en-US/terms-privacy"
 cookie:
-  strMessage: "This website uses cookies to ensure you get the best experience on our website"
+  strMessage: "This website uses cookies to ensure you get the best experience"
   strDismiss: "Got it!"
   strAllow: "Allow cookies"
   strDeny: "No, thanks!"
   strLink: "Learn More"
-  strHref: "https://davicruz.com/en-US/terms-privacy"
+  strHref: "https://davicruz.com/en-US/terms-and-privacy/"
 tag_archive:
   path: "/tag/"
 category_archive:

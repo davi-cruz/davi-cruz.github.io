@@ -13,9 +13,3 @@ Atualmente com foco em soluções do Microsoft Defender 365 e Azure para detecç
 
 Também apaixonado por Linux e Open Source em geral.
 
-## Aviso Legal
-
-
-As opiniões esxpressas neste blog são exclusivamente minhas e não necessariamente de qualquer cliente ou empregador anterior, atual ou futuro.
-
-Como me reservo o direito de revisar minha posição com base em evidências futuras, elas podem nem mesmo refletir minhas próprias opiniões no momento em que você as lê. Em caso de dúvida, fique à vontade para perguntar.

@@ -13,8 +13,3 @@ Currently focusing on Threat Detection and Security Management Solution from Mic
 
 Also passionate about Linux and Open Source in general.
 
-## Disclaimer
-
-The views expressed on this blog are mine alone and not (necessarily) those of any former, current or future client or employer. 
-
-As I reserve the right to review my position based on future evidence, they may not even reflect my own views by the time you read them. If in doubt, feel free to ask.

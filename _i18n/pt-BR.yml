@@ -8,15 +8,15 @@ global:
   readalsoin: "Read also in "
   alsoavailablein: "Also available in "
   bio: "Apenas mais um profissional de Cibersegurança"
-  terms: "Termos e Privacidade"
+  terms: "Termos de uso e Política Privacidade"
   termsurl: "https://davicruz.com/termos-privacidade"
 cookie:
   strMessage: "Este website utiliza cookies para garantir a você uma melhor experiência"
-  strDismiss: "Entendi"
-  strAllow: "Permitir"
+  strDismiss: "Entendi!"
+  strAllow: "Permitir Cookies"
   strDeny: "Não, obrigado!"
   strLink: "Saiba Mais"
-  strHref: "https://davicruz.com/termos-privacidade"
+  strHref: "https://davicruz.com/termos-e-privacidade/"
 tag_archive:
   path: "/tags/"
 category_archive:

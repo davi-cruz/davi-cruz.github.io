@@ -22,6 +22,7 @@ title_separator          : "|"
 name                     : *name
 description              : &description "Just another Cybersecurity blog"
 url                      : "https://davicruz.com"
+domain                   : "davicruz.com"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
 repository               : "davi-cruz/davi-cruz.github.io" # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
 teaser                   : "/assets/images/teaser.png" # path of fallback teaser image, e.g. "/assets/images/500x300.png"
@@ -80,7 +81,8 @@ facebook:
   username               :
   app_id                 :
   publisher              :
-og_image                 : "/assets/images/og.jpg"
+og_image                 : "/assets/images/og.png"
+
 # For specifying social profiles
 # - https://developers.google.com/structured-data/customize/social-profiles
 social:

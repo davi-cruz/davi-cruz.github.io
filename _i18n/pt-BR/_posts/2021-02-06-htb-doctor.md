@@ -1,12 +1,12 @@
 ---
 layout: single
 title: "Hackthebox write-up: Doctor"
+namespace: "Hackthebox write-up: Doctor"
 category: writeup
 tags: HackTheBox htb-easy htb-linux
 date: 2021-02-06 12:00:00
 header:
    teaser: https://i.imgur.com/EeJREQG.png
-comment_id: 1
 ---
 ![image-20210209083728228](https://i.imgur.com/7DBDPWU.png)
 

@@ -13,3 +13,6 @@ Atualmente com foco em soluções do Microsoft Defender 365 e Azure para detecç
 
 Também apaixonado por Linux e Open Source em geral.
 
+## Badges
+
+![Hack The Box](https://www.hackthebox.eu/badge/image/150448)

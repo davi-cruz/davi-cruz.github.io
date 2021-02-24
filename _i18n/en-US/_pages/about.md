@@ -13,3 +13,6 @@ Currently focusing on Threat Detection and Security Management Solution from Mic
 
 Also passionate about Linux and Open Source in general.
 
+## Badges
+
+![Hack The Box](https://www.hackthebox.eu/badge/image/150448)

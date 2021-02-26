@@ -1,3 +1,9 @@
+---
+permalink:          /comandos-uteis/
+permalink_en-US:    /useful-commands/
+namespace:          useful-commands
+author_profile:     true
+---
 {% translate_file _pages/useful-commands.md %}
 
 ## File Transfer

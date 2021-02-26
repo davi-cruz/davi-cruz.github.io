@@ -12,7 +12,7 @@ header:
 
 Oá pessoal!
 
-Começando a postar sobre alguns write-ups de máquinas estilo CTF, a primeira a ser resolvida será **Doctor**, uma máquina Linux classificada como fácil do [Hack The Box](https://www.hackthebox.eu).
+Começando a postar sobre alguns write-ups de máquinas estilo CTF, a primeira a ser resolvida será **Doctor**, uma máquina Linux classificada como fácil do [Hack The Box](https://www.hackthebox.eu) criada por [egotisticalSW](https://app.hackthebox.eu/users/94858).
 
 Write-ups para máquinas do Hack The Box serão postados assim que as máquinas sejam aposentadas, então segue abaixo a primeira :smiley:!
 {: .notice--info}

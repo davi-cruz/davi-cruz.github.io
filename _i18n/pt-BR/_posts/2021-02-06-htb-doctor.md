@@ -2,7 +2,7 @@
 layout: single
 title: "Hackthebox write-up: Doctor"
 namespace: "Hackthebox write-up: Doctor"
-category: writeup
+category: Writeup
 tags: HackTheBox htb-easy htb-linux
 date: 2021-02-06 12:00:00
 header:

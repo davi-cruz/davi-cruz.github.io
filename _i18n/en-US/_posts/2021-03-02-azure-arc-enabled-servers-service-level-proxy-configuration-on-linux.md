@@ -13,7 +13,7 @@ In this post I'll guide you on how to configure this for Linux, without configur
 
 ## Default configuration
 
-As default, when we specify a proxy server during the Azure Arc agent installation in a Linux Server, there's a utility which handles all these requestes, which is `azcmagent_proxy, as below:
+By default, when we specify a proxy server during the Azure Arc agent installation in a Linux Server, there's a utility which handles all these requestes, which is `azcmagent_proxy, as below:
 
 ```bash
 dcruz@vmlx02:~$ sudo azcmagent_proxy

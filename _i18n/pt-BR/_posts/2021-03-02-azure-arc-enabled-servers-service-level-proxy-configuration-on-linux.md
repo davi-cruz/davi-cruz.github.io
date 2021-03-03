@@ -34,7 +34,7 @@ Adding proxy environment variable to file:  /opt/azcmagent/bin/azcmagent
 dcruz@vmlx02:~$
 ```
 
-O primeiro deles, o ` /lib/systemd/system.conf.d/proxy.conf`, define o proxy a todos os serviços systemd de forma global, enquanto o arquivo `/opt/azcmagent/bin/azcmagent`, que é o wrapper do utilitário de linha de comando do Arc, também recebe esta configuração. 
+O primeiro deles, o `/lib/systemd/system.conf.d/proxy.conf`, que define o proxy a todos os serviços systemd de forma global, enquanto o arquivo `/opt/azcmagent/bin/azcmagent`, que é o wrapper do utilitário de linha de comando do Arc, também recebe esta configuração. 
 
 ## Alterando o proxy apenas para o Azure Arc
 
@@ -60,8 +60,19 @@ A fim de configurar os serviços para que tenham a conectividade necessária, se
   $ sudo systemctl daemon-reexec
   $ sudo systemct	restart extd.service himdsd.service gcad.service
   ```
+  
+- Adicionalmente é necessário incluir o proxy no wrapper `azcmagent` para que o commando `azcmagent connect` funcione corretamente na máquina. Esta ação se dá a partir da inclusão da linha `export https_proxy=<proxyserver>` logo abaixo do comentário de que não se deve apagar a linha no arquivo `/opt/azcmagent/bin/azcmagent`, conforme exemplo abaixo:
 
-Após estas alterações, voce deverá ver a seguinte entrada nos arquivos de log, que comprovam que o serviço está funcionando corretamente e utilizando o proxy recém definido. O Log pode ser validado em `/var/opt/azcmagent/log/himds.log`
+  ```bash
+  [...]
+  
+  # Do not remove this line ==== place Environment Variables below ======
+  export https_proxy=http://vmlx01:3128
+  
+  [...]
+  ```
+
+Após estas alterações, você deverá ver a seguinte entrada nos arquivos de log, que comprovam que o serviço está funcionando corretamente e utilizando o proxy recém definido. O Log pode ser validado em `/var/opt/azcmagent/log/himds.log`
 
 ```
 time="yyyy-MM-dd02T17:34:07Z" level=debug msg="Using Https Proxy: http://vmlx01:3128"

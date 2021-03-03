@@ -58,7 +58,7 @@ A fim de configurar os serviços para que tenham a conectividade necessária, se
 
   ```bash
   $ sudo systemctl daemon-reexec
-  $ sudo systemct	restart extd.service himdsd.service gcad.service
+  $ sudo systemctl restart extd.service himdsd.service gcad.service
   ```
   
 - Adicionalmente é necessário incluir o proxy no wrapper `azcmagent` para que o commando `azcmagent connect` funcione corretamente na máquina. Esta ação se dá a partir da inclusão da linha `export https_proxy=<proxyserver>` logo abaixo do comentário de que não se deve apagar a linha no arquivo `/opt/azcmagent/bin/azcmagent`, conforme exemplo abaixo:
@@ -77,6 +77,8 @@ Após estas alterações, você deverá ver a seguinte entrada nos arquivos de l
 ```
 time="yyyy-MM-dd02T17:34:07Z" level=debug msg="Using Https Proxy: http://vmlx01:3128"
 ```
+
+A partir deste ponto você estará preparando para gerenciar este endpoint com o Azure Arc ou conectá-lo ao serviço utilizando o comando `azcmagent connect` caso seja uma nova instalação.
 
 ### Script
 

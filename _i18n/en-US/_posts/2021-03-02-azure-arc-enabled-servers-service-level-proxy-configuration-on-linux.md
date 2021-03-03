@@ -4,7 +4,7 @@ title: "Azure Arc enabled Servers: Service-level proxy configuration on Linux"
 namespace: "azure-arc-enabled-servers-service-level-proxy-configuration-on-linux"
 category: "Azure Arc"
 tags: azure arc linux
-date: 2021-02-27 12:00:00
+date: 2021-03-02 18:00:00
 ---
 
 Sometimes, when engaged to customers, I use to be asked to help them to configure proxy for internet services in some specific services, and this is not different with Azure Arc

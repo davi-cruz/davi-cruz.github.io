@@ -13,7 +13,7 @@ Neste post irei guiá-los quanto ao procedimento de configuração de proxy apen
 
 ## Configuração default
 
-Por padrão, quando especificamos um servidor proxy na instalação do agente do Azure Arc for Linux Server, existe um utilitário para que automatiza estas configurações, o `azcmagent_proxy`, que possui duas opções:
+Por padrão, quando especificamos um servidor proxy na instalação do agente do Azure Arc for Linux Server, o utilitário `azcmagent_proxy` é invocado para automatizar estas configurações, que possui as seguintes opções:
 
 ```bash
 dcruz@vmlx02:~$ sudo azcmagent_proxy
@@ -22,7 +22,7 @@ Usage:  azcmagent_proxy add <URL> - to add URL as the proxy
 dcruz@vmlx02:~$
 ```
 
-Quando configuramos o proxy via este método, dois arquivos são alterados, conforme podemos ver abaixo:
+Quando configuramos o proxy a partir deste método, dois arquivos são alterados, conforme podemos ver abaixo:
 
 ```bash
 dcruz@vmlx02:~$ sudo azcmagent_proxy add http://vmlx01:3128
@@ -34,19 +34,19 @@ Adding proxy environment variable to file:  /opt/azcmagent/bin/azcmagent
 dcruz@vmlx02:~$
 ```
 
-O primeiro deles, o ` /lib/systemd/system.conf.d/proxy.conf`, define o proxy a todos os serviços systemd de forma global, enquanto o arquivo `/opt/azcmagent/bin/azcmagent` que é o wrapper do utilitário de linha de comando do Arc.
+O primeiro deles, o ` /lib/systemd/system.conf.d/proxy.conf`, define o proxy a todos os serviços systemd de forma global, enquanto o arquivo `/opt/azcmagent/bin/azcmagent`, que é o wrapper do utilitário de linha de comando do Arc, também recebe esta configuração. 
 
 ## Alterando o proxy apenas para o Azure Arc
 
-A fim de configurar os serviços para que tenham a conectividade necessária, sem ativar o proxy de forma global ao sistema, é necessário editar cada um dos arquivos de unidade do **systemd** (*unity files*), conforme descrito abaixo:
+A fim de configurar os serviços para que tenham a conectividade necessária, sem ativar o proxy de forma global ao systemd é necessário editar cada um dos arquivos de unidade(*unity files*), conforme descrito abaixo:
 
-- Se o proxy foi configurado utilizando o `azcmagent_proxy` e deseja remover as configurações feitas por ele, é necessário executar a linha de comando abaixo que atende à esta necessidade
+- Se o proxy foi configurado utilizando o `azcmagent_proxy` e deseja remover as configurações feitas por ele, é necessário executar a linha de comando abaixo com o parâmetro **remove**
 
   ```bash
   $ sudo azcmagent_proxy remove
   ```
 
-- Adicionalmente, para cada um dos arquivos dos 3 serviços utilizados pelo Azure Arc for Linux Servers (`himdsd.service` ,`gcad.service` ,`extd.service`) localizados no diretório `/lib/systemd/system`, precisamos incluir um parâmetro na seção `[Service]` com a variável de ambiente **https_proxy**, conforme exemplo abaixo e que pode ser visto também na documentação do [**systemd**](https://www.freedesktop.org/software/systemd/man/systemd.service.html):
+- Adicionalmente, para cada um dos arquivos dos 3 serviços utilizados pelo Azure Arc for Linux Servers (`himdsd.service` ,`gcad.service` ,`extd.service`), que estão localizados no diretório `/lib/systemd/system`, precisamos incluir um parâmetro na seção `[Service]` com a variável de ambiente **https_proxy**, conforme exemplo abaixo e que pode ser visto também na documentação do [**systemd**](https://www.freedesktop.org/software/systemd/man/systemd.service.html):
 
   ```ini
   [Service]
@@ -54,14 +54,14 @@ A fim de configurar os serviços para que tenham a conectividade necessária, se
   Environment=https_proxy=http://vmlx01:3128
   ```
 
-- Após alterar os arquivos mencionados, basta executar os comandos a seguir para realizar o reload dos systemd e reiniciar os serviços:
+- Após alterar os arquivos mencionados, basta executar os comandos a seguir para realizar o reinício do systemd e reiniciar as dependências do Arc:
 
   ```bash
   $ sudo systemctl daemon-reexec
   $ sudo systemct	restart extd.service himdsd.service gcad.service
   ```
 
-Após estas alterações, voce deverá ver a seguinte entrada nos arquivos de log, que comprovam que o serviço está funcionando corretamente e utilizando o proxy definido. O Log pode ser validado em `/var/opt/azcmagent/log/himds.log`
+Após estas alterações, voce deverá ver a seguinte entrada nos arquivos de log, que comprovam que o serviço está funcionando corretamente e utilizando o proxy recém definido. O Log pode ser validado em `/var/opt/azcmagent/log/himds.log`
 
 ```
 time="yyyy-MM-dd02T17:34:07Z" level=debug msg="Using Https Proxy: http://vmlx01:3128"

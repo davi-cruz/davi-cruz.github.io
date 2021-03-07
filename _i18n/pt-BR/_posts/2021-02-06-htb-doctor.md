@@ -10,7 +10,7 @@ header:
 ---
 ![image-20210209083728228](https://i.imgur.com/7DBDPWU.png)
 
-Oá pessoal!
+Olá pessoal!
 
 Começando a postar sobre alguns write-ups de máquinas estilo CTF, a primeira a ser resolvida será **Doctor**, uma máquina Linux classificada como fácil do [Hack The Box](https://www.hackthebox.eu) criada por [egotisticalSW](https://app.hackthebox.eu/users/94858).
 

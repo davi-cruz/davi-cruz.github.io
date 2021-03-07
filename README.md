@@ -1,5 +1,7 @@
 # Davi Cruz Blog
 
+Repository for [Davi Cruz](https://davicruz.com) 
+
 #### Used Resources
 
 - [Jekyll](https://jekyllrb.com/)
@@ -7,7 +9,6 @@
 - [kurtsson/jekyll-multiple-languages-plugin: I18n support for Jekyll and Octopress (github.com)](https://github.com/kurtsson/jekyll-multiple-languages-plugin)
 - [utterances](https://utteranc.es/)
 - [osano/cookieconsent: A free solution to the EU, GDPR, and California Cookie Laws (github.com)](https://github.com/osano/cookieconsent)
-
 
 
 #### Tracking

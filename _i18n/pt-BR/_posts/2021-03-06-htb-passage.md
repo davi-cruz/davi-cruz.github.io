@@ -170,6 +170,7 @@ Além da credencial, obtive um shell reverso interativo com a conta **www-data**
 
 Após executar o script `linpeas.sh`, encontrei alguns itens interessantes:
 
+- Máquina é vulnerável a USBCreator
 
   ```
   [+] USBCreator

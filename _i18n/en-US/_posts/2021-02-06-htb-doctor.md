@@ -14,7 +14,7 @@ Hello everyone!
 
 Starting to posting about some write-ups of CTF-like machines, the first one will be **Doctor**, an easy-rated Linux box from [Hack The Box](https://www.hackthebox.eu) created by  cri [egotisticalSW](https://app.hackthebox.eu/users/94858).
 
-Write-ups for Hack The Box will be posted as soon as machines get retired, so here's the first one :smiley:!
+:information_source: **Info**: Write-ups for Hack The Box will be posted as soon as machines get retired, so here's the first one :smiley:!
 {: .notice--info}
 
 ## Enumeration

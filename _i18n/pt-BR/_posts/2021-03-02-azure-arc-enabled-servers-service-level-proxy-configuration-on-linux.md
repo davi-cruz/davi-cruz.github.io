@@ -86,8 +86,8 @@ Para simplificar a configuração, criei um script inspirado no `azcmagent_proxy
 
 Este script pode ser útil não apenas para definir as configurações de proxy para os servidores Linux habilitados com Azure Arc mas também para outros service unities em seus workloads. :smile:
 
-## Nota
-
+:warning: **Atenção**: 
 Como estas alterações não são globais, outros serviços instalados a partir de Azure Extensions (Nativas ou Customizadas) podem requerer alterações adicionais para que funcionem com o proxy padrão ou a mesma configuração deverá ser reproduzida para estes serviços
+{: .notice--warning} 
 
 Espero que ajude!

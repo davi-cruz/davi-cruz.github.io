@@ -15,7 +15,7 @@ Hello everyone!
 
 The box of this week will be Passage, a medium-rated Linux box from Hack The Box created by [ChefByzen](https://www.hackthebox.eu/home/users/profile/140851). 
 
-Write-ups for Hack The Box are always posted as soon as machines get retired.
+:information_source: **Info**: Write-ups for Hack The Box are always posted as soon as machines get retired.
 {: .notice--info}
 
 ## Enumeration

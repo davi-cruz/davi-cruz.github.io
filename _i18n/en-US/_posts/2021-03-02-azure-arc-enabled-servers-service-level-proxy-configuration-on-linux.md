@@ -88,6 +88,6 @@ This could be useful to you not only to define proxy settings for Azure Arc enab
 
 :warning: **Alert**: 
 As these changes are not global, other services installed by using Azure Extensions (Native or Custom ones) might require additional changes in order to make then work with the default proxy or to also make the same configuration to their services.
-{.notice--warning}
+{: .notice--warning}
 
 HTH!

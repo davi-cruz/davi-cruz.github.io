@@ -15,7 +15,7 @@ Olá pessoal!
 
 A máquina desta semana será **Academy**, outra máquina Linux classificada como fácil do [Hack The Box](https://www.hackthebox.eu), criada por [egre55](https://app.hackthebox.eu/users/1190) e [mrb3n](https://app.hackthebox.eu/users/2984).
 
-Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas
+:information_source: **Info**: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas
 {: .notice--info}
 
 ## Enumeração

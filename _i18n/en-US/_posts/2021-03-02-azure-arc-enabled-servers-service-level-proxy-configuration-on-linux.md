@@ -43,7 +43,7 @@ In order to configure the services to have connectivity needed to perform all ma
 - If you have already configured proxy using `azcmagent_proxy` during the setup and desires to rollback its configurations, is necessary to run it again to do the task:
 
   ```bash
-  $ sudo azcmagent_proxy remove
+  sudo azcmagent_proxy remove
   ```
 
 - Also, for each service unity used by Azure Arc for Linux Servers (`himdsd.service` ,`gcad.service` ,`extd.service`) located at `/lib/systemd/system`, we need to add a variable in the section `[Service]` defining **https_proxy**, as the example below and can also be seen in the official [**systemd** Documentation](https://www.freedesktop.org/software/systemd/man/systemd.service.html):
@@ -57,8 +57,8 @@ In order to configure the services to have connectivity needed to perform all ma
 - After changing all the three mentioned files, run the commands below to reload daemons and restart the services
 
   ```bash
-  $ sudo systemctl daemon-reexec
-  $ sudo systemctl restart extd.service himdsd.service gcad.service
+  sudo systemctl daemon-reexec
+  sudo systemctl restart extd.service himdsd.service gcad.service
   ```
   
 - Also is necessary to add the proxy to the `azcmagent` wrapper, in order to make the command `azcmagent connect` work properly in the system. This is achieved y adding a line `export https_proxy=<proxyserver>` right below the commented message that a specific line should not be removed in the file located at `/opt/azcmagent/bin/azcmagent`, as the sample below:
@@ -74,7 +74,7 @@ In order to configure the services to have connectivity needed to perform all ma
 
 After making these changes, you should see the following line on your logs, which is proof that the service is using the correct proxy configuration inside the  `/var/opt/azcmagent/log/himds.log`
 
-```
+```log
 time="yyyy-MM-dd02T17:34:07Z" level=debug msg="Using Https Proxy: http://vmlx01:3128"
 ```
 
@@ -86,7 +86,7 @@ To simplify configuration, I've created one script inspired on `azcmagent_proxy`
 
 This could be useful to you not only to define proxy settings for Azure Arc enabled Linux Servers but also for any service unities you run in your workloads :smile:
 
-:warning: **Alert**: 
+:warning: **Alert**:
 As these changes are not global, other services installed by using Azure Extensions (Native or Custom ones) might require additional changes in order to make then work with the default proxy or to also make the same configuration to their services.
 {: .notice--warning}
 

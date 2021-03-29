@@ -1,28 +1,27 @@
-
-
 # Termos de uso e Política de Privacidade
 
 ## Termos de uso
 
-Ao acessar ao site DAVI CRUZ, concorda em cumprir estes termos de serviço, todas as leis e regulamentos aplicáveis e concorda que é responsável pelo cumprimento de todas as leis locais aplicáveis. Se você não concordar com algum desses termos, está proibido de usar ou acessar este site. 
+Ao acessar ao site DAVI CRUZ, concorda em cumprir estes termos de serviço, todas as leis e regulamentos aplicáveis e concorda que é responsável pelo cumprimento de todas as leis locais aplicáveis. Se você não concordar com algum desses termos, está proibido de usar ou acessar este site.
 
 ### Licença de Uso
+
 Todo conteúdo publicado neste blog está licenciado sob [MIT License](https://choosealicense.com/licenses/mit/):
 
 > MIT License
-> 
-> Copyright (c) 2021 Davi Cruz - https://davicruz.com
-> 
+>
+> Copyright (c) 2021 Davi Cruz - `https://davicruz.com`
+>
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
 > in the Software without restriction, including without limitation the rights
 > to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 > copies of the Software, and to permit persons to whom the Software is
 > furnished to do so, subject to the following conditions:
-> 
+>
 > The above copyright notice and this permission notice shall be included in all
 > copies or substantial portions of the Software.
-> 
+>
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 > IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 > FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -32,20 +31,27 @@ Todo conteúdo publicado neste blog está licenciado sob [MIT License](https://c
 > SOFTWARE.
 
 ### Isenção de responsabilidade
-Os materiais no site de DAVI CRUZ são fornecidos 'como estão'. DAVI CRUZ não oferece garantias, expressas ou implícitas, e, por este meio, isenta e nega todas as outras garantias, incluindo, sem limitação, garantias implícitas ou condições de comercialização, adequação a um fim específico ou não violação de propriedade intelectual ou outra violação de direitos. 
+
+Os materiais no site de DAVI CRUZ são fornecidos 'como estão'. DAVI CRUZ não oferece garantias, expressas ou implícitas, e, por este meio, isenta e nega todas as outras garantias, incluindo, sem limitação, garantias implícitas ou condições de comercialização, adequação a um fim específico ou não violação de propriedade intelectual ou outra violação de direitos.
 
 Além disso, o DAVI CRUZ não garante ou faz qualquer representação relativa à precisão, aos resultados prováveis ou à confiabilidade do uso dos materiais em seu site ou de outra forma relacionado a esses materiais ou em sites vinculados a este site.
 
 ### Limitações
+
 Em nenhum caso o DAVI CRUZ ou seus fornecedores serão responsáveis por quaisquer danos (incluindo, sem limitação, danos por perda de dados ou lucro ou devido a interrupção dos negócios) decorrentes do uso ou da incapacidade de usar os materiais em DAVI CRUZ, mesmo que DAVI CRUZ ou um representante autorizado de DAVI CRUZ tenha sido notificado oralmente ou por escrito da possibilidade de tais danos. Como algumas jurisdições não permitem limitações em garantias implícitas, ou limitações de responsabilidade por danos consequentes ou incidentais, essas limitações podem não se aplicar a você.
 
 ### Precisão dos materiais
+
 Os materiais exibidos no site de DAVI CRUZ podem incluir erros técnicos, tipográficos ou fotográficos. DAVI CRUZ não garante que qualquer material em seu site seja preciso, completo ou atual. DAVI CRUZ pode fazer alterações nos materiais contidos em seu site a qualquer momento, sem aviso prévio. No entanto, DAVI CRUZ não se compromete a atualizar os materiais.
+
 ### Links externos
+
 O DAVI CRUZ não analisou todos os sites vinculados ao seu site e não é responsável pelo conteúdo de nenhum site vinculado. A inclusão de qualquer link não implica endosso por DAVI CRUZ do site. O uso de qualquer site vinculado é por conta e risco do usuário.
 
-### Modificações 
+### Modificações
+
 O DAVI CRUZ pode revisar estes termos de serviço do site a qualquer momento, sem aviso prévio. Ao usar este site, você concorda em ficar vinculado à versão atual desses termos de serviço.
+
 ## Política de Privacidade
 
 A sua privacidade é extremamente importante para nós. Esta política de privacidade cita os tipos de informações recebidas e coletadas, assim como são utilizadas.
@@ -74,9 +80,10 @@ A política de privacidade dos serviços utilizados encontra-se disponível nos 
 
 ### Cookies
 
-Para sua conveniência cookies são utilizados para armazenar suas preferências neste site, permitindo que elas sejam lembradas na próxima vez que o acessar. 
+Para sua conveniência cookies são utilizados para armazenar suas preferências neste site, permitindo que elas sejam lembradas na próxima vez que o acessar.
 
 Cookies de terceiros também poderão ser armazenados, conforme consentimento explícito mencionado no item anterior.
 
 ### Mais informações
+
 Esperemos que esteja esclarecido e, como mencionado anteriormente, se houver algo que você não tem certeza se precisa ou não, geralmente é mais seguro deixar os cookies ativados, caso interaja com um dos recursos que você usa em nosso site.

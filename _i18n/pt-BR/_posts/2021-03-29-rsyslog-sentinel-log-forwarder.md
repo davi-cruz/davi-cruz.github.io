@@ -8,7 +8,7 @@ date: 2021-03-29 12:00:00
 toc: true
 ---
 
-Frequentemente, durante engajamentos com clientes, os ajudo no deployment de *forwarders* (encaminhadores) de logs CEF/Syslog em seus ambientes para coletar informações de appliances de rede e/ou servidores e serviços para o Log Analytics, que consequentemente os disponibiliza para o Azure Sentinel.
+Frequentemente apoio clientes no deployment de *forwarders* (encaminhadores) de logs CEF/Syslog em seus ambientes para coletar informações de appliances de rede e/ou servidores e serviços para o Log Analytics, que consequentemente os disponibiliza para o Azure Sentinel.
 
 Embora tenhamos uma diversidade de documentações em como fazer este deployment, assim como recursos de comunidade como o Tech Community e Webinars, compilei todos os pontos que normalmente reviso com meus clientes nestes engajamentos de deployment e revisão neste post para ajudar àqueles que estejam enfrentando algum desafio em seu ambiente.
 

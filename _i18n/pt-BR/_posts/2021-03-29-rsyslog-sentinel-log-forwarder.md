@@ -41,11 +41,11 @@ Agora vou orientá-los quando aos detalhes da configuração desta infraestrutur
 Antes de realizar o deploy/revisar a infraestrutura do seu forwarder, existem algumas perguntas que precisamos responder que auxiliarão na correta definição das suas configurações:
 
 - **Este forwarder receberá apenas mensagens CEF, Syslog ou ambos?**
-  - Embora ambos os tipos de mensagens sejam recebidos via protocolo syslog, as mensagens CEF são formatadas de acordo com seu padrão pelo omsagent, disponibilizando cada campo em uma coluna própria no Log Analytics, enquanto as mensagens Syslog puro são armazenadas em uma única coluna, o que irá requerer esforço adicional quando necessário realizar a análise destes dados em alguma regra de analytics.
-  - Também, se você estiver utilizando o forwarder para ambos os tipos de logs, precisará impedir que mensagens enviadas do tipo CEF sejam também armazenadas como Syslog, o que irá incorrer em **custo duplicado** para sua workspace.
+  - Embora ambos os tipos de mensagens sejam recebidos via protocolo syslog, as mensagens CEF são formatadas de acordo com seu padrão pelo omsagent, disponibilizando cada campo em uma coluna própria no Log Analytics, enquanto as mensagens Syslog puro são armazenadas em uma única coluna, o que irá requerer esforço adicional quando necessário realizar a análise destes dados em alguma regra.
+  - Também, se você estiver utilizando o forwarder para ambos os tipos de logs, precisará impedir que mensagens enviadas do tipo CEF sejam armazenadas também como Syslog, o que irá incorrer em **custo duplicado** para sua workspace.
 - **Quais são os facilities e severidades, assim como tipos de mensagens e fontes que serão encaminhados ao Sentinel?**
-  - Envio de dados em excesso ao Sentinel pode gerar um algo custo se não filtrados adequadamente.
-  - Considere mapear os cenários de detecção de acordo com o [MITRE ATT&CK Matrix Techniques](https://attack.mitre.org/matrices/enterprise/) que tem interesse investigar antes de enviar os dados. Desta forma você conseguirá evitar o envio de dados sem um propósito ao seu SIEM, que não lhe trará nenhum retorno sobre o investimento feito tanto em armazenamento quanto no analytics do Sentinel.
+  - Envio de dados em excesso ao Sentinel pode gerar alto custo se não filtrados adequadamente.
+  - Considere mapear os cenários de detecção de acordo com o [MITRE ATT&CK Matrix Techniques](https://attack.mitre.org/matrices/enterprise/) que tem interesse investigar antes de enviar os dados. Desta forma você conseguirá evitar o envio de dados sem um propósito ao seu SIEM, que não lhe trarão nenhum retorno sobre o investimento feito tanto em armazenamento quanto no Sentinel.
 - **Quais são os requisitos de segurança para esta comunicação?**
   - Como descrito no post sobre [boas práticas](https://techcommunity.microsoft.com/t5/azure-sentinel/best-practices-for-common-event-format-cef-collection-in-azure/ba-p/969990) compartilhado por Cristhofer Romeo Muñoz, **devemos utilizar TCP como o protocolo padrão** para qualquer comunicação devido a sua confiabilidade, a menos que seu appliance apenas suporte UDP ou se necessite de criptografia na comunicação, adotando TLS quando o dado for transmitido pela internet ou se houver dados sensíveis a serem coletados.
   - Instalando o forwarder próximo da fonte também ajuda a reduzir a complexidade dos protocolos utilizados, assim como evita que tenhamos problemas de performance causados por alta latencia na comunicação entre origem e forwarder.
@@ -72,7 +72,7 @@ sudo chown omsagent:omiusers /etc/opt/microsoft/omsagent/proxy.conf
 sudo /opt/microsoft/omsagent/bin/service_control restart
 ```
 
-Este script de instalação realiza as alterações abaixo em seu sistema. A maioria delas necessita de conectividade com o Github uma vez que os assets utilizados estão armazenados no [repositório oficial do Azure Sentinel](https://github.com/Azure/Azure-Sentinel):
+Este script de instalação realiza as alterações listadas abaixo em seu sistema. A maioria delas necessita de conectividade com o Github uma vez que os assets utilizados estão armazenados no [repositório oficial do Azure Sentinel](https://github.com/Azure/Azure-Sentinel):
 
 - Download e instalação do Microsoft Monitoring Agent para Linux.
 - Configuração do omsagent para ouvir na porta TCP/25226 e realizar o parsing das mensagens CEF a partir da cópia do arquivo `security_events.conf` dentro do diretório de configuração da workspace (`/etc/opt/microsoft/omsagent/<workspaceID>/conf/omsagent.d`).
@@ -83,7 +83,7 @@ Com esta configuração você já estará preparado para encaminhar as mensagens
 
 ## Configuração
 
-Como vimos a infraestrutura é baseada no serviço de syslog + omsagent. Uma vez que o **rsyslog** é um dos mais populares serviços utilizados, já que é padrão da maioria das distribuições hoje, utilizarei todas as configurações aqui descritas para este serviço, embora você possa também ajustá-las para funcionamento com o syslog-ng caso necessário.
+Como vimos a infraestrutura é baseada no serviço de syslog + omsagent. Uma vez que o **rsyslog** é um dos mais populares serviços utilizados e já disponível por padrão da maioria das distribuições atualmente, utilizarei todas as configurações aqui descritas para este serviço, embora você possa também ajustá-las para funcionamento com o syslog-ng caso necessário.
 
 ### Validação da versão e instalação do rsyslog
 
@@ -106,7 +106,7 @@ rsyslogd 8.32.0, compiled with:
         Number of Bits in RainerScript integers: 64
 ```
 
-De acordo com a [documentação do projeto](https://www.rsyslog.com/doc/v8-stable/installation/index.html), você não deve ter maiores problemas executando a versão do rsyslog disponível no repositório do mantenedor da distribuição usada a menos que eles não tenham portado alguma correção para ela. Neste caso você deverá baixar a última build para sua distribuição da página do projeto ou instalar a partir do código fonte.
+De acordo com a [documentação do projeto](https://www.rsyslog.com/doc/v8-stable/installation/index.html), você não deve ter maiores problemas executando a versão do rsyslog disponível no repositório do mantenedor da distribuição a menos que eles não tenham portado alguma correção para ela. Neste caso você deverá baixar a última build para sua distribuição da página do projeto ou instalar a partir do código fonte.
 
 ### Aplicando as configurações do rsyslog
 
@@ -137,7 +137,7 @@ input(type="imtcp" port="514")
 
 A configuração para comunicação via TLS requer alguns itens adicionais, onde é necessário emitir os certificados para servidores e clientes (caso não esteja utilizando uma infra de PKI) assim como alterar o arquivo de configuração do rsyslog para aceitar estas comunicações.
 
-Maiores detalhes exemplos de configurações podem ser encontrados na documentação oficial [neste link](https://www.rsyslog.com/doc/v8-stable/tutorials/tls_cert_summary.html), de onde retirei o trecho abaixo para que tenham uma ideia de como esta configuração se parece:
+Maiores detalhes e exemplos de configurações podem ser encontrados na documentação oficial [neste link](https://www.rsyslog.com/doc/v8-stable/tutorials/tls_cert_summary.html), de onde retirei o trecho abaixo para que tenham uma ideia de como esta configuração se parece:
 
 ```conf
 module(load="imuxsock") # local messages
@@ -260,7 +260,7 @@ A única coisa que não pode ser alterada no arquivo `95-omsagent.conf` é a ins
 {: .notice--info}
 
 :warning: **Atenção**: No webinar citado anteriormente sobre um Dep Dive a respeito de CEF forwarder, Ofer também recomendou alterar as configurações do omsagent para aceitar as comunicações também via TCP para Syslog. Se seguir esta recomendação você deverá também ajustar qualquer instrução de encaminhamento para dois arrobas no arquivo `95-omsagent.conf`, caso contrário suas mensagens poderão não ser enviadas ao Log Analytics.
-{:notice--warning}
+{: .notice--warning}
 
 ### Filtrando eventos
 
@@ -278,8 +278,8 @@ if ($rawmsg contains "test") and prifilt("auth,authpriv.*") then {
 }
 ```
 
-A documentação do rsyslog é muito rica em recursos mostrando [como você pode filtrar](https://www.rsyslog.com/doc/master/configuration/filters.html) estas mensagens, assim como [quais propriedades](https://www.rsyslog.com/doc/master/configuration/properties.html) se encontram disponíveis para que possa configurar estas instruções de forma mais avançada, incluindo dicas de [como converter](https://www.rsyslog.com/doc/v8-stable/configuration/converting_to_new_format.html) as instruções da sintaxe syslogd para o advanced, anteriormente também conhecido como **RainerScript**.
+A documentação do rsyslog é muito rica em recursos mostrando [como você pode filtrar](https://www.rsyslog.com/doc/master/configuration/filters.html) estas mensagens, assim como [quais propriedades](https://www.rsyslog.com/doc/master/configuration/properties.html) se encontram disponíveis para que possa configurar estas instruções de forma mais avançada, incluindo dicas de [conversão das instruções](https://www.rsyslog.com/doc/v8-stable/configuration/converting_to_new_format.html) que utilizam sintaxe syslogd para o advanced, também conhecido como **RainerScript**.
 
-Espero que este conteúdo seja útil para aqueles realizando o seu deployment ou manutenção de CEF/Syslog forwarders no seu ambiente!
+Espero que este conteúdo tenha sido útil para aqueles que estão realizando o seu deployment ou manutenção de CEF/Syslog forwarders no seu ambiente!
 
 Você tem alguma configuração específica ou desafio não discutido aqui? Sinta-se à vontade para compartilhar nos comentários para que possamos complementar o post com mais detalhes, podendo assim auxiliar outros que estejam enfrentando o mesmo! :smile:

@@ -260,7 +260,7 @@ The only thing that cannot be changed at `95-omsagent.conf` file is the forwardi
 {: .notice--info}
 
 :warning: **Warning**: In the previously mentioned Deep Dive CEF webinar, Ofer also recommend you change the omsagent configuration to accept messages using TCP. If you follow his recommendation, you also need to adjust any forwarding instruction to double at signs in your `95-omsagent.conf` file, otherwise the messages won't be sent to Log Analytics.
-{:notice--warning}
+{: .notice--warning}
 
 ### Filtering out events
 

@@ -275,6 +275,8 @@ defaults:
       share: true
       related: true
       show_date: true
+      classes: wide
+      toc_sticky: false
   # _pages
   - scope:
       path: ""

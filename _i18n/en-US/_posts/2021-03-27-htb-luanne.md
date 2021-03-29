@@ -2,11 +2,11 @@
 layout: single
 title: "Hackthebox write-up: Luanne"
 namespace: "Hackthebox write-up: Luanne"
-category: writeup
+category: Writeup
 tags: HackTheBox htb-easy htb-linux
 date: 2021-03-27 12:00:00
 header:
-	teaser: https://i.imgur.com/8bsXO5e.png
+   teaser: https://i.imgur.com/8bsXO5e.png
 ---
 
 ![laboratory-image](https://i.imgur.com/H8PyuHc.png)

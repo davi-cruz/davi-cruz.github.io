@@ -5,6 +5,7 @@ namespace: "Azure Sentinel: Log Forwarder Configuration"
 category: "Azure Sentinel"
 tags: sentinel syslog rsyslog Linux forwarder collector CEF
 date: 2021-03-29 12:00:00
+toc: true
 ---
 
 Often, during customer engagements, I help them on deploying CEF/Syslog forwarders in their environments to gather data from Network Appliances and/or other servers and services into Log Analytics, which is consequently available for Azure Sentinel.

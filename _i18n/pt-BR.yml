@@ -23,9 +23,9 @@ category_archive:
   path: "/categorias/"
 navigation:
   main:
-    - title: "Sobre"
-      url: /sobre/
     - title: "Categorias"
       url: /categorias/
     - title: "Tags"
       url: /tags/
+    - title: "Sobre"
+      url: /sobre/

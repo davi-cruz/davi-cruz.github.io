@@ -25,7 +25,7 @@ navigation:
   main:
     - title: "About"
       url: /about/
-    - title: "Tags"
-      url: /tag/
     - title: "Categories"
       url: /categories/
+    - title: "Tags"
+      url: /tag/ 

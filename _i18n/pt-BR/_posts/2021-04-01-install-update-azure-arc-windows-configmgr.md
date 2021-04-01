@@ -3,7 +3,7 @@ layout: single
 title: "Azure Arc enabled Servers: Instalação e Atualização via Configuration Manager"
 namespace: "install-update-azure-arc-windows-configmgr"
 category: "Azure Arc"
-tags: azure arc windows ConfigMgr MECM MEM
+tags: Azure Arc Windows ConfigMgr MECM MEM
 date: 2021-04-01 12:00:00
 ---
 
@@ -22,20 +22,20 @@ O Azure Arc é um asset bastante importante para utilização de features como o
 
 ### Preço
 
-De acordo com a página [Azure Arc – Azure Management | Microsoft Azure](https://azure.microsoft.com/en-us/pricing/details/azure-arc/), features relacionadas ao control plane do Azure (Instalação de Extensões, Arm Templates, etc.) **são gratuitos**, assim como o uso do Azure Update Management.
+De acordo com a página [Azure Arc – Azure Management \| Microsoft Azure](https://azure.microsoft.com/en-us/pricing/details/azure-arc/), features relacionadas ao control plane do Azure (Instalação de Extensões, Arm Templates, etc.) **são gratuitos**, assim como o uso do Azure Update Management.
 
 Features relacionadas à Azure Policy Guest Configurations (Automações, inventários, state configuration) e outros serviços conectados via Arc (Azure Defender e Azure Monitor, por exemplo) são cobrados de acordo com suas respectivas tabelas de custos, as quais poderão ser verificadas diretamente na [calculadora do Azure](https://azure.microsoft.com/en-us/pricing/calculator/).
 
 ### Pré-requisitos
 
-Alguns requisitos devem ser observados para viabilizar esta instalação, cujos detalhes podem ser observados no link [Overview of the Connected Machine agent - Azure Arc | Microsoft Docs](https://docs.microsoft.com/en-us/azure/azure-arc/servers/agent-overview#prerequisites):
+Alguns requisitos devem ser observados para viabilizar esta instalação, cujos detalhes podem ser observados no link [Overview of the Connected Machine agent - Azure Arc \| Microsoft Docs](https://docs.microsoft.com/en-us/azure/azure-arc/servers/agent-overview#prerequisites):
 
 - Um Sistema Operacional Suportado.
 - Liberação das URLs necessárias para o Serviço do Azure Arc, vide link acima citado.
   - Dependendo de como seu ambiente está configurado, o uso de um servidor proxy pode ser necessário.
   - Algumas extensões a serem instaladas via Arc podem necessitar de liberações adicionais para garantir seu funcionamento.
-- Provisionamento de um Service Principal para que o onboarding do Arc seja feito de modo silencioso. O procedimento de criação deste objeto está disponível detalhado em [Connect hybrid machines to Azure at scale - Azure Arc | Microsoft Docs](https://docs.microsoft.com/en-us/azure/azure-arc/servers/onboard-service-principal).
-- Ativação dos resource providers **Microsoft.HybridCompute** e **Microsoft.GuestConfiguration**, conforme discutido em [Connect hybrid machine with Azure Arc enabled servers - Azure Arc | Microsoft Docs](https://docs.microsoft.com/en-us/azure/azure-arc/servers/learn/quick-enable-hybrid-vm#register-azure-resource-providers).
+- Provisionamento de um Service Principal para que o onboarding do Arc seja feito de modo silencioso. O procedimento de criação deste objeto está disponível detalhado em [Connect hybrid machines to Azure at scale - Azure Arc \| Microsoft Docs](https://docs.microsoft.com/en-us/azure/azure-arc/servers/onboard-service-principal).
+- Ativação dos resource providers **Microsoft.HybridCompute** e **Microsoft.GuestConfiguration**, conforme discutido em [Connect hybrid machine with Azure Arc enabled servers - Azure Arc \| Microsoft Docs](https://docs.microsoft.com/en-us/azure/azure-arc/servers/learn/quick-enable-hybrid-vm#register-azure-resource-providers).
 
 ## Gestão via Configuration Configuration Manager
 
@@ -78,15 +78,15 @@ Abaixo descrevo o procedimento utilizado para criar este recurso:
 
 - Seguir com a criação do application no console do MECM acessando *Software Library* > *Application Management* > *Applications* e selecionar a opção *Create Application* no ribbon ou no menu de contexto de *Application*.
 
-![Criando um Application no MECM](https://i.imgur.com/UTfhvOv.png)
+![Criando um Application no MECM](https://i.imgur.com/UTfhvOv.png){: .align-center}
 
 - Selecione o arquivo caminho do `*.msi` no File Share onde foi armazenado, de acordo com o pré-estabelecido em seu ambiente.
 
-![Create Application Wizard - General](https://i.imgur.com/dE4HPPW.png)
+![Create Application Wizard - General](https://i.imgur.com/dE4HPPW.png){: .align-center}
 
 - Clique em *Next* para avançar após validar os dados do aplicativo a ser instalado.
 
-![Create Application Wizard - Important Information](https://i.imgur.com/RIHhWc0.png)
+![Create Application Wizard - Important Information](https://i.imgur.com/RIHhWc0.png){: .align-center}
 
 - Em *General Information*, substitua a linha de comando pré-configurada com a linha de comando abaixo para que a instalação ocorra a partir do script PowerShell baixado e clique em *Next*.
 
@@ -97,31 +97,31 @@ Abaixo descrevo o procedimento utilizado para criar este recurso:
   :bulb: **Dica**: Complemente nesta janela também as informações solicitadas para enriquecer os dados de catálogo para este aplicativo e simplificar sua gestão posterior.
   {: .notice--primary}
 
-![Create Application Wizard - General Information](https://i.imgur.com/V6qUH4B.png)
+![Create Application Wizard - General Information](https://i.imgur.com/V6qUH4B.png){: .align-center}
 
 - Revise as informações configuradas e clique em *Next* para criar o application.
 
-![Create Application Wizard - Summary](https://i.imgur.com/tYcMhvu.png)
+![Create Application Wizard - Summary](https://i.imgur.com/tYcMhvu.png){: .align-center}
 
 - Após concluída a criação, a seguinte mensagem de sucesso será exibida. Clique em *Close* para fechá-la.
 
-![Create Application Wizard - Completion](https://i.imgur.com/93fBtqs.png)
+![Create Application Wizard - Completion](https://i.imgur.com/93fBtqs.png){: .align-center}
 
 Após criar o application, precisaremos ajudar alguns outros detalhes para que funcione de forma mais adequada, conforme abaixo:
 
 - Acesse as propriedades do deployment type selecionando o aplicativo > clique na aba *Deployment Types* > clique com o botão direito no deployment existente e selecione a opção *Properties*.
 
-![ConfigMgr Console - Deployment Type Properties](https://i.imgur.com/an2pGmr.png)
+![ConfigMgr Console - Deployment Type Properties](https://i.imgur.com/an2pGmr.png){: .align-center}
 
 - Na aba *Detection Method*, selecione a opção *Use a custom script to detect the presence of this deployment type* e clique no botão *Edit*.
 
-![Deployment Type Properties - Detection Method](https://i.imgur.com/QkRIfhc.png)
+![Deployment Type Properties - Detection Method](https://i.imgur.com/QkRIfhc.png){: .align-center}
 
 - Selecione a opção *Powershell* e cole o snippet abaixo, clicando em *OK* para concluir.
 
   - Este script de detecção verificará não apenas se o agente está devidamente instalado, mas se também estará conectado ao Azure Arc ao término do processo de instalação.
 
-![Detection Method - Script Editor](https://i.imgur.com/BWSfWnQ.png)
+![Detection Method - Script Editor](https://i.imgur.com/BWSfWnQ.png){: .align-center}
 
   :warning: **Alerta**: É importante que o script apenas retorne algum output se o aplicativo estiver instalado. Qualquer output retornado o ConfigMgr interpreta como instalado.
   {: .notice--warning}
@@ -144,7 +144,7 @@ Após criar o application, precisaremos ajudar alguns outros detalhes para que f
 
 - Na aba *Requirements* é importante também configurarmos as versões de Sistema Operacional que desejamos que este pacote seja instalado. Isso também evita que deployments acidentais venham instalar o produto em desktops Windows, o que não é suportado.
 
-![Deployment Type Properties - Requirements - Create Requirement](https://i.imgur.com/TMATvrP.png)
+![Deployment Type Properties - Requirements - Create Requirement](https://i.imgur.com/TMATvrP.png){: .align-center}
 
 - Após ajustes, clicar em *OK* para finalizar a configuração.
 
@@ -176,9 +176,9 @@ Como pudemos ver o processo de instalação via Configuration Manager é bem sim
 
 Na documentação oficial temos outros métodos de deployment disponíveis, que podem ser conferidos diretamente em seus respectivos artigos oficiais:
 
-- [Install Connected Machine agent using Windows PowerShell DSC - Azure Arc | Microsoft Docs](https://docs.microsoft.com/en-us/azure/azure-arc/servers/onboard-dsc)
-- [Connect hybrid machines to Azure from Windows Admin Center - Azure Arc | Microsoft Docs](https://docs.microsoft.com/en-us/azure/azure-arc/servers/onboard-windows-admin-center)
-- [Connect hybrid machines to Azure by using PowerShell - Azure Arc | Microsoft Docs](https://docs.microsoft.com/en-us/azure/azure-arc/servers/onboard-powershell)
+- [Install Connected Machine agent using Windows PowerShell DSC - Azure Arc \| Microsoft Docs](https://docs.microsoft.com/en-us/azure/azure-arc/servers/onboard-dsc)
+- [Connect hybrid machines to Azure from Windows Admin Center - Azure Arc \| Microsoft Docs](https://docs.microsoft.com/en-us/azure/azure-arc/servers/onboard-windows-admin-center)
+- [Connect hybrid machines to Azure by using PowerShell - Azure Arc \| Microsoft Docs](https://docs.microsoft.com/en-us/azure/azure-arc/servers/onboard-powershell)
 
 Espero que as orientações compartilhadas lhe sejam úteis para a criação deste deployment via ConfigMgr, permitindo a gestão destes dispositivos a partir da console do Azure.
 

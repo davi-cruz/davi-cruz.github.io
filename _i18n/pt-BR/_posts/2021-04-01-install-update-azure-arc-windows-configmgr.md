@@ -159,6 +159,7 @@ Neste caso temos duas opções a serem seguidas:
 - **Criar outro application no Configuration Manager para a nova versão**:
 
   - Este mecanismo requer maior esforço administrativo por parte do ConfigMgr porém pode ser alcançado criando outro Application para a nova versão, conforme orientado neste post.
+      - Se desejar seguir com este método, a detecção deverá ser melhorada para levar em consideração a versão do Azure Arc instalado.
   - É importante que seja definido para este novo aplicativo uma **relação de substituição**, conforme pode ser visto em mais detalhes [neste link](https://docs.microsoft.com/en-us/mem/configmgr/apps/deploy-use/revise-and-supersede-applications#supersedence). Isso permite que novas instalações que referenciam o item anterior façam uso da versão mais recente, além de permitir a definição do comportamento a ser seguido para as máquinas que já possuem o produto instalado, que pode ser atualizar ou desinstalar.
 
 - **Incluir os produtos e serviços no Catálogo de Software Update Point e processo de gestão de atualizações de sua organização (recomendado)**: Esta abordagem permite o uso do processo já implementado de gestão de atualizações via ConfigMgr para também atualizar o Azure Arc.

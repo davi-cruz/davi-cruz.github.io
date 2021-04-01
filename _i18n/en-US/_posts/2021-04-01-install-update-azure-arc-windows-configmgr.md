@@ -160,7 +160,7 @@ In this case we can leverage ConfigMgr in both ways:
 
   - This mechanism requires more administration effort from ConfigMgr but can be achieved by duplicating the application and replacing the installation binaries.
     - If you desire to proceed with this, your detection method will need to be enhanced by looking for a specific Arc Version.
-  - Is also important that, if you go through this path, a **supersedence relation** be created between these apps, as you can learn more in [this link](https://docs.microsoft.com/en-us/mem/configmgr/apps/deploy-use/revise-and-supersede-applications#supersedence). It allows that for the existing deployments for older versions, the latest app available be used, besides also allowing you to define the behavior for the devices where the app already installed, that can be update or uninstall.
+  - Is also important that, if you go through this path, a **supersedence relation** be created between these apps, as you can learn more in [this link](https://docs.microsoft.com/en-us/mem/configmgr/apps/deploy-use/revise-and-supersede-applications#supersedence). It allows that, for the existing deployments of older versions, the latest app available be used, as well as allowing you to set the behavior for the devices where the app already installed, that can be update or uninstall.
 
 - **Add products and classifications to Software Update Catalog and manage using Software Update Management (recommended)**: This approach leverages the existing process in your organization using Configuration Manager to also update Azure Arc.
 

@@ -3,7 +3,7 @@ layout: single
 title: "Azure Arc enabled Servers: Service-level proxy configuration on Linux"
 namespace: "azure-arc-enabled-servers-service-level-proxy-configuration-on-linux"
 category: "Azure Arc"
-tags: azure arc linux
+tags: Azure Arc Linux
 date: 2021-03-02 18:00:00
 ---
 

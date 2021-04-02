@@ -9,14 +9,14 @@ header:
    teaser: https://i.imgur.com/8bsXO5e.png
 ---
 
-![laboratory-image](https://i.imgur.com/H8PyuHc.png)
-
 Olá pessoal!
 
 A máquina desta semana será **Luanne**, outra máquina Linux classificada como fácil do [Hack The Box](https://www.hackthebox.eu), , criada por [polarbearer](https://app.hackthebox.eu/users/159204).
 
 :information_source: **Info**: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas
 {: .notice--info}
+
+![laboratory-image](https://i.imgur.com/H8PyuHc.png){: .align-center}
 
 ## Enumeração
 

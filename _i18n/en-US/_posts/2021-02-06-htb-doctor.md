@@ -8,14 +8,14 @@ date: 2021-02-06 12:00:00
 header:
    teaser: https://i.imgur.com/EeJREQG.png
 ---
-![image-20210209083728228](https://i.imgur.com/7DBDPWU.png)
-
 Hello everyone!
 
 Starting to posting about some write-ups of CTF-like machines, the first one will be **Doctor**, an easy-rated Linux box from [Hack The Box](https://www.hackthebox.eu) created by  cri [egotisticalSW](https://app.hackthebox.eu/users/94858).
 
 :information_source: **Info**: Write-ups for Hack The Box will be posted as soon as machines get retired, so here's the first one :smiley:!
 {: .notice--info}
+
+![image-20210209083728228](https://i.imgur.com/7DBDPWU.png){: .align-center}
 
 ## Enumeration
 

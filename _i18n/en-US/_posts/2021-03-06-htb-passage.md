@@ -9,14 +9,14 @@ header:
    teaser: https://i.imgur.com/Oxk4R89.png
 ---
 
-![img](https://i.imgur.com/jm8eRRi.png)
-
 Hello everyone!
 
 The box of this week will be Passage, a medium-rated Linux box from Hack The Box created by [ChefByzen](https://www.hackthebox.eu/home/users/profile/140851).
 
 :information_source: **Info**: Write-ups for Hack The Box are always posted as soon as machines get retired.
 {: .notice--info}
+
+![img](https://i.imgur.com/jm8eRRi.png){: .align-center}
 
 ## Enumeration
 

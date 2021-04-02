@@ -8,14 +8,14 @@ date: 2021-02-06 12:00:00
 header:
    teaser: https://i.imgur.com/EeJREQG.png
 ---
-![image-20210209083728228](https://i.imgur.com/7DBDPWU.png)
-
 Olá pessoal!
 
 Começando a postar sobre alguns write-ups de máquinas estilo CTF, a primeira a ser resolvida será **Doctor**, uma máquina Linux classificada como fácil do [Hack The Box](https://www.hackthebox.eu) criada por [egotisticalSW](https://app.hackthebox.eu/users/94858).
 
 :information_source: **Info**: Write-ups para máquinas do Hack The Box serão postados assim que as máquinas sejam aposentadas, então segue abaixo a primeira :smiley:!
 {: .notice--info}
+
+![image-20210209083728228](https://i.imgur.com/7DBDPWU.png){: .align-center}
 
 ## Enumeração
 

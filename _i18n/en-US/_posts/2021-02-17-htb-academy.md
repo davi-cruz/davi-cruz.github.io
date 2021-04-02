@@ -9,14 +9,14 @@ header:
    teaser: https://i.imgur.com/PjYV5g5.png
 ---
 
-![AcademyHTB](https://i.imgur.com/3SXgHMd.png)
-
 Hello everyone!
 
 The box of this week will be **Academy**, another easy-rated Linux box from [Hack the Box](https://www.hackthebox.eu) created by [egre55](https://app.hackthebox.eu/users/1190) and [mrb3n](https://app.hackthebox.eu/users/2984).
 
-:information_source: **Info**: Write-ups for Hack the Box are always posted as soon as machines get retired
+:information_source: **Info**: Write-ups for Hack the Box are always posted as soon as machines get retired.
 {: .notice--info}
+
+![AcademyHTB](https://i.imgur.com/3SXgHMd.png){: .align-center}
 
 ## Enumeration
 

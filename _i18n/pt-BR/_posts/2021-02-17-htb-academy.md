@@ -9,14 +9,14 @@ header:
    teaser: https://i.imgur.com/PjYV5g5.png
 ---
 
-![AcademyHTB](https://i.imgur.com/3SXgHMd.png)
-
 Olá pessoal!
 
 A máquina desta semana será **Academy**, outra máquina Linux classificada como fácil do [Hack The Box](https://www.hackthebox.eu), criada por [egre55](https://app.hackthebox.eu/users/1190) e [mrb3n](https://app.hackthebox.eu/users/2984).
 
 :information_source: **Info**: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas
 {: .notice--info}
+
+![AcademyHTB](https://i.imgur.com/3SXgHMd.png){: .align-center}
 
 ## Enumeração
 

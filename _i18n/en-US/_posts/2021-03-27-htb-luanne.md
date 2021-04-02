@@ -11,7 +11,7 @@ header:
 
 Hello everyone!
 
-The box of this week will be **Luanne**, another easy-rated Linux box from  [Hack The Box](https://www.hackthebox.eu), created by [polarbearer](https://app.hackthebox.eu/users/159204).
+The box of this week will be **Luanne**, another easy-rated Linux box from  [Hack The Box](https://www.hackthebox.eu), created by [polarbearer](https://app.hackthebox.eu/users/159204).<!--more-->
 
 :information_source: **Info**: Write-ups for Hack The Box are always posted as soon as machines get retired.
 {: .notice--info}

@@ -277,6 +277,7 @@ defaults:
       show_date: true
       classes: wide
       toc_sticky: false
+      excerpt_separator: <!--more-->
   # _pages
   - scope:
       path: ""

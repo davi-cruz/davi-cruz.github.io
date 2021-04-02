@@ -11,7 +11,7 @@ header:
 
 Olá pessoal!
 
-A máquina desta semana será Passage, outra máquina Linux classificada como mediana do Hack The Box criada por [ChefByzen](https://www.hackthebox.eu/home/users/profile/140851).
+A máquina desta semana será Passage, outra máquina Linux classificada como mediana do Hack The Box criada por [ChefByzen](https://www.hackthebox.eu/home/users/profile/140851).<!--more-->
 
 :information_source: **Info**: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas
 {: .notice--info}

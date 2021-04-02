@@ -11,7 +11,7 @@ header:
 
 Olá pessoal!
 
-A máquina desta semana será **Luanne**, outra máquina Linux classificada como fácil do [Hack The Box](https://www.hackthebox.eu), , criada por [polarbearer](https://app.hackthebox.eu/users/159204).
+A máquina desta semana será **Luanne**, outra máquina Linux classificada como fácil do [Hack The Box](https://www.hackthebox.eu), , criada por [polarbearer](https://app.hackthebox.eu/users/159204).<!--more-->
 
 :information_source: **Info**: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas
 {: .notice--info}

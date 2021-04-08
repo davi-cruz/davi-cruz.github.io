@@ -1,0 +1,100 @@
+{
+  "main": {
+    "id": "460237878190177e",
+    "type": "split",
+    "children": [
+      {
+        "id": "6ec0794cc9c32fec",
+        "type": "leaf",
+        "active": true,
+        "state": {
+          "type": "markdown",
+          "state": {
+            "file": "_i18n/en-US/_posts/2021-02-17-htb-academy.md",
+            "mode": "preview"
+          }
+        }
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "df175f5abf3f9e71",
+    "type": "split",
+    "children": [
+      {
+        "id": "268b3f75489a8bcb",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3832f723a6adc5ef",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {}
+            }
+          },
+          {
+            "id": "e7f1b3ceae28f21e",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "485da9815ac2af7c",
+    "type": "split",
+    "children": [
+      {
+        "id": "ded48265e7767d4e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5674f7901140871a",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "_i18n/en-US/_posts/2021-02-17-htb-academy.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "lastOpenFiles": [
+    "_i18n/en-US/_posts/2021-02-17-htb-academy.md",
+    "_i18n/en-US/_posts/2021-03-02-azure-arc-enabled-servers-service-level-proxy-configuration-on-linux.md",
+    "_i18n/en-US/_posts/2021-02-06-htb-doctor.md",
+    "_i18n/en-US/_pages/useful-commands.md",
+    "_i18n/en-US/_pages/terms-privacy.md",
+    "_i18n/en-US/_pages/about.md",
+    "_drafts/_general/2021-03-02-running-kali-on-azure.md",
+    "_drafts/_general/2021-03-12-htb-spectra.md",
+    "_drafts/_general/2020-12-19-vyos-lab-setup-part-1.md",
+    "_drafts/_general/2021-02-27-htb-tenet.md"
+  ]
+}

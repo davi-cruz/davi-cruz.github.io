@@ -6,7 +6,6 @@
       {
         "id": "6ec0794cc9c32fec",
         "type": "leaf",
-        "active": true,
         "state": {
           "type": "markdown",
           "state": {
@@ -73,6 +72,8 @@
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
                 "backlinkCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -85,6 +86,7 @@
     "width": 300,
     "collapsed": true
   },
+  "active": "6ec0794cc9c32fec",
   "lastOpenFiles": [
     "_i18n/en-US/_posts/2021-02-17-htb-academy.md",
     "_i18n/en-US/_posts/2021-03-02-azure-arc-enabled-servers-service-level-proxy-configuration-on-linux.md",

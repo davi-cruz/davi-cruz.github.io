@@ -5,6 +5,8 @@ namespace: "install-update-azure-arc-windows-configmgr"
 category: "Azure Arc"
 tags: Azure Arc Windows ConfigMgr MECM MEM
 date: 2021-04-01 12:00:00
+header:
+  og_image: https://i.imgur.com/dBG1AZY.png
 ---
 
 Neste post compartilho o procedimento de como realizar o deploy e atualização do Azure Arc for Servers (Windows) via Microsoft Endpoint Manager Configuration Manager - MECM (aka SCCM).

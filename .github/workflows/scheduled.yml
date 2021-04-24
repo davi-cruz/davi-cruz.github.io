@@ -4,19 +4,16 @@ on:
   schedule:
     #- cron: '0 19 * * 6' # 16:00 BRT Sabados
     #- cron: '0 21 * * 0-5' # 18:00 BRT outros dias
-    - cron: '50 21 * * *' # Testing only
+    - cron: '20 23 * * *' # Testing only
 
 jobs:
   Publish:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Checkout submodules
-      shell: bash
-      run: |
-        git config --global url."https://github.com/".insteadOf "git@github.com:"
-        git submodule sync --recursive
-        git -c "http.extraheader=Authorization: basic ${{ secrets.GITHUB_TOKEN }}" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+       with: 
+          submodules: "true"
+          token: "${{ secrets.GITHUB_TOKEN }}"
     - name: Publish Posts
       shell: bash
       run: |

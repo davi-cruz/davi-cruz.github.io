@@ -1,7 +1,7 @@
 ---
 layout: single
 title: "Azure Sentinel: Log Forwarder Configuration"
-namespace: "Azure Sentinel: Log Forwarder Configuration"
+namespace: rsyslog-sentinel-log-forwarder
 category: "Azure Sentinel"
 tags: Sentinel Syslog Rsyslog Linux Forwarder Collector CEF
 date: 2021-03-29 12:00:00

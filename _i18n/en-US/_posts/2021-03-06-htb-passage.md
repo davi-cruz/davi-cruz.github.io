@@ -1,7 +1,7 @@
 ---
 layout: single
 title: "Hackthebox write-up: Passage"
-namespace: "Hackthebox write-up: Passage"
+namespace: htb-passage
 category: Writeup
 tags: HackTheBox htb-medium htb-linux
 date: 2021-03-06 16:00:00

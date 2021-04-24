@@ -1,7 +1,7 @@
 ---
 layout: single
 title: "Azure Arc enabled Servers: Deployment and Update using Configuration Manager"
-namespace: "install-update-azure-arc-windows-configmgr"
+namespace: install-update-azure-arc-windows-configmgr
 category: "Azure Arc"
 tags: Azure Arc Windows ConfigMgr MECM MEM
 date: 2021-04-01 12:00:00

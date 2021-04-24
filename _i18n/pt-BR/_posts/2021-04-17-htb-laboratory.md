@@ -1,7 +1,7 @@
 ---
 layout: single
 title: "Hackthebox write-up: Laboratory"
-namespace: "Hackthebox write-up: Laboratory"
+namespace: htb-laboratory
 category: Writeup
 tags: HackTheBox htb-easy htb-linux
 date: 2021-04-17 16:00:00

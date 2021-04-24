@@ -1,7 +1,7 @@
 ---
 layout: single
 title: "Hackthebox write-up: Luanne"
-namespace: "Hackthebox write-up: Luanne"
+namespace: htb-luanne
 category: Writeup
 tags: HackTheBox htb-easy htb-linux
 date: 2021-03-27 12:00:00

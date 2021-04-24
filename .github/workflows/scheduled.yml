@@ -4,7 +4,7 @@ on:
   schedule:
     #- cron: '0 19 * * 6' # 16:00 BRT Sabados
     #- cron: '0 21 * * 0-5' # 18:00 BRT outros dias
-    - cron: '* 22 * * *' # Testing only
+    - cron: '50 21 * * *' # Testing only
 
 jobs:
   Publish:

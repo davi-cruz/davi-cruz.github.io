@@ -22,7 +22,7 @@ jobs:
           git config --global user.name "Davi Cruz"
           # List all posts to be published
           for i in $(find ./ -name $dateString*); do
-          d=$(echo $i | sed 's/_drafts/_i18n/' | sed 's/BR/BR\/_posts/')
+          d=$(echo $i | sed 's/_drafts/_i18n/' | sed 's/BR/BR\/_posts/' | sed 's/US/US\/_posts/')
           mv $i $d
           done
           # Commit project changes

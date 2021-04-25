@@ -17,13 +17,13 @@ jobs:
       - name: Publish Posts
         shell: bash
         run: |
-          dateString=$(date -I)
+          dateString=$(date -I);
           # List all posts to be published
           for i in $(find ./ -name $dateString*); do;
-          d=$(echo $i | sed 's/_drafts/_i18n/' | sed 's/BR/BR\/_posts/')
-          mv $i $d
-          done
+          d=$(echo $i | sed 's/_drafts/_i18n/' | sed 's/BR/BR\/_posts/');
+          mv $i $d;
+          done;
           # Commit project changes
-          git add *
-          git commit -m "Published Post"
-          git push origin master
+          git add *;
+          git commit -m "Published Post";
+          git push origin master;

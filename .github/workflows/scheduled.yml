@@ -17,7 +17,7 @@ jobs:
       - name: Publish Posts
         shell: bash
         run: |
-          dateString=$(date -I)
+          dateString=$(date -I -d yesterday)
           git config --global user.email "eu@davicruz.com"
           git config --global user.name "Davi Cruz"
           # List all posts to be published

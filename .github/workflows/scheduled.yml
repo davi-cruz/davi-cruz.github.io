@@ -4,26 +4,25 @@ on:
   schedule:
     #- cron: '0 19 * * 6' # 16:00 BRT Sabados
     #- cron: '0 21 * * 0-5' # 18:00 BRT outros dias
-    - cron: '20 23 * * *' # Testing only
+    - cron: '10 0 * * *' # Testing only
 
 jobs:
   Publish:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-       with: 
+      - uses: actions/checkout@v2
+        with:
           submodules: "true"
           token: "${{ secrets.GITHUB_TOKEN }}"
-    - name: Publish Posts
-      shell: bash
-      run: |
-        dateString=$(date -I)
-        # List all posts to be published
-        for i in $(find ./ -name $dateString*); do;
+      - name: Publish Posts
+        shell: bash
+        run: |
+          dateString=$(date -I)
+          # List all posts to be published
+          for i in $(find ./ -name $dateString*); do
           d=$(echo $i | sed 's/_drafts/_i18n/' | sed 's/BR/BR\/_posts/')
           mv $i $d
         done
-        
         # Commit project changes
         git add *
         git commit -m "Published Post"

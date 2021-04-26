@@ -1,12 +1,9 @@
 name: Publish pages ready to post
 
 on:
-  #schedule:
-    #- cron: '0 19 * * 6' # 16:00 BRT Sábados
-    #- cron: '0 21 * * 0-5' # 18:00 BRT outros dias
-  push:
-    branches:
-      - master
+  schedule:
+    - cron: '0 19 * * 6' # SATURDAY 4:00 PM BRT
+    - cron: '0 21 * * 0-5' # OTHERS 6:00 PM BRT
 
 jobs:
   Publish:
@@ -19,28 +16,31 @@ jobs:
       - name: Publish Posts
         shell: bash
         run: |
-          dateString=$(date -I -d "2021-04-24")
+          dateString=$(date -I)
+
           git config --global user.email "eu@davicruz.com"
           git config --global user.name "Davi Cruz"
+
           # Determine posts to be published
           toPublish=$(find ./ -name $dateString* )
           if [ $(echo $toPublish | wc -l) -gt 1 ]; then
-          for i in $(find ./ -name $dateString* ); do
-          postName=$(echo $i | awk -F'[/-.]' '{print toupper($9) " " toupper($10)'})
-          echo $postName
-          d=$(echo $i | sed 's/_drafts/_i18n/' | sed 's/BR/BR\/_posts/' | sed 's/US/US\/_posts/')
-          mv $i $d
-          done
-          # Commit _drafts changes
-          cd ./_drafts
-          git status
-          git add *
-          git commit -m "Published Post $postName"
-          git push origin main
-          # Commit project changes
-          cd ..
-          git status
-          git add *
-          git commit -m "Published Post $postName"
-          git push origin master
+            find ./ -name $dateString* | while read i; do
+              postName=$(echo $i | awk -F'[/-.]' '{print toupper($9) " " toupper($10)}')
+              d=$(echo $i | sed 's/_drafts/_i18n/' | sed 's/BR\|US/&\/_posts/')
+              mv $i $d
+            done
+            
+            # Commit _drafts changes
+            cd ./_drafts
+            git switch main
+            git add .
+            git commit -m "Published Post $postName"
+            git push origin main
+
+            # Commit project changes
+            cd ..
+            git status
+            git add *
+            git commit -m "Published Post $postName"
+            git push origin master
           fi

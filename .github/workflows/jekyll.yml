@@ -3,11 +3,11 @@ name: Build and deploy to gh-pages
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   jekyll:
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
 

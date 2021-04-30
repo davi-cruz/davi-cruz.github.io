@@ -206,7 +206,7 @@ Se você sofre com este tipo de problema ou quer prevenir antes mesmo que venha 
 $RepeatedMsgReduction on
 ```
 
-A referência oficial sobre esta feature na documentação do RSyslog pode ser encontrada [neste lin](https://www.rsyslog.com/doc/master/configuration/action/rsconf1_repeatedmsgreduction.html).
+A referência oficial sobre esta feature na documentação do RSyslog pode ser encontrada [neste link](https://www.rsyslog.com/doc/master/configuration/action/rsconf1_repeatedmsgreduction.html).
 
 ### Fluxo de processamento de mensagens
 

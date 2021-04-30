@@ -13,6 +13,10 @@ Often I help customers on deploying CEF/Syslog forwarders in their environments 
 
 Besides having plenty documentation on how to do this deployment, as well as other community resources like Tech Community and Webinars, I have compiled all the resources I normally review with my customers during this deployment or revision in their environments.
 
+:newspaper: **Edits**:  
+**30/04/2021** - Added section [Repeated message reduction](#repeated-message-reduction)
+{: .notice--success}
+
 ## Requirements
 
 According to [Microsoft's official documentation](https://docs.microsoft.com/en-us/azure/sentinel/connect-common-event-format), the requirement for this resource is quite simple as listed below:

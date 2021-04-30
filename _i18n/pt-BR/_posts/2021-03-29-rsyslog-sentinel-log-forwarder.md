@@ -13,6 +13,10 @@ Frequentemente apoio clientes no deployment de *forwarders* (encaminhadores) de 
 
 Embora tenhamos uma diversidade de documentações em como fazer este deployment, assim como recursos de comunidade como o Tech Community e Webinars, compilei todos os pontos que normalmente reviso com meus clientes nestes engajamentos de deployment e revisão neste post para ajudar àqueles que estejam enfrentando algum desafio em seu ambiente.
 
+:newspaper: **Edits**:  
+**30/04/2021** - Incluído seção [Redução de mensagens repetidas](#redução-de-mensagens-repetidas)
+{: .notice--success}
+
 ## Requisitos
 
 De acordo com a [documentação oficial da Microsoft](https://docs.microsoft.com/en-us/azure/sentinel/connect-common-event-format), os requisitos para este recurso são bastante simples, conforme listado abaixo:

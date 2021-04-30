@@ -4,7 +4,8 @@ title: "Azure Sentinel: Log Forwarder Configuration"
 namespace: rsyslog-sentinel-log-forwarder
 category: "Azure Sentinel"
 tags: Sentinel Syslog Rsyslog Linux Forwarder Collector CEF
-date: 2021-03-29 12:00:00
+date: 2021-03-29 12:00:00 -03
+last_modified_at: 2021-04-30 16:00:00 -03
 toc: true
 ---
 
@@ -194,6 +195,18 @@ if ($fromhost-ip == '127.0.0.1') then {
     *.emerg                         :omusrmsg:*
 }
 ```
+
+### Repeated message reduction
+
+As remembered by my colleague [Flavio Honda](https://www.linkedin.com/in/flavio-honda/), Rsyslog has an option that can help you reduce repeated messages.
+
+If you have trouble with this kind of situation or even wants to prevent this even before happen in the first time, you can enable the configuration below into your `/etc/rsyslog.conf` file :smile:.
+
+```ini
+$RepeatedMsgReduction on
+```
+
+Official reference about this feature in Rsyslog documentation can be found on [this link](https://www.rsyslog.com/doc/master/configuration/action/rsconf1_repeatedmsgreduction.html).
 
 ### Message processing flow
 

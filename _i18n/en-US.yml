@@ -10,6 +10,7 @@ global:
   bio: "Just another Cybersecurity professional"
   terms: "Terms of Service and Privacy Policy"
   termsurl: "https://davicruz.com/en-US/terms-and-privacy/"
+  share: "Share"
 cookie:
   strMessage: "This website uses cookies to ensure you get the best experience"
   strDismiss: "Got it!"

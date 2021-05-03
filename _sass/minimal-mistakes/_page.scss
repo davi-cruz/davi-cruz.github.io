@@ -546,6 +546,14 @@ EDIT:
 
 .grid__item .archive__item .page__meta .page__meta-lang  {
   visibility: hidden;
+  max-height: 0;
+  display: none;
+}
+
+.grid__item .archive__item .page__meta .page__meta-share  {
+  visibility: hidden;
+  display: none;
+  max-height: 0;
 }
 
 /*

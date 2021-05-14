@@ -14,7 +14,7 @@ Olá pessoal!
 A máquina desta semana será **Bucket**, outra máquina classificada como mediana do [Hack The Box](https://www.hackthebox.eu/), criada por [MrR3boot](https://app.hackthebox.eu/users/13531). <!--more-->
 
 :information_source: **Info**: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas.
-{: .information--notice}
+{: .notice--info}
 
 ![HTB Bucket](https://i.imgur.com/Qp79TCm.png){: .align-center}
 

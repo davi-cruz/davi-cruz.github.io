@@ -290,20 +290,16 @@ $ tree -a -I '.git'
 2 directories, 6 files
 ```
 
-Ao validar a chave RSA existente (`id_rsa`) notei que não se trata de uma chave RSA, mas uma chave `OPENSSH`. Para convertê-la precisei realizar os seguintes procedimentos:
+Assim como na máquina [Luanne]({% post_url 2021-03-27-htb-luanne %}), realizado a conversão da chave para RSA, utilizando os comandos abaixo:
 
-- Remover a quebra de linha ao final do arquivo, após a instrução `-----END OPENSSH PRIVATE KEY-----`.
-
-- Conversão de OpenSSH para RSA usando o comando abaixo, assim como a redefinição das permissões para que pudéssemos utilizá-la com o `ssh`, informando a senha da chave a ser exportada em branco.
-
-  ```bash
-  $ chmod 600 id_rsa
-  $ ssh-keygen -p -m PEM -f ./id_rsa
-  Key has comment 'root@laboratory'
-  Enter new passphrase (empty for no passphrase): 
-  Enter same passphrase again: 
-  Your identification has been saved with the new passphrase.
-  ```
+```bash
+$ chmod 600 id_rsa
+$ ssh-keygen -p -m PEM -f ./id_rsa
+Key has comment 'root@laboratory'
+Enter new passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved with the new passphrase.
+```
 
 Após o procedimento mencionado, foi possível conectar-se à máquina via SSH e obter a flag a partir do usuário `dexter`.
 

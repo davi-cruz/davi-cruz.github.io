@@ -289,7 +289,11 @@ QLAuGW2EaxejWHYC5gTh7jwK6wOwQArJhU48h6DFl+5PUO8KQCDBC9WaGm3EVXbPwXlzp9
 -----END OPENSSH PRIVATE KEY-----
 ```
 
-Just like we did on Laboratory, we have converted it to an RSA key using the commands below:
+Validating the `id_rsa` file, noticed that it isn't a RSA key but `OpenSSH`, where we'll need to convert it before using. The procedure below allowed us to complete it easily:
+
+- Remove the line break at the end of the file after `-----END OPENSSH PRIVATE KEY-----`.
+
+- Convert the OpenSSH to RSA using the command below, as well as the redefinition of its permissions so we could be able to use it with `ssh`, entering a blank password to the exported key.
 
 ```bash
 chmod 600 id_rsa
@@ -348,7 +352,6 @@ permit r.michaels as root
 ```
 
 - This user has a PGP key stored for `netpgp`, that will possibly allow is to decrypt the file found on backup folder;
-  
 ```log
 [+] Do I have PGP keys?
 gpg Not Found
@@ -360,7 +363,6 @@ uid "RSA 2048-bit key <r.michaels@localhost>" ""
 ```
 
 - Some user writable directories:
-  
 ```log
 [+] Interesting writable files owned by me or writable by everyone (not in Home) (max 500)
 [i] https://book.hacktricks.xyz/linux-unix/privilege-escalation#writable-files

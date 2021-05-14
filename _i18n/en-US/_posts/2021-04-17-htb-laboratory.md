@@ -290,20 +290,16 @@ $ tree -a -I '.git'
 2 directories, 6 files
 ```
 
-Validating the `id_rsa` file, noticed that it isn't a RSA key but `OpenSSH`, where we'll need to convert it before using. The procedure below allowed us to complete it easily:
+Just like we did on [Luanne]({% post_url 2021-03-27-htb-luanne %}), we have converted it to an RSA key using the commands below:
 
-- Remove the line break at the end of the file after `-----END OPENSSH PRIVATE KEY-----`.
-
-- Convert the OpenSSH to RSA using the command below, as well as the redefinition of its permissions so we could be able to use it with `ssh`, entering a blank password to the exported key.
-
-  ```bash
-  $ ssh-keygen -p -m PEM -f ./id_rsa
-  Key has comment 'root@laboratory'
-  Enter new passphrase (empty for no passphrase): 
-  Enter same passphrase again: 
-  Your identification has been saved with the new passphrase.
-  $ chmod 600 id_rsa
-  ```
+```bash
+$ ssh-keygen -p -m PEM -f ./id_rsa
+Key has comment 'root@laboratory'
+Enter new passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved with the new passphrase.
+$ chmod 600 id_rsa
+```
 
 After the mentioned process, I was able to SSH to the machine and get the user flag under Dexter's account:
 

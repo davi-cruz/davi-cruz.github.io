@@ -289,7 +289,10 @@ QLAuGW2EaxejWHYC5gTh7jwK6wOwQArJhU48h6DFl+5PUO8KQCDBC9WaGm3EVXbPwXlzp9
 -----END OPENSSH PRIVATE KEY-----
 ```
 
-Assim como na máquina Laboratory, realizado a conversão da chave para RSA, utilizando os comandos abaixo:
+Ao validar a chave RSA existente (`id_rsa`) notei que não se trata de uma chave RSA, mas uma chave `OPENSSH`. Para convertê-la precisei realizar os seguintes procedimentos:
+
+- Remover a quebra de linha ao final do arquivo, após a instrução `-----END OPENSSH PRIVATE KEY-----`.
+- Conversão de OpenSSH para RSA usando o comando abaixo, assim como a redefinição das permissões para que pudéssemos utilizá-la com o `ssh`, informando a senha da chave a ser exportada em branco.
 
 ```bash
 chmod 600 id_rsa
@@ -348,7 +351,6 @@ permit r.michaels as root
 ```
 
 - Chave PGP para o app `netpgp`, que permite criptografar, descriptografar e assinar arquivos;
-  
 ```log
 [+] Do I have PGP keys?
 gpg Not Found
@@ -360,7 +362,6 @@ uid "RSA 2048-bit key <r.michaels@localhost>" ""
 ```
 
 - Caminhos user writable:
-  
 ```log
 [+] Interesting writable files owned by me or writable by everyone (not in Home) (max 500)
 [i] https://book.hacktricks.xyz/linux-unix/privilege-escalation#writable-files

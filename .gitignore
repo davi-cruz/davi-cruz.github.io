@@ -30,3 +30,4 @@ _site
 
 # Obsidian
 .obsidian
+_config_local.yml

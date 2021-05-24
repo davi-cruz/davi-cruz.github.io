@@ -129,19 +129,19 @@ After creating this application, we need to adjust a few details so it can work 
   {: .notice--warning}
 
 ```powershell
-  # Detection Method: Returns the installed version if properly installed
-  
-  try{
-      $agentDetails = azcmagent show
-      $agentStatus = ($agentDetails | Where-Object {$_ -like '*Agent Status*'}).Split(": ")[-1]
-      
-      if($agentStatus){
-          Write-Output ($agentDetails | Where-Object {$_ -like '*Agent Version*'}).Split(": ")[-1]
-      }
-  }
-  catch{
-      # Returns nothing if not installed
-  }
+# Detection Method: Returns the installed version if properly installed
+
+try{
+    $agentDetails = & "$env:ProgramW6432\AzureConnectedMachineAgent\azcmagent.exe" show
+    $agentStatus = ($agentDetails | Where-Object {$_ -like '*Agent Status*'}).Split(": ")[-1]
+
+    if($agentStatus -eq 'Connected' ){
+    	Write-Output ($agentDetails | Where-Object {$_ -like '*Agent Version*'}).Split(": ")[-1]
+    }
+}
+catch{
+	# Returns nothing if not installed
+} 
 ```
 
 - On *Requirements* tab we need also to define the supported Operating System versions we're targeting. This also avoids accidental deployments installing Arc Agent on unsupported devices, like Windows Clients.

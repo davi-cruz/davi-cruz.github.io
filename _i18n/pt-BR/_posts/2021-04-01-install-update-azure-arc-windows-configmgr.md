@@ -129,19 +129,19 @@ Após criar o application, precisaremos ajudar alguns outros detalhes para que f
   {: .notice--warning}
 
 ```powershell
-  # Detection Method: Returns the installed version if properly installed
-  
-  try{
-      $agentDetails = azcmagent show
-      $agentStatus = ($agentDetails | Where-Object {$_ -like '*Agent Status*'}).Split(": ")[-1]
-      
-      if($agentStatus){
-          Write-Output ($agentDetails | Where-Object {$_ -like '*Agent Version*'}).Split(": ")[-1]
-      }
-  }
-  catch{
-      # Returns nothing if not installed
-  }
+# Detection Method: Returns the installed version if properly installed
+
+try{
+    $agentDetails = & "$env:ProgramW6432\AzureConnectedMachineAgent\azcmagent.exe" show
+    $agentStatus = ($agentDetails | Where-Object {$_ -like '*Agent Status*'}).Split(": ")[-1]
+
+    if($agentStatus -eq 'Connected' ){
+    	Write-Output ($agentDetails | Where-Object {$_ -like '*Agent Version*'}).Split(": ")[-1]
+    }
+}
+catch{
+	# Returns nothing if not installed
+} 
 ```
 
 - Na aba *Requirements* é importante também configurarmos as versões de Sistema Operacional que desejamos que este pacote seja instalado. Isso também evita que deployments acidentais venham instalar o produto em desktops Windows, o que não é suportado.

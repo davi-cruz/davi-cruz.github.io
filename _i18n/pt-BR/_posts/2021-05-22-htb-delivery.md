@@ -16,7 +16,7 @@ A máquina desta semana será **Delivery**, outra máquina Linux classificada co
 :information_source: **Info**: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas
 {: .notice--info}
 
-![htb-delivery](https://i.imgur.com/7C0GCed.png)
+![htb-delivery](https://i.imgur.com/7C0GCed.png){: .align-center}
 
 A resolução desta máquina foi bem interessante, onde tive a oportunidade de aprender a crackear senhas utilizando variações de dicionários utilizando o `hashcat`, além de vários pivoteamentos, porém simples, até que chegássemos nas credenciais de user e logo após sua obtenção, root.
 
@@ -76,7 +76,11 @@ Após verificada a conta, pudemos acessar o portal com as credenciais previament
 
 ![Delivery HTB - Mattermost - Account Confirmed](https://i.imgur.com/qN2YraR.png){: .align-center}
 
-Dentre as mensagens neste time, haviam algumas que chamavam a atenção, porém uma delas, continha as credenciais para administração do osTicket **maildeliverer:Youve_G0t_Mail!** e algo sobre <mark>variações de **PleaseSubscribe!**</mark>, muito utilizado por ippsec em seus videos de resolução de máquinas do Hack The Box.
+Dentre as mensagens neste time, algumas chamaram atenção, que continham informações importantes para a resolução desta máquina:
+
+- Credenciais para o osTicket são **maildeliverer:Youve_G0t_Mail!**.
+- Desenvolvedores utilizavam com frequência *variações de **PleaseSubscribe!*** e deveriam deixar de fazê-lo.
+  - Estas variações poderiam ser facilmente craqueadas utilizando **`hashcat` rules**, que foi uma dica bastante valiosa em como quebrar a senha de root ou algo em seu caminho.
 
 ![Delivery HTB - Mattermost Internal Channel](https://i.imgur.com/8KP9NRl.png){: .align-center}
 

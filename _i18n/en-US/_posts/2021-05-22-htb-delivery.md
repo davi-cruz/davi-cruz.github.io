@@ -16,7 +16,7 @@ This week’s machine will be **Delivery**, another easy-rated machine from [Hac
 :information_source: **Info**: Write-ups for Hack The Box machines are posted as soon as they’re retired.
 {: .notice--info}
 
-![htb-delivery](https://i.imgur.com/7C0GCed.png)
+![htb-delivery](https://i.imgur.com/7C0GCed.png){: .align-center}
 
 This box's resolution was pretty interesting, where I had the opportunity to learn on how to crack passwords using a dictionary variation using `hashcat`, besides the several pivoting, until get to the user credentials, and then, getting root.
 
@@ -79,7 +79,7 @@ After verified the account, we were able to access the portal with the created c
 Among the messages available on this channel, some called attention, but some information was gathered that might be useful for machine resolution:
 
 - osTicket Admin Credentials were **maildeliverer:Youve_G0t_Mail!**.
-- Devs were using <mark>variants of **PleaseSubscribe!**</mark> as passwords everywhere and should stop using it.
+- Devs were using *variants of **PleaseSubscribe!*** as passwords everywhere and should stop using it.
   - These variants could be easily cracked using **`hashcat` rules**, which is a great tip on how to obtain the root password, or something in its path.
 
 ![Delivery HTB - Mattermost Internal Channel](https://i.imgur.com/8KP9NRl.png){: .align-center}

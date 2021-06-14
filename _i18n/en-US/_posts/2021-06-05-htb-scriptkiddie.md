@@ -16,7 +16,7 @@ This week's machine will be **ScriptKiddie**, another easy-rated Linux box from 
 :information_source: **Info**:  Write-ups for Hack The Box machines are posted as soon as they’re retired.
 {: .notice--info}
 
-![ScriptKiddie](https://i.imgur.com/W5wv9JE.png){: .align-center}
+![HTB ScriptKiddie](https://i.imgur.com/W5wv9JE.png){: .align-center}
 
 ## Enumeration
 
@@ -147,7 +147,7 @@ After setting up a new listener and changing the `hackers` file with the above-m
 
 Enumerating the box again, this time with the new user account, noticed by running `linpeas.sh` that this user has access to start `msfconsole` in a privileged way.
 
-```output
+```plaintext
 [+] Checking 'sudo -l', /etc/sudoers, and /etc/sudoers.d
 [i] https://book.hacktricks.xyz/linux-unix/privilege-escalation#sudo-and-suid
 Matching Defaults entries for pwn on scriptkiddie:

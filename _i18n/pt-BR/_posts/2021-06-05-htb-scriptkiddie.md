@@ -16,7 +16,7 @@ A máquina desta semana será **ScriptKiddie**, outra máquina Linux classificad
 :information_source: **Info**: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas
 {: .notice--info}
 
-![ScriptKiddie](https://i.imgur.com/W5wv9JE.png){: .align-center}
+![HTB ScriptKiddie](https://i.imgur.com/W5wv9JE.png){: .align-center}
 
 ## Enumeração
 
@@ -147,7 +147,7 @@ Após definir o novo listener e alterar o arquivo `hackers`, um novo shell rever
 
 Enumerando novamente a máquina, desta vez a partir da conta deste novo usuário utilizando o `linpeas.sh`, notei que este user possuía direitos de execução do `msfconsole` de modo privilegiado.
 
-```output
+```plaintext
 [+] Checking 'sudo -l', /etc/sudoers, and /etc/sudoers.d
 [i] https://book.hacktricks.xyz/linux-unix/privilege-escalation#sudo-and-suid
 Matching Defaults entries for pwn on scriptkiddie:

@@ -80,7 +80,7 @@ Abaixo descrevo o procedimento utilizado para criar este recurso:
 
 - Seguir com a criação do application no console do MECM acessando *Software Library* > *Application Management* > *Applications* e selecionar a opção *Create Application* no ribbon ou no menu de contexto de *Application*.
 
-![Criando um Application no MECM](https://i.imgur.com/UTfhvOv.png){: .align-center}
+![Creating an Application on MECM](https://i.imgur.com/UTfhvOv.png){: .align-center}
 
 - Selecione o arquivo caminho do `*.msi` no File Share onde foi armazenado, de acordo com o pré-estabelecido em seu ambiente.
 
@@ -92,7 +92,7 @@ Abaixo descrevo o procedimento utilizado para criar este recurso:
 
 - Em *General Information*, substitua a linha de comando pré-configurada com a linha de comando abaixo para que a instalação ocorra a partir do script PowerShell baixado e clique em *Next*.
 
-  ```properties
+  ```bash
   %windir%\System32\WindowsPowerShell\v1.0\powershell.exe -File .\Install-AzureArcMECM.ps1
   ```
 

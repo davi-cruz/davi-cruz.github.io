@@ -92,7 +92,7 @@ Below I describe de instructions on how to create this resource:
 
 - In *General Information*, replace the preconfigured command line with the one provided below, so the install process will happen from PowerShell and hit *Next*.
 
-  ```properties
+  ```bash
   %windir%\System32\WindowsPowerShell\v1.0\powershell.exe -File .\Install-AzureArcMECM.ps1
   ```
 
@@ -136,11 +136,11 @@ try{
     $agentStatus = ($agentDetails | Where-Object {$_ -like '*Agent Status*'}).Split(": ")[-1]
 
     if($agentStatus -eq 'Connected' ){
-    	Write-Output ($agentDetails | Where-Object {$_ -like '*Agent Version*'}).Split(": ")[-1]
+      Write-Output ($agentDetails | Where-Object {$_ -like '*Agent Version*'}).Split(": ")[-1]
     }
 }
 catch{
-	# Returns nothing if not installed
+  # Returns nothing if not installed
 } 
 ```
 

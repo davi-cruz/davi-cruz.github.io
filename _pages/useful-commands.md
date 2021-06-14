@@ -28,4 +28,3 @@ python3 -c 'import pty;pty.spawn("/bin/bash")'
 stty raw -echo; fg
 export TERM=screen-256color; stty rows 50 columns 200
 ```
-

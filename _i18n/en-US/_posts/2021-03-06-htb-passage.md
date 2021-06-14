@@ -16,7 +16,7 @@ The box of this week will be Passage, a medium-rated Linux box from Hack The Box
 :information_source: **Info**: Write-ups for Hack The Box are always posted as soon as machines get retired.
 {: .notice--info}
 
-![img](https://i.imgur.com/jm8eRRi.png){: .align-center}
+![HTB Passage](https://i.imgur.com/jm8eRRi.png){: .align-center}
 
 ## Enumeration
 
@@ -48,7 +48,7 @@ Nmap done: 1 IP address (1 host up) scanned in 10.65 seconds
 
 Accessing the web page noticed that it is a blog built using **[CuteNews](http://cutephp.com/)** and the first post is very interesting, mentioning that Fail2Ban was recently implemented. This will prevent us from using any kind of brute force enumeration (`dirbuster` and related tools/techniques).
 
-![image-20210225141945974](https://i.imgur.com/XLBq0J7.png){: .align-center}
+![HTB Passage - News](https://i.imgur.com/XLBq0J7.png){: .align-center}
 
 Inspecting the source code of the page, while searching for interesting links, found some e-mail addresses, besides the **passage.htb** domain, which was added to the local hosts file.
 
@@ -69,7 +69,7 @@ href="mailto:sid@example.com"
 
 After some research about the product, found the administration page at `http://passage.htb/CuteNews` where I could identify the running version, which is **2.1.2**.
 
-![image-20210225154213926](https://i.imgur.com/cYxMtVe.png){: .align-center}
+![HTB Passage - CuteNews Admin](https://i.imgur.com/cYxMtVe.png){: .align-center}
 
 ## Initial Foothold
 
@@ -166,13 +166,11 @@ With the obtained RCE as **www-data**, sent payload and retrieved an interactive
 
 ## User flag
 
-### Enumeration
-
 After running `linpeas.sh` found some interesting information:
 
 - This box is vulnerable to **USBCreator**
 
-  ```bash
+  ```plaintext
   [+] USBCreator
   [i] https://book.hacktricks.xyz/linux-unix/privilege-escalation/d-bus-enumeration-and-command-injection-privilege-escalation
   Vulnerable!!
@@ -188,7 +186,7 @@ After running `linpeas.sh` found some interesting information:
 
 - Noted other 2 users in this box, where these were initially listed as e-mail addresses in the page and Paul called us attention once this is a user to which we have already cracked a password.
 
-  ```bash
+  ```plaintext
   [+] Users with console
   nadav:x:1000:1000:Nadav,,,:/home/nadav:/bin/bash
   paul:x:1001:1001:Paul Coles,,,:/home/paul:/bin/bash
@@ -197,7 +195,7 @@ After running `linpeas.sh` found some interesting information:
 
 - Permissions for the console users, where **nadav** is the one that holds more privileges in the system, including being a member of **sudo** group.
 
-  ```bash
+  ```plaintext
   [+] All users & groups
   uid=1000(nadav) gid=1000(nadav) groups=1000(nadav),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),113(lpadmin),128(sambashare)
   uid=1001(paul) gid=1001(paul) groups=1001(paul)

@@ -16,7 +16,7 @@ A máquina desta semana será Passage, outra máquina Linux classificada como me
 :information_source: **Info**: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas
 {: .notice--info}
 
-![img](https://i.imgur.com/jm8eRRi.png){: .align-center}
+![HTB Passage](https://i.imgur.com/jm8eRRi.png){: .align-center}
 
 ## Enumeração
 
@@ -48,7 +48,7 @@ Nmap done: 1 IP address (1 host up) scanned in 10.65 seconds
 
 Acessando a página notado que se trata de um blog criado com **[CuteNews](http://cutephp.com/)** e o primeiro post continha algo bastante interessante, mencionando que Fail2Ban foi recentemente implementado no site. Isso irá nos impedir de utilizar qualquer ferramenta de enumeração que utilize brute force (como dirbuster e outras ferramentas/técnicas relacionadas).
 
-![image-20210225141945974](https://i.imgur.com/XLBq0J7.png){: .align-center}
+![HTB Passage - News](https://i.imgur.com/XLBq0J7.png){: .align-center}
 
 Inspecionando o código fonte da página, enquanto buscava por links interessantes, encontrei alguns endereços e-mail, além do domínio **passage.htb**, o qual foi adicionado na sequência no arquivo hosts local.
 
@@ -69,7 +69,7 @@ href="mailto:sid@example.com"
 
 Após alguma pesquisa sobre o produto, encontrei a página de administração em `http://passage.htb/CuteNews`, onde pude identificar a versão em execução **2.1.2**.
 
-![image-20210225154213926](https://i.imgur.com/cYxMtVe.png){: .align-center}
+![HTB Passage - CuteNews Admin](https://i.imgur.com/cYxMtVe.png){: .align-center}
 
 ## Acesso inicial
 
@@ -170,7 +170,7 @@ Após executar o script `linpeas.sh`, encontrei alguns itens interessantes:
 
 - Máquina é vulnerável a USBCreator
 
-  ```bash
+  ```plaintext
   [+] USBCreator
   [i] https://book.hacktricks.xyz/linux-unix/privilege-escalation/d-bus-enumeration-and-command-injection-privilege-escalation
   Vulnerable!!
@@ -186,7 +186,7 @@ Após executar o script `linpeas.sh`, encontrei alguns itens interessantes:
 
 - Observado 2 usuários na máquina, que inicialmente foram listados quando encontrei os endereços de e-mail e, para o usuário Paul, já temos uma possível senha.
 
-  ```bash
+  ```plaintext
   [+] Users with console
   nadav:x:1000:1000:Nadav,,,:/home/nadav:/bin/bash
   paul:x:1001:1001:Paul Coles,,,:/home/paul:/bin/bash
@@ -195,7 +195,7 @@ Após executar o script `linpeas.sh`, encontrei alguns itens interessantes:
 
 - Permissões para os usuários de console listados, onde **nadav** é o que possui mais privilégios na máquina, sendo inclusive membro do grupo **sudo**.
 
-  ```bash
+  ```plaintext
   [+] All users & groups
   uid=1000(nadav) gid=1000(nadav) groups=1000(nadav),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),113(lpadmin),128(sambashare)
   uid=1001(paul) gid=1001(paul) groups=1001(paul)
@@ -208,6 +208,7 @@ www-data@passage:~$ su paul
 Password:
 paul@passage:~$ cat user.txt
 <redacted>
+paul@passage:~$
 ```
 
 ## Root flag

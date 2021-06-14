@@ -15,7 +15,7 @@ Começando a postar sobre alguns write-ups de máquinas estilo CTF, a primeira a
 :information_source: **Info**: Write-ups para máquinas do Hack The Box serão postados assim que as máquinas sejam aposentadas, então segue abaixo a primeira :smiley:!
 {: .notice--info}
 
-![image-20210209083728228](https://i.imgur.com/7DBDPWU.png){: .align-center}
+![HTB Doctor](https://i.imgur.com/7DBDPWU.png){: .align-center}
 
 ## Enumeração
 
@@ -56,7 +56,7 @@ Nmap done: 1 IP address (1 host up) scanned in 63.98 seconds
 
 Antes de começar a enumeração, navegando no website utilizando o browser, notei de que se trata de um site institucional, que menciona um endereço de e-mail **info@doctors.htb**, onde o domínio `doctors.htb` deve se tratar do FQDN desta máquina.
 
-![image-20210114195257224](https://i.imgur.com/cRUWuPh.png){: .align-center}
+![HTB Doctor - 80/TCP](https://i.imgur.com/cRUWuPh.png){: .align-center}
 
 Para garantir que a enumeração dos serviços HTTP seja feita corretamente, caso algum deles esteja sendo publicado por este DNS, alterei o arquivo hosts local para refletir o nome correto para o endereço IP da máquina, podendo assim iniciar o processo de enumeração dos serviços.
 
@@ -81,7 +81,7 @@ ff02::2 ip6-allrouters
 
 Após alterar a entrada, uma vez acessando novamente a porta 80/TPC, desta vez via hostname, uma página diferente é exibida, conforme podemos ver abaixo:
 
-![image-20210114210614527](https://i.imgur.com/bnqIzON.png){: .align-center}
+![HTB Doctor - Secure Messaging](https://i.imgur.com/bnqIzON.png){: .align-center}
 
 Agora que confirmamos que a máquina possui um outro serviço publicado usando o dns, vamos começar enumerando os dois websites, tanto com DNS quanto IP, para que possamos buscar por alguma oportunidade interessante para um acesso inicial.
 
@@ -98,11 +98,11 @@ Enquanto validando o website notei que na página de login havia também a possi
 
 Após algumas tentativas, tentando manipular os requests de alteração de senha, decidi por mudar de estratégia e tentar criar uma conta.
 
-![image-20210115110541005](https://i.imgur.com/fSXdu3M.png){: .align-center}
+![HTB Doctor - Secure Messaging - Creating User](https://i.imgur.com/fSXdu3M.png){: .align-center}
 
 Depois de criá-la com sucesso, uma mensagem de aviso foi exibida conforme abaixo, o que significa que **teremos apenas 20 minutos para utilizar a conta no site**.
 
-![image-20210130194324306](https://i.imgur.com/R7dtMR4.png){: .align-center}
+![HTB Doctor - Secure Messaging - Account creation](https://i.imgur.com/R7dtMR4.png){: .align-center}
 
 Depois de criada, iniciada a enumeração pelo código fonte da página, onde encontrei um diretorio `/archive` comentado no código, mas nada foi exibido quando acessei a página pela primeira vez.
 
@@ -112,7 +112,7 @@ Depois de criada, iniciada a enumeração pelo código fonte da página, onde en
 
 Avaliando as demais possibilidades parti para a criação de uma nova mensagem, uma das opções disponíveis, onde inseri o seguinte conteúdo para testes:
 
-![image-20210115111008460](https://i.imgur.com/JT3MZfR.png){: .align-center}
+![HTB Doctor - Secure Messaging - New Post](https://i.imgur.com/JT3MZfR.png){: .align-center}
 
 Acessando a mensagem postada na sequência, notei que é direcionado para a URL `http://doctors.htb/post/2` mas também não consegui identificar nenhuma outra oportunidade de exploração neste ponto, apenas as opções padrão para alterar ou deletar a mensagem.
 
@@ -122,11 +122,11 @@ As coisas ficaram interessantes quando decidi acessar novamente o `/archive`, on
 
 Para confirmar a possibilidade, seguindo o que encontrei em [SSTI (Server Side Template Injection) - HackTricks](https://book.hacktricks.xyz/pentesting-web/ssti-server-side-template-injection#identify), troquei o conteúdo do título da minha mensagem anterior para testar alguns tipos de injeção sugeridos, que nos permitirá identificar qual a engine utilizada e, posteriormente, criar o conteúdo malicioso para obter um acesso inicial.
 
-![image-20210115111707069](https://i.imgur.com/vVVwKY2.png){: .align-center}
+![HTB Doctor - Secure Messaging - SSTI test](https://i.imgur.com/vVVwKY2.png){: .align-center}
 
 Esta injeção funcionou com sucesso, indicando que temos um website construido com Twig ou Jinja2 :smile: (o que faz sentido, já que o webservice é publicado utilizando **Werkzeug**, conforme pudemos notar via whatweb, que é um servidor web muito popular utilizado normalmente em conjunto com Flask ou Django).
 
-![image-20210115111818436](https://i.imgur.com/EH0zQHN.png){: .align-center}
+![HTB Doctor - SSTI output ](https://i.imgur.com/EH0zQHN.png){: .align-center}
 
 Depois de alguns testes, brincando com exemplos disponíveis em [PayloadsAllTheThings/Server Side Template Injection at master · swisskyrepo/PayloadsAllTheThings (github.com)](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Template%20Injection), consegui confirmar que a engine utilizada é **Jinja2**, onde o conteúdo abaixo funcionou sem problemas, dentre outros:
 
@@ -170,7 +170,7 @@ Após confirmado que um payload para Jinja2 deveria ser utilizado, foi possível
 
 - E voilá! Recebi um shell reverso :smiley:
 
-![image-20210117191626475](https://i.imgur.com/TyHFL9D.png){: .align-center}
+![HTB Doctor - Exploit](https://i.imgur.com/TyHFL9D.png){: .align-center}
 
 **Bônus**: Pra facilitar na reobtenção deste acesso inicial, uma vez que a conta criada tem a validade curta de 20 min, criei um script simples em python para esta tarefa :smiley:.​ Para usá-lo basta configurar o listener e o webserver, da mesma forma que faríamos no método 100% manual, com a diferença de que o script irá recriar o usuário, configurar o payload malicioso na mensagem e fazer o request retornando o shell reverso novamente.
 {: .notice--info}
@@ -343,9 +343,11 @@ Após executar o script `linpeas.sh` do [PEASS - Privilege Escalation Awesome Sc
 
 Acessando este serviço manualmente, ao clicar no link **services**, conforme listado abaixo, uma janela de autenticação é exibida. Como a única credencial que possuímos é a do usuário shaun foi a primeira a ser tentada, onde tive sucesso :smiley:.
 
-![image-20210131080459535](https://i.imgur.com/R4VNKDe.png){: .align-center}
+![HTB Doctor - Splunkd](https://i.imgur.com/R4VNKDe.png){: .align-center}
 
-![image-20210131080540525](https://i.imgur.com/lsTJ2cg.png){: .align-center}
+
+
+![HTB Doctor - Services](https://i.imgur.com/lsTJ2cg.png){: .align-center}
 
 Uma vez que temos credenciais para logon no serviço do Splunk, o próximo passo é encontrar uma forma de obter execução remota de código através do mesmo. Após alguma pesquisa, encontrei este link [Abusing Splunk Forwarders For Shells and Persistence · Eapolsniper's Blog](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/) que menciona um script disponível em [GitHub - cnotin/SplunkWhisperer2: Local privilege escalation, or remote code execution, through Splunk Universal Forwarder (UF) misconfigurations](https://github.com/cnotin/SplunkWhisperer2), que permitirá exatamente o que estávamos procurando.
 

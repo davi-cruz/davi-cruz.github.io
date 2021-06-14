@@ -15,7 +15,7 @@ Starting to posting about some write-ups of CTF-like machines, the first one wil
 :information_source: **Info**: Write-ups for Hack The Box will be posted as soon as machines get retired, so here's the first one :smiley:!
 {: .notice--info}
 
-![image-20210209083728228](https://i.imgur.com/7DBDPWU.png){: .align-center}
+![HTB Doctor](https://i.imgur.com/7DBDPWU.png){: .align-center}
 
 ## Enumeration
 
@@ -56,7 +56,7 @@ Nmap done: 1 IP address (1 host up) scanned in 63.98 seconds
 
 Before starting the enumeration, checking the website using browser, noticed that it is an institutional site, that mentions an e-mail **info@doctors.htb**, where the domain `doctors.htb` might be the FQDN of this machine.
 
-![image-20210114195257224](https://i.imgur.com/cRUWuPh.png){: .align-center}
+![HTB Doctor - 80/TCP](https://i.imgur.com/cRUWuPh.png){: .align-center}
 
 To ensure proper enumeration of HTTP services which might be using DNS, changed local hosts file to reflect the correct name so we could also start enumerating the services.
 
@@ -81,7 +81,7 @@ ff02::2 ip6-allrouters
 
 After changing the entry, once accessing the same url, a different page is displayed, as seen below:
 
-![image-20210114210614527](https://i.imgur.com/bnqIzON.png){: .align-center}
+![HTB Doctor - Secure Messaging](https://i.imgur.com/bnqIzON.png){: .align-center}
 
 Now that we have confirmed that the box contained a different content being hosted using the DNS, we'll start enumerating these websites using both ways so we can look for interesting opportunities for an initial foothold.
 
@@ -98,11 +98,11 @@ While checking the website I have noticed that on that login page would be possi
 
 After some further testing, including checking the possibility to tamper the change password request, I decided change strategy and to try to create an account.
 
-![image-20210115110541005](https://i.imgur.com/fSXdu3M.png){: .align-center}
+![HTB Doctor - Secure Messaging - Creating User](https://i.imgur.com/fSXdu3M.png){: .align-center}
 
 After having one successfully created, the warning below is displayed, which means that **we'll only have 20 minutes** to use this recently created account.
 
-![image-20210130194324306](https://i.imgur.com/R7dtMR4.png){: .align-center}
+![HTB Doctor - Secure Messaging - Account creation](https://i.imgur.com/R7dtMR4.png){: .align-center}
 
 After having the account created, started enumerating the source code where I've found a `/archive` folder hidden in the page, but it didn't returned anything when first accessed.
 
@@ -112,7 +112,7 @@ After having the account created, started enumerating the source code where I've
 
 So going further I noticed the possibility to add a new message, where I have created the following dummy content:
 
-![image-20210115111008460](https://i.imgur.com/JT3MZfR.png){: .align-center}
+![HTB Doctor - Secure Messaging - New Post](https://i.imgur.com/JT3MZfR.png){: .align-center}
 
 Accessing the posted message afterwards, I noticed that it redirects to `http://doctors.htb/post/2` but also nothing interesting besides the possibility of updating its content or deleting the message.
 
@@ -122,11 +122,11 @@ Things get interesting when I decided to access `/archive` again, where the cont
 
 In order to confirm this, following the guidance available on [SSTI (Server Side Template Injection) - HackTricks](https://book.hacktricks.xyz/pentesting-web/ssti-server-side-template-injection#identify) I've changed the Title from my previous message in order to test some types of injections and determine the engine used, which will help us define the malicious injection itself.
 
-![image-20210115111707069](https://i.imgur.com/vVVwKY2.png){: .align-center}
+![HTB Doctor - Secure Messaging - SSTI test](https://i.imgur.com/vVVwKY2.png){: .align-center}
 
 This injection worked flawlessly, indicating that we're handling Twig or Jinja2 :smile: (what makes sense, once this webservice, as noticed on whatweb, is **Werkzeug**, a very popular web application server normally used with Flask or Django).
 
-![image-20210115111818436](https://i.imgur.com/EH0zQHN.png){: .align-center}
+![HTB Doctor - SSTI output ](https://i.imgur.com/EH0zQHN.png){: .align-center}
 
 After a few tests, playing with the examples available at [PayloadsAllTheThings/Server Side Template Injection at master · swisskyrepo/PayloadsAllTheThings (github.com)](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Template%20Injection), I was able to confirm that the correct language to use would be **Jinja2**, once the content below worked properly, among others:
 
@@ -170,7 +170,7 @@ After confirming that a Jinja2 payload should be used, would be possible to get 
 
 - And voilà! A reverse shell was returned :smiley:
 
-![image-20210117191626475](https://i.imgur.com/TyHFL9D.png){: .align-center}
+![HTB Doctor - Exploit](https://i.imgur.com/TyHFL9D.png){: .align-center}
 
 **Bonus** To make it easier regain initial foothold, once user account has a short validity of 20 minutes, I've created this python3 script to help on this task :smiley:. To use it just set up the listener and python web server, then the script will recreate the user, the message and then make the request to get the reverse shell again
 {: .notice--info}
@@ -340,9 +340,9 @@ After running `linpeas.sh` from [PEASS - Privilege Escalation Awesome Scripts SU
 
 After browsing it directly, once I have clicked in the **services** link, as image below, an authentication prompt was shown. As the only credential we had is shaun it was the first one tried, which resulted in success :smiley:.
 
-![image-20210131080459535](https://i.imgur.com/R4VNKDe.png)
+![HTB Doctor - Splunkd](https://i.imgur.com/R4VNKDe.png){: .align-center}
 
-![image-20210131080540525](https://i.imgur.com/lsTJ2cg.png)
+![HTB Doctor - Services](https://i.imgur.com/lsTJ2cg.png){: .align-center}
 
 As we have credentials to logon to the Splunk Service, the next step is to find a way to get an RCE on this service. Doing some research I came across [Abusing Splunk Forwarders For Shells and Persistence · Eapolsniper's Blog](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/) that mentions [GitHub - cnotin/SplunkWhisperer2: Local privilege escalation, or remote code execution, through Splunk Universal Forwarder (UF) misconfigurations](https://github.com/cnotin/SplunkWhisperer2), which is a tool that makes easier to get a command execution from the access we already have.
 

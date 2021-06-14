@@ -16,7 +16,7 @@ A máquina desta semana será **Laboratory**, outra máquina Linux classificada 
 :information_source: **Info**: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas
 {: .notice--info}
 
-![laboratory-image](https://i.imgur.com/6fqKuas.png){: .align-center}
+![HTB Laboratory](https://i.imgur.com/6fqKuas.png){: .align-center}
 
 ## Enumeração
 

@@ -16,7 +16,7 @@ The machine of this week wil be **Laboratory**, another Linux box easy rated fro
 :information_source: **Info**: Write-ups for Hack the Box are always posted as soon as machines get retired.
 {: .notice--info}
 
-![laboratory-image](https://i.imgur.com/6fqKuas.png){: .align-center}
+![HTB Laboratory](https://i.imgur.com/6fqKuas.png){: .align-center}
 
 ## Enumeration
 
@@ -293,34 +293,34 @@ $ tree -a -I '.git'
 Just like we did on [Luanne]({% post_url 2021-03-27-htb-luanne %}), we have converted it to an RSA key using the commands below:
 
 ```bash
+$ chmod 600 id_rsa
 $ ssh-keygen -p -m PEM -f ./id_rsa
 Key has comment 'root@laboratory'
 Enter new passphrase (empty for no passphrase): 
 Enter same passphrase again: 
 Your identification has been saved with the new passphrase.
-$ chmod 600 id_rsa
 ```
 
 After the mentioned process, I was able to SSH to the machine and get the user flag under Dexter's account:
 
-  ```bash
-  $ ssh -i id_rsa dexter@10.10.10.216
-  dexter@laboratory:~$ ls -la
-  total 40
-  drwxr-xr-x 6 dexter dexter 4096 Oct 22 08:42 .
-  drwxr-xr-x 3 root   root   4096 Jun 26  2020 ..
-  lrwxrwxrwx 1 root   root      9 Jul 17  2020 .bash_history -> /dev/null
-  -rw-r--r-- 1 dexter dexter  220 Feb 25  2020 .bash_logout
-  -rw-r--r-- 1 dexter dexter 3771 Feb 25  2020 .bashrc
-  drwx------ 2 dexter dexter 4096 Jun 26  2020 .cache
-  drwx------ 2 dexter dexter 4096 Oct 22 08:14 .gnupg
-  drwxrwxr-x 3 dexter dexter 4096 Jun 26  2020 .local
-  -rw-r--r-- 1 dexter dexter  807 Feb 25  2020 .profile
-  drwx------ 2 dexter dexter 4096 Jun 26  2020 .ssh
-  -r--r----- 1 root   dexter   33 Feb 19 11:06 user.txt
-  dexter@laboratory:~$ cat user.txt 
-  <redacted>
-  ```
+```bash
+$ ssh -i id_rsa dexter@10.10.10.216
+dexter@laboratory:~$ ls -la
+total 40
+drwxr-xr-x 6 dexter dexter 4096 Oct 22 08:42 .
+drwxr-xr-x 3 root   root   4096 Jun 26  2020 ..
+lrwxrwxrwx 1 root   root      9 Jul 17  2020 .bash_history -> /dev/null
+-rw-r--r-- 1 dexter dexter  220 Feb 25  2020 .bash_logout
+-rw-r--r-- 1 dexter dexter 3771 Feb 25  2020 .bashrc
+drwx------ 2 dexter dexter 4096 Jun 26  2020 .cache
+drwx------ 2 dexter dexter 4096 Oct 22 08:14 .gnupg
+drwxrwxr-x 3 dexter dexter 4096 Jun 26  2020 .local
+-rw-r--r-- 1 dexter dexter  807 Feb 25  2020 .profile
+drwx------ 2 dexter dexter 4096 Jun 26  2020 .ssh
+-r--r----- 1 root   dexter   33 Feb 19 11:06 user.txt
+dexter@laboratory:~$ cat user.txt 
+<redacted>
+```
 
 ## Root flag
 

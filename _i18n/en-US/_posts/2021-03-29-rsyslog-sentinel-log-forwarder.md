@@ -19,7 +19,6 @@ Besides having plenty documentation on how to do this deployment, as well as oth
 - **30/04/2021** - Added section [Repeated message reduction](#repeated-message-reduction)
 {% endcapture %}
 
-
 <div>
 {{ changes | markdownify }}
 </div>{: .notice--success}
@@ -134,7 +133,7 @@ Besides the `cef_installer.py` already defines a listener for TCP/514 and UDP/51
 
 Your configuration for TCP and UDP should look like the sample below, which is an excerpt from file `/etc/rsyslog.conf`:
 
-```conf
+```ini
 module(load="imuxsock") # provides support for local system logging
 #module(load="immark")  # provides --MARK-- message capability
 
@@ -151,7 +150,7 @@ For TLS Configuration there's some additional work required, where need to issue
 
 More details and sample configurations can be found in official documentation at [this link](https://www.rsyslog.com/doc/v8-stable/tutorials/tls_cert_summary.html), from where the excerpt below was extracted to give you an idea of how this configuration looks like:
 
-```conf
+```ini
 module(load="imuxsock") # local messages
 module(load="imtcp" # TCP listener
     StreamDriver.Name="gtls"
@@ -260,7 +259,7 @@ After the initial installation, your MMA agent will create this file located at 
 
 For the configuration above the content of this file will look like this:
 
-```conf
+```ini
 # OMS Syslog collection for workspace <workspace id>
 auth.=alert;auth.=crit;auth.=debug;auth.=emerg;auth.=err;auth.=info;auth.=notice;auth.=warning  @127.0.0.1:25224
 authpriv.=alert;authpriv.=crit;authpriv.=debug;authpriv.=emerg;authpriv.=err;authpriv.=info;authpriv.=notice;authpriv.=warning  @127.0.0.1:25224
@@ -296,7 +295,7 @@ An uncomplicated way to implement this is creating a file to be processed before
 
 In this file we'll make use again of the instruction `stop`, dropping the messages we don't want to be forwarder either to Syslog or CEF. The sample below drops any message containing "test" and matching one of the severities/facilities will be dropped.
 
-```conf
+```ini
 if ($rawmsg contains "test") and prifilt("auth,authpriv.*") then {
         stop
 }

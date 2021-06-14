@@ -133,7 +133,7 @@ Embora o `cef_installer.py` já defina os listeners para TCP/514 e UDP/514, talv
 
 Sua configuração atual deve se parecer com o trecho abaixo, que pode ser visto no arquivo `/etc/rsyslog.conf`:
 
-```conf
+```ini
 module(load="imuxsock") # provides support for local system logging
 #module(load="immark")  # provides --MARK-- message capability
 
@@ -150,7 +150,7 @@ A configuração para comunicação via TLS requer alguns itens adicionais, onde
 
 Maiores detalhes e exemplos de configurações podem ser encontrados na documentação oficial [neste link](https://www.rsyslog.com/doc/v8-stable/tutorials/tls_cert_summary.html), de onde retirei o trecho abaixo para que tenham uma ideia de como esta configuração se parece:
 
-```conf
+```ini
 module(load="imuxsock") # local messages
 module(load="imtcp" # TCP listener
     StreamDriver.Name="gtls"
@@ -182,7 +182,7 @@ Isso ocorre porque as definições padrão do rsyslog, listadas abaixo, enviam a
 :bulb: **Nota**: O caminho onde encontrar estas configurações padrão variam de acordo com a distribuição Linux. Para Ubuntu existe um arquivo chamado `/etc/rsyslog.d/50-default.conf` enquanto para distribuições baseadas em RHEL (RHEL, CentOS, Fedora) está na configuração principal do `/etc/rsyslog.conf`.
 {: .notice--info}
 
-```conf
+```ini
 #Extracted from Ubuntu /etc/rsyslog.d/50-default.conf
 
 auth,authpriv.*                 /var/log/auth.log
@@ -195,7 +195,7 @@ mail.err                        /var/log/mail.err
 
 Como podem ver, qualquer mensagem que coincida com alguma severidade contida nesta lista é enviada para um dos arquivos locais. Uma forma rápida de prevenir este comportamento é editar o arquivo de configuração para apenas aceitar mensagens geradas pelo host local (`127.0.0.1`):
 
-```conf
+```ini
 if ($fromhost-ip == '127.0.0.1') then {
     auth,authpriv.*                 /var/log/auth.log
     *.*;auth,authpriv.none          -/var/log/syslog
@@ -259,7 +259,7 @@ Após a instalação inicial, o agente do MMA criará um arquivo de configuraç�
 
 Para a configuração acima o seguinte conteúdo será criado no arquivo, conforme abaixo:
 
-```conf
+```ini
 # OMS Syslog collection for workspace <workspace id>
 auth.=alert;auth.=crit;auth.=debug;auth.=emerg;auth.=err;auth.=info;auth.=notice;auth.=warning  @127.0.0.1:25224
 authpriv.=alert;authpriv.=crit;authpriv.=debug;authpriv.=emerg;authpriv.=err;authpriv.=info;authpriv.=notice;authpriv.=warning  @127.0.0.1:25224
@@ -295,7 +295,7 @@ Uma forma fácil de configurar esta filtragem é criando um arquivo a ser proces
 
 Neste arquivo vamos utilizar novamente a instrução `stop`, removendo as mensagens que não gostaríamos que fossem encaminhadas seja como Syslog ou CEF. Neste exemplo qualquer mensagem que contenha a palavra "test" e tenha algum dos facilities/severidades mencionados serão removidas.
 
-```conf
+```ini
 if ($rawmsg contains "test") and prifilt("auth,authpriv.*") then {
         stop
 }

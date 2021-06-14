@@ -13,7 +13,7 @@ In this post I'll guide you on how to configure this for Linux, without configur
 
 ## Default configuration
 
-By default, when we specify a proxy server during the Azure Arc agent installation in a Linux Server, there's a utility which handles all these requestes, which is `azcmagent_proxy, as below:
+By default, when we specify a proxy server during the Azure Arc agent installation in a Linux Server, there's a utility which handles all these requests, which is `azcmagent_proxy`, as below:
 
 ```bash
 dcruz@vmlx02:~$ sudo azcmagent_proxy
@@ -74,7 +74,7 @@ In order to configure the services to have connectivity needed to perform all ma
 
 After making these changes, you should see the following line on your logs, which is proof that the service is using the correct proxy configuration inside the  `/var/opt/azcmagent/log/himds.log`
 
-```log
+```plaintext
 time="yyyy-MM-dd02T17:34:07Z" level=debug msg="Using Https Proxy: http://vmlx01:3128"
 ```
 

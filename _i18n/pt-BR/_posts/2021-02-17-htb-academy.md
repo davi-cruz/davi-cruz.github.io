@@ -16,7 +16,7 @@ A máquina desta semana será **Academy**, outra máquina Linux classificada com
 :information_source: **Info**: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas
 {: .notice--info}
 
-![AcademyHTB](https://i.imgur.com/3SXgHMd.png){: .align-center}
+![HTB Academy](https://i.imgur.com/3SXgHMd.png){: .align-center}
 
 ## Enumeração
 
@@ -31,7 +31,7 @@ Host is up (0.15s latency).
 Not shown: 998 closed ports
 PORT   STATE SERVICE VERSION
 22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.1 (Ubuntu Linux; protocol 2.0)
-| ssh-hostkey: 
+| ssh-hostkey:
 |   3072 c0:90:a3:d8:35:25:6f:fa:33:06:cf:80:13:a0:a5:53 (RSA)
 |   256 2a:d5:4b:d0:46:f0:ed:c9:3c:8d:f6:5d:ab:ae:77:96 (ECDSA)
 |_  256 e1:64:14:c3:cc:51:b2:3b:a6:28:a7:b1:ae:5f:45:35 (ED25519)
@@ -41,14 +41,14 @@ PORT   STATE SERVICE VERSION
 Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-Nmap done: 1 IP address (1 host up) scanned in 34.43 seconds                                  
+Nmap done: 1 IP address (1 host up) scanned in 34.43 seconds
 ```
 
 ### 80 TCP - Serviço HTTP
 
 Verificando este serviço do scan do `nmap`, notei que a página contém um redirect para o host **academy.htb**, que é provavelmente o nome pelo qual esta máquina responde e que minha máquina não conseguiu resolver. Após adicioná-lo no meu arquivo `/etc/hosts`, foi possível navegar para a página abaixo, que contém dois links: um para registro e outro para login na página do serviço HTB Academy.
 
-![image-20210217115623157](https://i.imgur.com/jPgHc5K.png){: .align-center}
+![HTB Academy - 80/TCP](https://i.imgur.com/jPgHc5K.png){: .align-center}
 
 Como o código fonte da página não continha nada oculto, segui com a criação de uma conta para testes (`dummy:P@ssword`) para obter algum acesso no serviço. Durante a criação da conta notei algo interessante enviado no POST request, onde um campo oculto do formulário enviava o parametro **roleid**, definindo seu valor para **0**.
 
@@ -75,7 +75,7 @@ Vamos dar continuidade com os valores padrão por enquanto embora já saibamos d
 
 Depois de acessar o serviço com a credencial recentemente criada, notei que o usuário é capaz de ver o catálogo de serviços, com alguns créditos pré-carregados, porém nenhuma operação (unlock) foi possível uma vez que a API estava indisponível (`http://academy.htb/api/modules/unlock`), retornando erro HTTP 404.
 
-![image-20210217130138100](https://i.imgur.com/ZWqyaUH.png){: .align-center}
+![HTB Academy - Logged in](https://i.imgur.com/ZWqyaUH.png){: .align-center}
 
 ### Gobuster
 
@@ -113,13 +113,13 @@ Progress: 48339 / 220561 (21.92%)in.php (Status: 200)
 
 Acessando `admin.php` notei que a tela de logon se parece bastante com a tela de login anterior, porém nossas credenciais de testes não funcionaram. Lembrando que temos uma oportunidade de adulterar detalhes da criação do usuário, decidi por criar uma nova conta, desta vez alterando o parametro **roleid** substituindo o valor 0 no request por 1. Com esta nova conta, cujo roleid=**1**, consegui acessar a área restrita, onde o conteúdo abaixo doi exibido:
 
-![image-20210217131705459](https://i.imgur.com/s54Fy4z.png){: .align-center}
+![HTB Academy - Admin Page](https://i.imgur.com/s54Fy4z.png){: .align-center}
 
 Embora não possua nenhuma informação oculta no fonte, o que chamou atenção foi o host **dev-staging-01.academy.htb**, que possivelmente também encontra-se em execução nesta máquina.
 
 Após adicionar este host no arquivo hosts sob o mesmo endereço IP da máquina, o conteúdo abaixo foi exibido, que é um framework para tratativa de erros no PHP que permite aos desenvolvedores debugar seu código, mas neste caso estava aberto e vazando uma série de informações como credenciais e variáveis de ambiente.
 
-![image-20210217132525919](https://i.imgur.com/EdXyUeb.png){: .align-center}
+![HTB Academy - DevSta](https://i.imgur.com/EdXyUeb.png){: .align-center}
 
 O que mais chamou a atenção dentre os dados vazados foram as credenciais de MySQL e App_key do Laravel, que podem nos levar a um acesso inicial nesta máquina.
 

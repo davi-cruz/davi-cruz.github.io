@@ -16,7 +16,7 @@ The box of this week will be **Academy**, another easy-rated Linux box from [Hac
 :information_source: **Info**: Write-ups for Hack the Box are always posted as soon as machines get retired.
 {: .notice--info}
 
-![AcademyHTB](https://i.imgur.com/3SXgHMd.png){: .align-center}
+![HTB Academy](https://i.imgur.com/3SXgHMd.png){: .align-center}
 
 ## Enumeration
 
@@ -48,7 +48,7 @@ Nmap done: 1 IP address (1 host up) scanned in 34.43 seconds
 
 Checking this service from `nmap` scan, noticed that the page contains a redirect to the host **academy.htb**, which probably was not able to follow redirect once this domain name was not solved. After adding it to the `/etc/hosts`, we were able to navigate to the specified page which contains 2 links, one for registering and other to login to this HTB Academy service.
 
-![image-20210217115623157](https://i.imgur.com/jPgHc5K.png){: .align-center}
+![HTB Academy - 80/TCP](https://i.imgur.com/jPgHc5K.png){: .align-center}
 
 As the page source did not disclosed nothing, proceeded by creating a dummy account (`dummy:P@ssword`) to get initial access to the platform but noticed something interesting in the post request, where a hidden field from the register form was sending a parameter **roleid**, set to value **0**.
 
@@ -75,7 +75,7 @@ Let us proceed with the default value for now but we already have an idea of wha
 
 After entering the recently created credentials, noticed that the user could see the academy catalog, with some pre-loaded credit but no operation (unlock) was possible once the unlock API (`http://academy.htb/api/modules/unlock`) was not available, returning a HTTP 404 error.
 
-![image-20210217130138100](https://i.imgur.com/ZWqyaUH.png){: .align-center}
+![HTB Academy - Logged in](https://i.imgur.com/ZWqyaUH.png){: .align-center}
 
 ### Gobuster
 
@@ -113,13 +113,13 @@ Progress: 48339 / 220561 (21.92%)in.php (Status: 200)
 
 Accessing `admin.php` noticed that this pace looks very similar to the previous one, but our dummy credentials did not work there. So, remembering from the parameter we saw in the registration form (**roleid**), I decided to create another account but, in this case, tampering the data sent in the request, replacing 0 by 1 for the mentioned identifier. With this new account, which roleid = **1**, I was able to login to the restricted area and the page below was displayed:
 
-![image-20210217131705459](https://i.imgur.com/s54Fy4z.png){: .align-center}
+![HTB Academy - Admin Page](https://i.imgur.com/s54Fy4z.png){: .align-center}
 
 Besides not existing any information hidden in the source code of this page, what called attention was the host **dev-staging-01.academy.htb** which might also be running in this box.
 
 After adding it to the hosts file under the same IP, the page below was shown, which is an error handler framework for PHP, which allows developers to debug code in their code, but in this case was open and leaking lots of information such as credentials and environment variables.
 
-![image-20210217132525919](https://i.imgur.com/EdXyUeb.png){: .align-center}
+![HTB Academy - DevSta](https://i.imgur.com/EdXyUeb.png){: .align-center}
 
 What most called attention in the information leaked was the MySQL credentials and Laravel App_key, which might lead us to an initial foothold in this box.
 

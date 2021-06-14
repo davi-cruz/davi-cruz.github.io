@@ -16,7 +16,7 @@ A máquina desta semana será **Delivery**, outra máquina Linux classificada co
 :information_source: **Info**: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas
 {: .notice--info}
 
-![htb-delivery](https://i.imgur.com/7C0GCed.png){: .align-center}
+![HTB Delivery](https://i.imgur.com/7C0GCed.png){: .align-center}
 
 A resolução desta máquina foi bem interessante, onde tive a oportunidade de aprender a crackear senhas utilizando variações de dicionários utilizando o `hashcat`, além de vários pivoteamentos, porém simples, até que chegássemos nas credenciais de user e logo após sua obtenção, root.
 
@@ -50,31 +50,30 @@ Nmap done: 1 IP address (1 host up) scanned in 32.54 seconds
 
 Acessando a página e inspecionando o código-fonte, identifiquei que existe um link para **helpdesk.delivery.htb**. Adicionada entrada encontrada, assim como dominio `delivery.htb`, no `/etc/hosts` da máquina para permitir o acesso aos websites publicados nesta máquina.
 
-![delivery.htb website](https://i.imgur.com/DFYYSkN.png){: .align-center}
+![HTB Delivery - Website](https://i.imgur.com/DFYYSkN.png){: .align-center}
 
 Ao clicar no link *Contact us*, a seguinte informação é exibida, informando que assim que tivermos um e-mail delivery.htb, poderemos acessar a plataforma **MatterMost**, que, conforme links enumerados, funciona na porta TCP 8065.
 
 > ## CONTACT US
-
 > For unregistered users, please use our HelpDesk to get in touch with our team. Once you have an @delivery.htb email address, you'll be able to have access to our MatterMost server.
 
 Seguindo com a tentativa de conseguir um e-mail com o HelpDesk, aberto um ticket com conteúdo de mentira enquanto inspecionava as requisições via *BurpSuite*.
 
 Após concluída a abertura do ticket, recebida seguinte informação, algo que foi crucial para obter acesso ao MatterMost: um endereço de e-mail do domínio **@delivery.htb**!
 
-![helpdesk.delivery.htb website](https://i.imgur.com/Zh6GeDh.png){: .align-center}
+![HTB Delivery - Helpdesk Website](https://i.imgur.com/Zh6GeDh.png){: .align-center}
 
 Acessando a plataforma do Mattermost criado uma conta e informado o e-mail recém obtido. Desta forma, caso precisemos receber alguma validação do serviço, os dados estarão disponíveis como comentários no ticket que acabamos de abrir :smile:.
 
-![Delivery HTB - Mattermost](https://i.imgur.com/6zMqj4N.png){: .align-center}
+![HTB Delivery - Mattermost](https://i.imgur.com/6zMqj4N.png){: .align-center}
 
 Como esperado, ao verificar o status do ticket criado, comprovamos que nos comentários tínhamos um e-mail de confirmação do Mattermost, enviado para **8024065@delivery.htb**, onde pudemos obter o link de verificação para o serviço.
 
-![Delivery HTB - Email comment](https://i.imgur.com/TLIBKIn.png){: .align-center}
+![HTB Delivery - Email comment](https://i.imgur.com/TLIBKIn.png){: .align-center}
 
 Após verificada a conta, pudemos acessar o portal com as credenciais previamente utilizadas e obter acesso a um time chamado **Internal**.
 
-![Delivery HTB - Mattermost - Account Confirmed](https://i.imgur.com/qN2YraR.png){: .align-center}
+![HTB Delivery - Mattermost - Account Confirmed](https://i.imgur.com/qN2YraR.png){: .align-center}
 
 Dentre as mensagens neste time, algumas chamaram atenção, que continham informações importantes para a resolução desta máquina:
 
@@ -82,15 +81,15 @@ Dentre as mensagens neste time, algumas chamaram atenção, que continham inform
 - Desenvolvedores utilizavam com frequência *variações de **PleaseSubscribe!*** e deveriam deixar de fazê-lo.
   - Estas variações poderiam ser facilmente craqueadas utilizando **`hashcat` rules**, que foi uma dica bastante valiosa em como quebrar a senha de root ou algo em seu caminho.
 
-![Delivery HTB - Mattermost Internal Channel](https://i.imgur.com/8KP9NRl.png){: .align-center}
+![HTB Delivery - Mattermost Internal Channel](https://i.imgur.com/8KP9NRl.png){: .align-center}
 
 Buscando a página de administração do osTicket, fiz logoff da conta *Guest User*, do lado esquerdo superior e, durante o processo de sign-in, selecionei a opção **I'm an agent - sign in here**, que me levou à URL `http://helpdesk.delivery.htb/scp/login.php`, de onde é feita a administração dos incidentes gerados na plataforma.
 
-![Delivery HTB - OsTicket Admin Portal](https://i.imgur.com/JsI5fmb.png){: .align-center}
+![HTB Delivery - OsTicket Admin Portal](https://i.imgur.com/JsI5fmb.png){: .align-center}
 
 Ao acessá-la com as credenciais do usuário **maildeliverer**, pude confirmar acesso ao serviço e validar a versão em execução do osTicket, que é a **1.15.1**, onde vamos buscar um acesso inicial a partir de alguma vulnerabilidade ou funcionalidade existente na plataforma.
 
-![Delivery HTB - OsTicket Version](https://i.imgur.com/vYiQjKN.png){: .align-center}
+![HTB Delivery - OsTicket Version](https://i.imgur.com/vYiQjKN.png){: .align-center}
 
 Navegando pela console, encontrei uma API, onde menciona a execução de tarefas usando `cron`, que poderia eventualmente ser utilizado pra algum acesso inicial na máquina. Vendo a documentação encontrei [este link](https://docs.osticket.com/en/latest/Developer%20Documentation/API/Tasks.html?highlight=cron) que menciona o arquivo `scripts\rcron.php` o qual é utilizado para manipular as chamadas.
 
@@ -142,7 +141,7 @@ Iniciado com a execução do `linpeas.sh` para que pudesse realizar a enumeraç�
 
 Embora pudessem ser caminhos promissores, não foi possível ler os arquivos citados, logo parti pra outra abordagem que seria buscar por credencias para conexão no MySQL. Analisando os arquivos do osTicket, encontrei em `/var/www/osticket/upload/include/ost-config.php` as credenciais para o usuário **ost_user**:
 
-```properties
+```ini
 define('SECRET_SALT','nP8uygzdkzXRLJzYUmdmLDEqDSq5bGk3');
 
 define('ADMIN_EMAIL','maildeliverer@delivery.htb');
@@ -180,7 +179,7 @@ De acordo com os processos em execução, a aplicação é executada a partir do
 
 Utilizando as credenciais **mmuser:Crack_The_MM_Admin_PW** acessei o database **mattermost** e na tabela users, encontrei os seguintes usuários e hashes, onde temos o usuário **root** com privilégios de **system_admin**
 
-```output
+```plaintext
 MariaDB [mattermost]> select Username,Password,Roles from Users;
 +----------------------------------+--------------------------------------------------------------+--------------------------+
 | Username                         | Password                                                     | Roles                    |

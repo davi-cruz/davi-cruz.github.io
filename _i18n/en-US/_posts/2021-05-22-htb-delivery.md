@@ -16,7 +16,7 @@ This week’s machine will be **Delivery**, another easy-rated machine from [Hac
 :information_source: **Info**: Write-ups for Hack The Box machines are posted as soon as they’re retired.
 {: .notice--info}
 
-![htb-delivery](https://i.imgur.com/7C0GCed.png){: .align-center}
+![HTB Delivery](https://i.imgur.com/7C0GCed.png){: .align-center}
 
 This box's resolution was pretty interesting, where I had the opportunity to learn on how to crack passwords using a dictionary variation using `hashcat`, besides the several pivoting, until get to the user credentials, and then, getting root.
 
@@ -50,31 +50,30 @@ Nmap done: 1 IP address (1 host up) scanned in 32.54 seconds
 
 Acessing the page and inspecting the source-code, identified that there's a link to **helpdesk.delivery.htb**. Added this dns entry to `/etc/hosts`, as well as `delivery.htb`, to make easier access and enumeration to this page.
 
-![delivery.htb website](https://i.imgur.com/DFYYSkN.png){: .align-center}
+![HTB Delivery - Website](https://i.imgur.com/DFYYSkN.png){: .align-center}
 
 After clicking to *Contact us* link, the following information was shown, informing that as soon as we get a delivery.htb e-mail we could access the **MatterMost** server, which works at TCP 8065, according to enumeration.
 
 > ## CONTACT US
-
 > For unregistered users, please use our HelpDesk to get in touch with our team. Once you have an @delivery.htb email address, you'll be able to have access to our MatterMost server.
 
 While looking for a way to get e-mail address with HelpDesk, raised a support ticket with dummy content while inspecting the requests using *BurpSuite*.
 
 After submitting the request, received the information below, something crucial to obtain access to Mattermost: a **@delivery.htb** e-mail address!
 
-![helpdesk.delivery.htb website](https://i.imgur.com/Zh6GeDh.png){: .align-center}
+![HTB Delivery - Helpdesk Website](https://i.imgur.com/Zh6GeDh.png){: .align-center}
 
 Accessing the Mattermost platform, created an account using the osTicket provided e-mail. This way, in case we need to receive any kind of confirmation in a delivery.htb account, data will supposedly be sent to the incident history we have just created :smile:.
 
-![Delivery HTB - Mattermost](https://i.imgur.com/6zMqj4N.png){: .align-center}
+![HTB Delivery - Mattermost](https://i.imgur.com/6zMqj4N.png){: .align-center}
 
 As expected, once reviewing the request history, we can see the account activation details from Mattermost, sent to **8024065@delivery.htb**.
 
-![Delivery HTB - Email comment](https://i.imgur.com/TLIBKIn.png){: .align-center}
+![HTB Delivery - Email comment](https://i.imgur.com/TLIBKIn.png){: .align-center}
 
 After verified the account, we were able to access the portal with the created credentials and had access to a public team called **Internal**.
 
-![Delivery HTB - Mattermost - Account Confirmed](https://i.imgur.com/qN2YraR.png){: .align-center}
+![HTB Delivery - Mattermost - Account Confirmed](https://i.imgur.com/qN2YraR.png){: .align-center}
 
 Among the messages available on this channel, some called attention, but some information was gathered that might be useful for machine resolution:
 
@@ -82,15 +81,15 @@ Among the messages available on this channel, some called attention, but some in
 - Devs were using *variants of **PleaseSubscribe!*** as passwords everywhere and should stop using it.
   - These variants could be easily cracked using **`hashcat` rules**, which is a great tip on how to obtain the root password, or something in its path.
 
-![Delivery HTB - Mattermost Internal Channel](https://i.imgur.com/8KP9NRl.png){: .align-center}
+![HTB Delivery - Mattermost Internal Channel](https://i.imgur.com/8KP9NRl.png){: .align-center}
 
 Searching in the osTicket administration page, made logoff of *Guest User*, from the left upper-corner and, during the sign-in process, selected the option **I'm an agent - sign in here**, which took me to `http://helpdesk.delivery.htb/scp/login.php`, where the incidents are managed.
 
-![Delivery HTB - OsTicket Admin Portal](https://i.imgur.com/JsI5fmb.png){: .align-center}
+![HTB Delivery - OsTicket Admin Portal](https://i.imgur.com/JsI5fmb.png){: .align-center}
 
 Once logged in as **maildeliverer**, was able to confirm the osTicket version, which is **1.15.1**, where we're going to look for some existing exploit o weakness which could get us an initial access.
 
-![Delivery HTB - OsTicket Version](https://i.imgur.com/vYiQjKN.png){: .align-center}
+![HTB Delivery - OsTicket Version](https://i.imgur.com/vYiQjKN.png){: .align-center}
 
 Browsing in the console, found an API, which mentions task execution through a scheduler using `cron`. Inspecting its documentation available at [this link](https://docs.osticket.com/en/latest/Developer%20Documentation/API/Tasks.html?highlight=cron) it mentions the file `scripts\rcron.php` which is used to orchestrate the calls.
 
@@ -142,7 +141,7 @@ Started with `linpeas.sh` execution to automate enumeration and the following fi
 
 As I couldn't read any of the two promising files for path hijack, started looking for credentials to get access to MySQL and try to dump some credentials. In osTicket install folder, have found `/var/www/osticket/upload/include/ost-config.php` which contained the creds for **ost_user**:
 
-```properties
+```ini
 define('SECRET_SALT','nP8uygzdkzXRLJzYUmdmLDEqDSq5bGk3');
 
 define('ADMIN_EMAIL','maildeliverer@delivery.htb');
@@ -180,7 +179,7 @@ Based in the process in execution, app resides in `/opt/mattermost`, where I hav
 
 Using the credentials found (**mmuser:Crack_The_MM_Admin_PW**) connected to **mattermost** database and, at users table, found some password hashes, being **root** the only with **system_admin** permissions.
 
-```output
+```plaintext
 MariaDB [mattermost]> select Username,Password,Roles from Users;
 +----------------------------------+--------------------------------------------------------------+--------------------------+
 | Username                         | Password                                                     | Roles                    |

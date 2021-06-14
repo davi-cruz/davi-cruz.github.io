@@ -265,7 +265,7 @@ Now with a reverse shell ot the machine, ran `linpeas.sh` to make it easier the 
 
 - Other services are running in this box, listening in ports 4566, 8000 and 38443, which could be used to escalate privileges later.
 
-  ```output
+  ```plaintext
   [+] Active Ports                                                                                         
   [i] https://book.hacktricks.xyz/linux-unix/privilege-escalation#open-ports                               
   Active Internet connections (servers and established)                                                     
@@ -283,7 +283,7 @@ Now with a reverse shell ot the machine, ran `linpeas.sh` to make it easier the 
 
 From the points discussed, what called more attention to me was the other services, so started by checking apache configurations (`/etc/apache2/sites-enabled`) where we had the file `000-default.conf` listed below, but nothing about 38443, but was able to get insights about 4566 and 8000, which published the content from `/var/www/bucket-app` folder.
 
-```properties
+```apache
 <VirtualHost 127.0.0.1:8000>
     <IfModule mpm_itk_module>
         AssignUserId root root

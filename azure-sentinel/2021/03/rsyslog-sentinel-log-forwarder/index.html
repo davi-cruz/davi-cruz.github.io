@@ -1,0 +1,1419 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.21.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Azure Sentinel: Configuração do Log Forwarder | Davi Cruz</title>
+<meta name="description" content="Frequentemente apoio clientes no deployment de forwarders (encaminhadores) de logs CEF/Syslog em seus ambientes para coletar informações de appliances de rede e/ou servidores e serviços para o Log Analytics, que consequentemente os disponibiliza para o Azure Sentinel.  Embora tenhamos uma diversidade de documentações em como fazer este deployment, assim como recursos de comunidade como o Tech Community e Webinars, compilei todos os pontos que normalmente reviso com meus clientes nestes engajamentos de deployment e revisão neste post para ajudar àqueles que estejam enfrentando algum desafio em seu ambiente.    :newspaper: Edits:     30/04/2021 - Incluído seção Redução de mensagens repetidas     Requisitos  De acordo com a documentação oficial da Microsoft, os requisitos para este recurso são bastante simples, conforme listado abaixo:     4 CPUs e 8GB RAM, que é capaz de processar cerca de 8500 EPS (eventos por segundo) utilizando o rsyslog, de acordo com a documentação.            Se estiver realizado este deployment no Azure você pode utilizar o SKU Standard_F4s_v2 que é otimizado para processamento e recomendado neste caso.           Uma distribuição Linux em que o Microsoft Monitoring Agent (também conhecido como omsagent) seja suportado.   Python versão 2.7 ou 3.   Um dos serviços de syslog suportados instalado. Na maioria dos cenários que trabalhei utilizei o rsyslog, uma vez que normalmente é o pacote padrão na maioria das distribuições. Abaixo a lista das versões suportadas, também de acordo com a documentação:            Rsyslog v8       Syslog-ng 2.1 - 3.22.1           Arquitetura do Forwarder    A arquitetura da solução é bem simples:     É composta por uma ou mais máquinas recebendo os logs em protocolo syslog via UDP, TCP ou TLS. Isso é alcançado a partir da configuração de listeners no rsyslog ou no syslog-ng, assim como quaisquer servidores syslog você tenha ou teve em execução em seu ambiente.   As mensagens recebidas são encaminhadas para os listeners locais que são configurados no omsagent para ingestão como logs puros em Syslog (UDP/25224) ou CEF (TCP/25226).   Mensagens são encaminhadas ao Log Analytics workspace de acordo com a sua configuração, acessíveis também ao Sentinel a partir da ativação da solução.   Agora vou orientá-los quando aos detalhes da configuração desta infraestrutura e compartilhar algumas dicas de configurações mais detalhadas para mitigar alguns problemas e reduzir ingestão desnecessária no seu ambiente.  Considerações de Design  Antes de realizar o deploy/revisar a infraestrutura do seu forwarder, existem algumas perguntas que precisamos responder que auxiliarão na correta definição das suas configurações:     Este forwarder receberá apenas mensagens CEF, Syslog ou ambos?            Embora ambos os tipos de mensagens sejam recebidos via protocolo syslog, as mensagens CEF são formatadas de acordo com seu padrão pelo omsagent, disponibilizando cada campo em uma coluna própria no Log Analytics, enquanto as mensagens Syslog puro são armazenadas em uma única coluna, o que irá requerer esforço adicional quando necessário realizar a análise destes dados em alguma regra.       Também, se você estiver utilizando o forwarder para ambos os tipos de logs, precisará impedir que mensagens enviadas do tipo CEF sejam armazenadas também como Syslog, o que irá incorrer em custo duplicado para sua workspace.           Quais são os facilities e severidades, assim como tipos de mensagens e fontes que serão encaminhados ao Sentinel?            Envio de dados em excesso ao Sentinel pode gerar alto custo se não filtrados adequadamente.       Considere mapear os cenários de detecção de acordo com o MITRE ATT&amp;CK Matrix Techniques que tem interesse investigar antes de enviar os dados. Desta forma você conseguirá evitar o envio de dados sem um propósito ao seu SIEM, que não lhe trarão nenhum retorno sobre o investimento feito tanto em armazenamento quanto no Sentinel.           Quais são os requisitos de segurança para esta comunicação?            Como descrito no post sobre boas práticas compartilhado por Cristhofer Romeo Muñoz, devemos utilizar TCP como o protocolo padrão para qualquer comunicação devido a sua confiabilidade, a menos que seu appliance apenas suporte UDP ou se necessite de criptografia na comunicação, adotando TLS quando o dado for transmitido pela internet ou se houver dados sensíveis a serem coletados.       Instalando o forwarder próximo da fonte também ajuda a reduzir a complexidade dos protocolos utilizados, assim como evita que tenhamos problemas de performance causados por alta latencia na comunicação entre origem e forwarder.           Instalação  A instalação inicial pode ser facilmente realizada executando o script cef_installer.py, disponível no repositório oficial do Github utilizando a linha de comando abaixo, que pode ser obtida para seu ambiente acessando a página do conector Common Event Format (CEF) no Sentinel ou simplesmente substituir os dados &lt;workspace id&gt; e &lt;workspace secret&gt; pelos de sua workspace.  :bulb: Nota: Se não tiver o python 2.7 na máquina deverá substituir a instrução python por python3 antes de executar a linha abaixo.  sudo wget -O cef_installer.py https://raw.githubusercontent.com/Azure/Azure-Sentinel/master/DataConnectors/CEF/cef_installer.py &amp;&amp; sudo python cef_installer.py &lt;workspace id&gt; &lt;workspace secret&gt;   Se seu forwarder necessita de um proxy para comunicar-se com a Internet, você precisará também atualizar tais configurações modificando o arquivo /etc/opt/microsoft/omsagent/proxy.conf:  proxyconf=&quot;http://user:password@proxyserver:3128&quot; #user:password can be ignored if you proxy doesn&#39;t require authentication sudo echo $proxyconf &gt;&gt;/etc/opt/microsoft/omsagent/proxy.conf sudo chown omsagent:omiusers /etc/opt/microsoft/omsagent/proxy.conf  #restart service sudo /opt/microsoft/omsagent/bin/service_control restart   Este script de instalação realiza as alterações listadas abaixo em seu sistema. A maioria delas necessita de conectividade com o Github uma vez que os assets utilizados estão armazenados no repositório oficial do Azure Sentinel:     Download e instalação do Microsoft Monitoring Agent para Linux.   Configuração do omsagent para ouvir na porta TCP/25226 e realizar o parsing das mensagens CEF a partir da cópia do arquivo security_events.conf dentro do diretório de configuração da workspace (/etc/opt/microsoft/omsagent/&lt;workspaceID&gt;/conf/omsagent.d).   Encaminha as mensagens que contenham ASA ou CEF para a porta TCP/25226 a partir da cópia do arquivo security-config-omsagent.conf para /etc/rsyslog.d/ ou /etc/syslog-ng/conf.d/, dependendo do seu serviço de syslog.   Habilita o serviço syslog para ouvir porta TCP/514 e UDP/514 a partir de edição do arquivo em /etc/rsyslog.conf ou /etc/syslog-ng/syslog-ng.conf.   Com esta configuração você já estará preparado para encaminhar as mensagens CEF para este servidor, que em breve estarão disponíveis na sua workspace de Log Analytics na tabela CommonSecurityLog, mas existem algumas outras alterações aqui descritas das quais poderá se beneficiar para coletar logs Syslog puro, assim como implementar filtros e ajustes na infraestrutura.  Configuração  Como vimos a infraestrutura é baseada no serviço de syslog + omsagent. Uma vez que o rsyslog é um dos mais populares serviços utilizados e já disponível por padrão da maioria das distribuições atualmente, utilizarei todas as configurações aqui descritas para este serviço, embora você possa também ajustá-las para funcionamento com o syslog-ng caso necessário.  Validação da versão e instalação do rsyslog  Como mencionado em documentação, precisamos utilizar o rsyslog versão 8. Para confirmar a versão em execução em seu systema você pode executar o comando rsyslogd -v, que exibirá um output como o exemplo abaixo:  $ rsyslogd -v rsyslogd 8.32.0, compiled with:         PLATFORM:                               x86_64-pc-linux-gnu         PLATFORM (lsb_release -d):         FEATURE_REGEXP:                         Yes         GSSAPI Kerberos 5 support:              Yes         FEATURE_DEBUG (debug build, slow code): No         32bit Atomic operations supported:      Yes         64bit Atomic operations supported:      Yes         memory allocator:                       system default         Runtime Instrumentation (slow code):    No         uuid support:                           Yes         systemd support:                        Yes         Number of Bits in RainerScript integers: 64   De acordo com a documentação do projeto, você não deve ter maiores problemas executando a versão do rsyslog disponível no repositório do mantenedor da distribuição a menos que eles não tenham portado alguma correção para ela. Neste caso você deverá baixar a última build para sua distribuição da página do projeto ou instalar a partir do código fonte.  Aplicando as configurações do rsyslog  Após quaisquer alterações feitas no arquivo de configuração do rsyslog (/etc/rsyslog.conf) ou qualquer outro arquivo por ele importado (normalmente em /etc/rsyslog.d/*.conf) você precisará reiniciar o serviço para que as alterações tenham efeito. Isso pode ser alcançado a partir da execução da linha de comando abaixo:  sudo systemctl restart rsyslog.service   Ajustando os listeners do rsyslog  Embora o cef_installer.py já defina os listeners para TCP/514 e UDP/514, talvez haja a necessidade de validar ou ajustar a sua configuração para criptografar a comunicação via TLS.  Sua configuração atual deve se parecer com o trecho abaixo, que pode ser visto no arquivo /etc/rsyslog.conf:  module(load=&quot;imuxsock&quot;) # provides support for local system logging #module(load=&quot;immark&quot;)  # provides --MARK-- message capability  # provides UDP syslog reception module(load=&quot;imudp&quot;) input(type=&quot;imudp&quot; port=&quot;514&quot;)   # provides TCP syslog reception module(load=&quot;imtcp&quot;) input(type=&quot;imtcp&quot; port=&quot;514&quot;)   A configuração para comunicação via TLS requer alguns itens adicionais, onde é necessário emitir os certificados para servidores e clientes (caso não esteja utilizando uma infra de PKI) assim como alterar o arquivo de configuração do rsyslog para aceitar estas comunicações.  Maiores detalhes e exemplos de configurações podem ser encontrados na documentação oficial neste link, de onde retirei o trecho abaixo para que tenham uma ideia de como esta configuração se parece:  module(load=&quot;imuxsock&quot;) # local messages module(load=&quot;imtcp&quot; # TCP listener     StreamDriver.Name=&quot;gtls&quot;     StreamDriver.Mode=&quot;1&quot; # run driver in TLS-only mode     StreamDriver.Authmode=&quot;anon&quot;     )  # make gtls driver the default and set certificate files global(     DefaultNetstreamDriver=&quot;gtls&quot;     DefaultNetstreamDriverCAFile=&quot;/path/to/contrib/gnutls/ca.pem&quot;     DefaultNetstreamDriverCertFile=&quot;/path/to/contrib/gnutls/cert.pem&quot;     DefaultNetstreamDriverKeyFile=&quot;/path/to/contrib/gnutls/key.pem&quot;     )      # start up listener at port 6514     input(     type=&quot;imtcp&quot;     port=&quot;6514&quot;     )   Evitando registro de eventos remotos em arquivos locais  Um ponto que é sempre questionado pelos clientes é que após configurar máquinas como forwarder para CEF e/ou Syslog os arquivos de log locais (frequentemente /var/log/messages ou /var/log/syslog) são sobrecarregados com mensagens oriundas de servidores remotos, e na maioria das vezes consumindo todo o espaço em disco disponível do volume onde /var/log reside.  Isso ocorre porque as definições padrão do rsyslog, listadas abaixo, enviam alguns facilities e severidades para arquivos locais sem validar a fonte destes eventos (comentários e linhas em branco removidas por simplicidade).  :bulb: Nota: O caminho onde encontrar estas configurações padrão variam de acordo com a distribuição Linux. Para Ubuntu existe um arquivo chamado /etc/rsyslog.d/50-default.conf enquanto para distribuições baseadas em RHEL (RHEL, CentOS, Fedora) está na configuração principal do /etc/rsyslog.conf.  #Extracted from Ubuntu /etc/rsyslog.d/50-default.conf  auth,authpriv.*                 /var/log/auth.log *.*;auth,authpriv.none          -/var/log/syslog kern.*                          -/var/log/kern.log mail.*                          -/var/log/mail.log mail.err                        /var/log/mail.err *.emerg                         :omusrmsg:*   Como podem ver, qualquer mensagem que coincida com alguma severidade contida nesta lista é enviada para um dos arquivos locais. Uma forma rápida de prevenir este comportamento é editar o arquivo de configuração para apenas aceitar mensagens geradas pelo host local (127.0.0.1):  if ($fromhost-ip == &#39;127.0.0.1&#39;) then {     auth,authpriv.*                 /var/log/auth.log     *.*;auth,authpriv.none          -/var/log/syslog     kern.*                          -/var/log/kern.log     mail.*                          -/var/log/mail.log     mail.err                        /var/log/mail.err     *.emerg                         :omusrmsg:* }   Redução de mensagens repetidas  Conforme lembrado pelo meu colega Flavio Honda, o Rsyslog possui uma opção que pode auxiliar com a redução de mensagens repetidas.  Se você sofre com este tipo de problema ou quer prevenir antes mesmo que venha acontecer em seu ambiente, você pode habilitar a configuração abaixo no seu arquivo /etc/rsyslog.conf :smile:.  $RepeatedMsgReduction on   A referência oficial sobre esta feature na documentação do RSyslog pode ser encontrada neste link.  Fluxo de processamento de mensagens  No rsyslog, o primeiro arquivo a ser processado é o rsyslog.conf, que normalmente contém uma instrução para importar todos os arquivos *.conf localizados no diretório /etc/rsyslog.d e os arquivos são processados em ordem alfabética. Quando uma mensagem chega ou é gerada no sistema, é encaminhada e avaliada por cada uma das configurações nesta mesma ordem, a menos que alteremos explicitamente este comportamento.  Na configuração abaixo, vamos considerar que estamos encaminhando mensagens no formato CEF de um appliance que são enviadas com o facility local4.info:       Se nenhuma alteração for realizada no rsyslog.conf ou 50-default.conf para prevenir o registro de mensagens de um host remoto, estas mensagens serão registradas no arquivo /var/log/syslog.   Também, se houver algum match no arquivo 95-omsagent.conf esta mensagem será enviada para a workspace de Log Analytics como Syslog puro.   E por fim, ele coincidirá com as regular expressions contidas no arquivo security-config-omsagent.conf e tratado como mensagem CEF para a tabela CommonSecurityLog.   Isso não apenas resultará no disco cheio, mas também em cobrança duplicada para este mesmo evento, que será armazenado duas vezes no Log Analytics.  Para evitar este comportamento, como Ofer Shezaf compartilhou em um dos Webinars da Comunidade de Segurança (Log Forwarder deep dive | Filtering CEF and Syslog events), vamos renomear o arquivo security-config-omsagent.conf para 60-cef.conf de forma que ele seja processado antes do 95-omsagent.conf.  Adicionalmente, precisamos garantir que uma vez que as mensagens sejam encaminhadas para o TCP/25226 e tratadas como CEF sejam descartadas, o que é alcançado pelo uso da instrução stop. O Stop remove as mensagens do processamento do rsyslog.  :bulb: Nota: Você poderá encontrar outras instruções que utilizem o stop como um til (~). Esta notação veio da syntax legado do syslogd  Esta configuração ficaria da seguinte forma:  $ cat /etc/rsyslog.d/60-cef.conf if ($rawmsg contains &quot;CEF:&quot;) or ($rawmsg contains &quot;ASA-&quot;) then {         *.*     @@127.0.0.1:25226         stop }     Ajustando o 95-omsagent.conf  Após a instalação inicial, o agente do MMA criará um arquivo de configuração no diretório do serviço syslog (/etc/rsyslog.d/95-omsagent.conf) em sincronismo com as configurações definidas no portal do Azure, navegando em sua workspace de Log Analytics &gt; Agents Configuration &gt; Syslog:    Para a configuração acima o seguinte conteúdo será criado no arquivo, conforme abaixo:  # OMS Syslog collection for workspace &lt;workspace id&gt; auth.=alert;auth.=crit;auth.=debug;auth.=emerg;auth.=err;auth.=info;auth.=notice;auth.=warning  @127.0.0.1:25224 authpriv.=alert;authpriv.=crit;authpriv.=debug;authpriv.=emerg;authpriv.=err;authpriv.=info;authpriv.=notice;authpriv.=warning  @127.0.0.1:25224 local3.=alert;local3.=crit;local3.=debug;local3.=emerg;local3.=err;local3.=info;local3.=notice;local3.=warning  @127.0.0.1:25224 local4.=alert;local4.=crit;local4.=debug;local4.=emerg;local4.=err;local4.=info;local4.=notice;local4.=warning  @127.0.0.1:25224   Mesmo que esta configuração seja extremamente simples de se fazer pelo portal, ela se aplica globalmente a todos os dispositivos Linux que possuem o omsagent conectado a esta workspace, ingerindo mais informação de que precisa dentro de sua workspace de Log Analytics se mais tipos de dados são selecionados que o necessário.  Se precisa definir uma configuração diferente para algumas máquinas como os seus forwarders, é recomendado que se edite diretamente o arquivo 95-omsagent.conf adicionando ou removendo facilities e severidades dele, assim como construindo suas condições para que estes dados sejam enviados ao Azure mas precisamos impedir que este arquivo seja sincronizado com as definições no portal.  O comando abaixo “quebra” o vínculo existente entre este arquivo e a configuração da workspace:  sudo su omsagent -c &#39;python /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py --disable&#39;   A única coisa que não pode ser alterada no arquivo 95-omsagent.conf é a instrução de encaminhamento para @127.0.0.1:25224.  :bulb: Nota: Na sintaxe do syslogd uma arroba (@) significa UDP enquanto duas arrobas (@@) significam TCP.  :warning: Atenção: No webinar citado anteriormente sobre um Dep Dive a respeito de CEF forwarder, Ofer também recomendou alterar as configurações do omsagent para aceitar as comunicações também via TCP para Syslog. Se seguir esta recomendação você deverá também ajustar qualquer instrução de encaminhamento para dois arrobas no arquivo 95-omsagent.conf, caso contrário suas mensagens poderão não ser enviadas ao Log Analytics.  Filtrando eventos  Se você ainda estiver notando a ingestão de eventos desnecessários em sua workspace, você pode implementar um filtro na fonte assim como no encaminhador, o que normalmente é mais simples já que muitos appliances não suportam grande granularidade em suas configurações.  Uma forma fácil de configurar esta filtragem é criando um arquivo a ser processando antes do 60-cef.conf e 95-omsagent.conf, neste exemplo chamado de 59-filter-out.conf, mas poderia utilizar qualquer nome que desejar, desde seja processado na ordem correta.    Neste arquivo vamos utilizar novamente a instrução stop, removendo as mensagens que não gostaríamos que fossem encaminhadas seja como Syslog ou CEF. Neste exemplo qualquer mensagem que contenha a palavra “test” e tenha algum dos facilities/severidades mencionados serão removidas.  if ($rawmsg contains &quot;test&quot;) and prifilt(&quot;auth,authpriv.*&quot;) then {         stop }   A documentação do rsyslog é muito rica em recursos mostrando como você pode filtrar estas mensagens, assim como quais propriedades se encontram disponíveis para que possa configurar estas instruções de forma mais avançada, incluindo dicas de conversão das instruções que utilizam sintaxe syslogd para o advanced, também conhecido como RainerScript.  Espero que este conteúdo tenha sido útil para aqueles que estão realizando o seu deployment ou manutenção de CEF/Syslog forwarders no seu ambiente!  Você tem alguma configuração específica ou desafio não discutido aqui? Sinta-se à vontade para compartilhar nos comentários para que possamos complementar o post com mais detalhes, podendo assim auxiliar outros que estejam enfrentando o mesmo! :smile:">
+
+
+  <meta name="author" content="Davi Cruz">
+  
+  <meta property="article:author" content="Davi Cruz">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Davi Cruz">
+<meta property="og:title" content="Azure Sentinel: Configuração do Log Forwarder">
+<meta property="og:url" content="https://davicruz.com/azure-sentinel/2021/03/rsyslog-sentinel-log-forwarder/">
+
+
+  <meta property="og:description" content="Frequentemente apoio clientes no deployment de forwarders (encaminhadores) de logs CEF/Syslog em seus ambientes para coletar informações de appliances de rede e/ou servidores e serviços para o Log Analytics, que consequentemente os disponibiliza para o Azure Sentinel.  Embora tenhamos uma diversidade de documentações em como fazer este deployment, assim como recursos de comunidade como o Tech Community e Webinars, compilei todos os pontos que normalmente reviso com meus clientes nestes engajamentos de deployment e revisão neste post para ajudar àqueles que estejam enfrentando algum desafio em seu ambiente.    :newspaper: Edits:     30/04/2021 - Incluído seção Redução de mensagens repetidas     Requisitos  De acordo com a documentação oficial da Microsoft, os requisitos para este recurso são bastante simples, conforme listado abaixo:     4 CPUs e 8GB RAM, que é capaz de processar cerca de 8500 EPS (eventos por segundo) utilizando o rsyslog, de acordo com a documentação.            Se estiver realizado este deployment no Azure você pode utilizar o SKU Standard_F4s_v2 que é otimizado para processamento e recomendado neste caso.           Uma distribuição Linux em que o Microsoft Monitoring Agent (também conhecido como omsagent) seja suportado.   Python versão 2.7 ou 3.   Um dos serviços de syslog suportados instalado. Na maioria dos cenários que trabalhei utilizei o rsyslog, uma vez que normalmente é o pacote padrão na maioria das distribuições. Abaixo a lista das versões suportadas, também de acordo com a documentação:            Rsyslog v8       Syslog-ng 2.1 - 3.22.1           Arquitetura do Forwarder    A arquitetura da solução é bem simples:     É composta por uma ou mais máquinas recebendo os logs em protocolo syslog via UDP, TCP ou TLS. Isso é alcançado a partir da configuração de listeners no rsyslog ou no syslog-ng, assim como quaisquer servidores syslog você tenha ou teve em execução em seu ambiente.   As mensagens recebidas são encaminhadas para os listeners locais que são configurados no omsagent para ingestão como logs puros em Syslog (UDP/25224) ou CEF (TCP/25226).   Mensagens são encaminhadas ao Log Analytics workspace de acordo com a sua configuração, acessíveis também ao Sentinel a partir da ativação da solução.   Agora vou orientá-los quando aos detalhes da configuração desta infraestrutura e compartilhar algumas dicas de configurações mais detalhadas para mitigar alguns problemas e reduzir ingestão desnecessária no seu ambiente.  Considerações de Design  Antes de realizar o deploy/revisar a infraestrutura do seu forwarder, existem algumas perguntas que precisamos responder que auxiliarão na correta definição das suas configurações:     Este forwarder receberá apenas mensagens CEF, Syslog ou ambos?            Embora ambos os tipos de mensagens sejam recebidos via protocolo syslog, as mensagens CEF são formatadas de acordo com seu padrão pelo omsagent, disponibilizando cada campo em uma coluna própria no Log Analytics, enquanto as mensagens Syslog puro são armazenadas em uma única coluna, o que irá requerer esforço adicional quando necessário realizar a análise destes dados em alguma regra.       Também, se você estiver utilizando o forwarder para ambos os tipos de logs, precisará impedir que mensagens enviadas do tipo CEF sejam armazenadas também como Syslog, o que irá incorrer em custo duplicado para sua workspace.           Quais são os facilities e severidades, assim como tipos de mensagens e fontes que serão encaminhados ao Sentinel?            Envio de dados em excesso ao Sentinel pode gerar alto custo se não filtrados adequadamente.       Considere mapear os cenários de detecção de acordo com o MITRE ATT&amp;CK Matrix Techniques que tem interesse investigar antes de enviar os dados. Desta forma você conseguirá evitar o envio de dados sem um propósito ao seu SIEM, que não lhe trarão nenhum retorno sobre o investimento feito tanto em armazenamento quanto no Sentinel.           Quais são os requisitos de segurança para esta comunicação?            Como descrito no post sobre boas práticas compartilhado por Cristhofer Romeo Muñoz, devemos utilizar TCP como o protocolo padrão para qualquer comunicação devido a sua confiabilidade, a menos que seu appliance apenas suporte UDP ou se necessite de criptografia na comunicação, adotando TLS quando o dado for transmitido pela internet ou se houver dados sensíveis a serem coletados.       Instalando o forwarder próximo da fonte também ajuda a reduzir a complexidade dos protocolos utilizados, assim como evita que tenhamos problemas de performance causados por alta latencia na comunicação entre origem e forwarder.           Instalação  A instalação inicial pode ser facilmente realizada executando o script cef_installer.py, disponível no repositório oficial do Github utilizando a linha de comando abaixo, que pode ser obtida para seu ambiente acessando a página do conector Common Event Format (CEF) no Sentinel ou simplesmente substituir os dados &lt;workspace id&gt; e &lt;workspace secret&gt; pelos de sua workspace.  :bulb: Nota: Se não tiver o python 2.7 na máquina deverá substituir a instrução python por python3 antes de executar a linha abaixo.  sudo wget -O cef_installer.py https://raw.githubusercontent.com/Azure/Azure-Sentinel/master/DataConnectors/CEF/cef_installer.py &amp;&amp; sudo python cef_installer.py &lt;workspace id&gt; &lt;workspace secret&gt;   Se seu forwarder necessita de um proxy para comunicar-se com a Internet, você precisará também atualizar tais configurações modificando o arquivo /etc/opt/microsoft/omsagent/proxy.conf:  proxyconf=&quot;http://user:password@proxyserver:3128&quot; #user:password can be ignored if you proxy doesn&#39;t require authentication sudo echo $proxyconf &gt;&gt;/etc/opt/microsoft/omsagent/proxy.conf sudo chown omsagent:omiusers /etc/opt/microsoft/omsagent/proxy.conf  #restart service sudo /opt/microsoft/omsagent/bin/service_control restart   Este script de instalação realiza as alterações listadas abaixo em seu sistema. A maioria delas necessita de conectividade com o Github uma vez que os assets utilizados estão armazenados no repositório oficial do Azure Sentinel:     Download e instalação do Microsoft Monitoring Agent para Linux.   Configuração do omsagent para ouvir na porta TCP/25226 e realizar o parsing das mensagens CEF a partir da cópia do arquivo security_events.conf dentro do diretório de configuração da workspace (/etc/opt/microsoft/omsagent/&lt;workspaceID&gt;/conf/omsagent.d).   Encaminha as mensagens que contenham ASA ou CEF para a porta TCP/25226 a partir da cópia do arquivo security-config-omsagent.conf para /etc/rsyslog.d/ ou /etc/syslog-ng/conf.d/, dependendo do seu serviço de syslog.   Habilita o serviço syslog para ouvir porta TCP/514 e UDP/514 a partir de edição do arquivo em /etc/rsyslog.conf ou /etc/syslog-ng/syslog-ng.conf.   Com esta configuração você já estará preparado para encaminhar as mensagens CEF para este servidor, que em breve estarão disponíveis na sua workspace de Log Analytics na tabela CommonSecurityLog, mas existem algumas outras alterações aqui descritas das quais poderá se beneficiar para coletar logs Syslog puro, assim como implementar filtros e ajustes na infraestrutura.  Configuração  Como vimos a infraestrutura é baseada no serviço de syslog + omsagent. Uma vez que o rsyslog é um dos mais populares serviços utilizados e já disponível por padrão da maioria das distribuições atualmente, utilizarei todas as configurações aqui descritas para este serviço, embora você possa também ajustá-las para funcionamento com o syslog-ng caso necessário.  Validação da versão e instalação do rsyslog  Como mencionado em documentação, precisamos utilizar o rsyslog versão 8. Para confirmar a versão em execução em seu systema você pode executar o comando rsyslogd -v, que exibirá um output como o exemplo abaixo:  $ rsyslogd -v rsyslogd 8.32.0, compiled with:         PLATFORM:                               x86_64-pc-linux-gnu         PLATFORM (lsb_release -d):         FEATURE_REGEXP:                         Yes         GSSAPI Kerberos 5 support:              Yes         FEATURE_DEBUG (debug build, slow code): No         32bit Atomic operations supported:      Yes         64bit Atomic operations supported:      Yes         memory allocator:                       system default         Runtime Instrumentation (slow code):    No         uuid support:                           Yes         systemd support:                        Yes         Number of Bits in RainerScript integers: 64   De acordo com a documentação do projeto, você não deve ter maiores problemas executando a versão do rsyslog disponível no repositório do mantenedor da distribuição a menos que eles não tenham portado alguma correção para ela. Neste caso você deverá baixar a última build para sua distribuição da página do projeto ou instalar a partir do código fonte.  Aplicando as configurações do rsyslog  Após quaisquer alterações feitas no arquivo de configuração do rsyslog (/etc/rsyslog.conf) ou qualquer outro arquivo por ele importado (normalmente em /etc/rsyslog.d/*.conf) você precisará reiniciar o serviço para que as alterações tenham efeito. Isso pode ser alcançado a partir da execução da linha de comando abaixo:  sudo systemctl restart rsyslog.service   Ajustando os listeners do rsyslog  Embora o cef_installer.py já defina os listeners para TCP/514 e UDP/514, talvez haja a necessidade de validar ou ajustar a sua configuração para criptografar a comunicação via TLS.  Sua configuração atual deve se parecer com o trecho abaixo, que pode ser visto no arquivo /etc/rsyslog.conf:  module(load=&quot;imuxsock&quot;) # provides support for local system logging #module(load=&quot;immark&quot;)  # provides --MARK-- message capability  # provides UDP syslog reception module(load=&quot;imudp&quot;) input(type=&quot;imudp&quot; port=&quot;514&quot;)   # provides TCP syslog reception module(load=&quot;imtcp&quot;) input(type=&quot;imtcp&quot; port=&quot;514&quot;)   A configuração para comunicação via TLS requer alguns itens adicionais, onde é necessário emitir os certificados para servidores e clientes (caso não esteja utilizando uma infra de PKI) assim como alterar o arquivo de configuração do rsyslog para aceitar estas comunicações.  Maiores detalhes e exemplos de configurações podem ser encontrados na documentação oficial neste link, de onde retirei o trecho abaixo para que tenham uma ideia de como esta configuração se parece:  module(load=&quot;imuxsock&quot;) # local messages module(load=&quot;imtcp&quot; # TCP listener     StreamDriver.Name=&quot;gtls&quot;     StreamDriver.Mode=&quot;1&quot; # run driver in TLS-only mode     StreamDriver.Authmode=&quot;anon&quot;     )  # make gtls driver the default and set certificate files global(     DefaultNetstreamDriver=&quot;gtls&quot;     DefaultNetstreamDriverCAFile=&quot;/path/to/contrib/gnutls/ca.pem&quot;     DefaultNetstreamDriverCertFile=&quot;/path/to/contrib/gnutls/cert.pem&quot;     DefaultNetstreamDriverKeyFile=&quot;/path/to/contrib/gnutls/key.pem&quot;     )      # start up listener at port 6514     input(     type=&quot;imtcp&quot;     port=&quot;6514&quot;     )   Evitando registro de eventos remotos em arquivos locais  Um ponto que é sempre questionado pelos clientes é que após configurar máquinas como forwarder para CEF e/ou Syslog os arquivos de log locais (frequentemente /var/log/messages ou /var/log/syslog) são sobrecarregados com mensagens oriundas de servidores remotos, e na maioria das vezes consumindo todo o espaço em disco disponível do volume onde /var/log reside.  Isso ocorre porque as definições padrão do rsyslog, listadas abaixo, enviam alguns facilities e severidades para arquivos locais sem validar a fonte destes eventos (comentários e linhas em branco removidas por simplicidade).  :bulb: Nota: O caminho onde encontrar estas configurações padrão variam de acordo com a distribuição Linux. Para Ubuntu existe um arquivo chamado /etc/rsyslog.d/50-default.conf enquanto para distribuições baseadas em RHEL (RHEL, CentOS, Fedora) está na configuração principal do /etc/rsyslog.conf.  #Extracted from Ubuntu /etc/rsyslog.d/50-default.conf  auth,authpriv.*                 /var/log/auth.log *.*;auth,authpriv.none          -/var/log/syslog kern.*                          -/var/log/kern.log mail.*                          -/var/log/mail.log mail.err                        /var/log/mail.err *.emerg                         :omusrmsg:*   Como podem ver, qualquer mensagem que coincida com alguma severidade contida nesta lista é enviada para um dos arquivos locais. Uma forma rápida de prevenir este comportamento é editar o arquivo de configuração para apenas aceitar mensagens geradas pelo host local (127.0.0.1):  if ($fromhost-ip == &#39;127.0.0.1&#39;) then {     auth,authpriv.*                 /var/log/auth.log     *.*;auth,authpriv.none          -/var/log/syslog     kern.*                          -/var/log/kern.log     mail.*                          -/var/log/mail.log     mail.err                        /var/log/mail.err     *.emerg                         :omusrmsg:* }   Redução de mensagens repetidas  Conforme lembrado pelo meu colega Flavio Honda, o Rsyslog possui uma opção que pode auxiliar com a redução de mensagens repetidas.  Se você sofre com este tipo de problema ou quer prevenir antes mesmo que venha acontecer em seu ambiente, você pode habilitar a configuração abaixo no seu arquivo /etc/rsyslog.conf :smile:.  $RepeatedMsgReduction on   A referência oficial sobre esta feature na documentação do RSyslog pode ser encontrada neste link.  Fluxo de processamento de mensagens  No rsyslog, o primeiro arquivo a ser processado é o rsyslog.conf, que normalmente contém uma instrução para importar todos os arquivos *.conf localizados no diretório /etc/rsyslog.d e os arquivos são processados em ordem alfabética. Quando uma mensagem chega ou é gerada no sistema, é encaminhada e avaliada por cada uma das configurações nesta mesma ordem, a menos que alteremos explicitamente este comportamento.  Na configuração abaixo, vamos considerar que estamos encaminhando mensagens no formato CEF de um appliance que são enviadas com o facility local4.info:       Se nenhuma alteração for realizada no rsyslog.conf ou 50-default.conf para prevenir o registro de mensagens de um host remoto, estas mensagens serão registradas no arquivo /var/log/syslog.   Também, se houver algum match no arquivo 95-omsagent.conf esta mensagem será enviada para a workspace de Log Analytics como Syslog puro.   E por fim, ele coincidirá com as regular expressions contidas no arquivo security-config-omsagent.conf e tratado como mensagem CEF para a tabela CommonSecurityLog.   Isso não apenas resultará no disco cheio, mas também em cobrança duplicada para este mesmo evento, que será armazenado duas vezes no Log Analytics.  Para evitar este comportamento, como Ofer Shezaf compartilhou em um dos Webinars da Comunidade de Segurança (Log Forwarder deep dive | Filtering CEF and Syslog events), vamos renomear o arquivo security-config-omsagent.conf para 60-cef.conf de forma que ele seja processado antes do 95-omsagent.conf.  Adicionalmente, precisamos garantir que uma vez que as mensagens sejam encaminhadas para o TCP/25226 e tratadas como CEF sejam descartadas, o que é alcançado pelo uso da instrução stop. O Stop remove as mensagens do processamento do rsyslog.  :bulb: Nota: Você poderá encontrar outras instruções que utilizem o stop como um til (~). Esta notação veio da syntax legado do syslogd  Esta configuração ficaria da seguinte forma:  $ cat /etc/rsyslog.d/60-cef.conf if ($rawmsg contains &quot;CEF:&quot;) or ($rawmsg contains &quot;ASA-&quot;) then {         *.*     @@127.0.0.1:25226         stop }     Ajustando o 95-omsagent.conf  Após a instalação inicial, o agente do MMA criará um arquivo de configuração no diretório do serviço syslog (/etc/rsyslog.d/95-omsagent.conf) em sincronismo com as configurações definidas no portal do Azure, navegando em sua workspace de Log Analytics &gt; Agents Configuration &gt; Syslog:    Para a configuração acima o seguinte conteúdo será criado no arquivo, conforme abaixo:  # OMS Syslog collection for workspace &lt;workspace id&gt; auth.=alert;auth.=crit;auth.=debug;auth.=emerg;auth.=err;auth.=info;auth.=notice;auth.=warning  @127.0.0.1:25224 authpriv.=alert;authpriv.=crit;authpriv.=debug;authpriv.=emerg;authpriv.=err;authpriv.=info;authpriv.=notice;authpriv.=warning  @127.0.0.1:25224 local3.=alert;local3.=crit;local3.=debug;local3.=emerg;local3.=err;local3.=info;local3.=notice;local3.=warning  @127.0.0.1:25224 local4.=alert;local4.=crit;local4.=debug;local4.=emerg;local4.=err;local4.=info;local4.=notice;local4.=warning  @127.0.0.1:25224   Mesmo que esta configuração seja extremamente simples de se fazer pelo portal, ela se aplica globalmente a todos os dispositivos Linux que possuem o omsagent conectado a esta workspace, ingerindo mais informação de que precisa dentro de sua workspace de Log Analytics se mais tipos de dados são selecionados que o necessário.  Se precisa definir uma configuração diferente para algumas máquinas como os seus forwarders, é recomendado que se edite diretamente o arquivo 95-omsagent.conf adicionando ou removendo facilities e severidades dele, assim como construindo suas condições para que estes dados sejam enviados ao Azure mas precisamos impedir que este arquivo seja sincronizado com as definições no portal.  O comando abaixo “quebra” o vínculo existente entre este arquivo e a configuração da workspace:  sudo su omsagent -c &#39;python /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py --disable&#39;   A única coisa que não pode ser alterada no arquivo 95-omsagent.conf é a instrução de encaminhamento para @127.0.0.1:25224.  :bulb: Nota: Na sintaxe do syslogd uma arroba (@) significa UDP enquanto duas arrobas (@@) significam TCP.  :warning: Atenção: No webinar citado anteriormente sobre um Dep Dive a respeito de CEF forwarder, Ofer também recomendou alterar as configurações do omsagent para aceitar as comunicações também via TCP para Syslog. Se seguir esta recomendação você deverá também ajustar qualquer instrução de encaminhamento para dois arrobas no arquivo 95-omsagent.conf, caso contrário suas mensagens poderão não ser enviadas ao Log Analytics.  Filtrando eventos  Se você ainda estiver notando a ingestão de eventos desnecessários em sua workspace, você pode implementar um filtro na fonte assim como no encaminhador, o que normalmente é mais simples já que muitos appliances não suportam grande granularidade em suas configurações.  Uma forma fácil de configurar esta filtragem é criando um arquivo a ser processando antes do 60-cef.conf e 95-omsagent.conf, neste exemplo chamado de 59-filter-out.conf, mas poderia utilizar qualquer nome que desejar, desde seja processado na ordem correta.    Neste arquivo vamos utilizar novamente a instrução stop, removendo as mensagens que não gostaríamos que fossem encaminhadas seja como Syslog ou CEF. Neste exemplo qualquer mensagem que contenha a palavra “test” e tenha algum dos facilities/severidades mencionados serão removidas.  if ($rawmsg contains &quot;test&quot;) and prifilt(&quot;auth,authpriv.*&quot;) then {         stop }   A documentação do rsyslog é muito rica em recursos mostrando como você pode filtrar estas mensagens, assim como quais propriedades se encontram disponíveis para que possa configurar estas instruções de forma mais avançada, incluindo dicas de conversão das instruções que utilizam sintaxe syslogd para o advanced, também conhecido como RainerScript.  Espero que este conteúdo tenha sido útil para aqueles que estão realizando o seu deployment ou manutenção de CEF/Syslog forwarders no seu ambiente!  Você tem alguma configuração específica ou desafio não discutido aqui? Sinta-se à vontade para compartilhar nos comentários para que possamos complementar o post com mais detalhes, podendo assim auxiliar outros que estejam enfrentando o mesmo! :smile:">
+
+
+
+  <meta property="og:image" content="https://davicruz.com/assets/images/og.png">
+
+
+
+  <meta name="twitter:site" content="@zerahzurc">
+  <meta name="twitter:title" content="Azure Sentinel: Configuração do Log Forwarder">
+  <meta name="twitter:description" content="Frequentemente apoio clientes no deployment de forwarders (encaminhadores) de logs CEF/Syslog em seus ambientes para coletar informações de appliances de rede e/ou servidores e serviços para o Log Analytics, que consequentemente os disponibiliza para o Azure Sentinel.  Embora tenhamos uma diversidade de documentações em como fazer este deployment, assim como recursos de comunidade como o Tech Community e Webinars, compilei todos os pontos que normalmente reviso com meus clientes nestes engajamentos de deployment e revisão neste post para ajudar àqueles que estejam enfrentando algum desafio em seu ambiente.    :newspaper: Edits:     30/04/2021 - Incluído seção Redução de mensagens repetidas     Requisitos  De acordo com a documentação oficial da Microsoft, os requisitos para este recurso são bastante simples, conforme listado abaixo:     4 CPUs e 8GB RAM, que é capaz de processar cerca de 8500 EPS (eventos por segundo) utilizando o rsyslog, de acordo com a documentação.            Se estiver realizado este deployment no Azure você pode utilizar o SKU Standard_F4s_v2 que é otimizado para processamento e recomendado neste caso.           Uma distribuição Linux em que o Microsoft Monitoring Agent (também conhecido como omsagent) seja suportado.   Python versão 2.7 ou 3.   Um dos serviços de syslog suportados instalado. Na maioria dos cenários que trabalhei utilizei o rsyslog, uma vez que normalmente é o pacote padrão na maioria das distribuições. Abaixo a lista das versões suportadas, também de acordo com a documentação:            Rsyslog v8       Syslog-ng 2.1 - 3.22.1           Arquitetura do Forwarder    A arquitetura da solução é bem simples:     É composta por uma ou mais máquinas recebendo os logs em protocolo syslog via UDP, TCP ou TLS. Isso é alcançado a partir da configuração de listeners no rsyslog ou no syslog-ng, assim como quaisquer servidores syslog você tenha ou teve em execução em seu ambiente.   As mensagens recebidas são encaminhadas para os listeners locais que são configurados no omsagent para ingestão como logs puros em Syslog (UDP/25224) ou CEF (TCP/25226).   Mensagens são encaminhadas ao Log Analytics workspace de acordo com a sua configuração, acessíveis também ao Sentinel a partir da ativação da solução.   Agora vou orientá-los quando aos detalhes da configuração desta infraestrutura e compartilhar algumas dicas de configurações mais detalhadas para mitigar alguns problemas e reduzir ingestão desnecessária no seu ambiente.  Considerações de Design  Antes de realizar o deploy/revisar a infraestrutura do seu forwarder, existem algumas perguntas que precisamos responder que auxiliarão na correta definição das suas configurações:     Este forwarder receberá apenas mensagens CEF, Syslog ou ambos?            Embora ambos os tipos de mensagens sejam recebidos via protocolo syslog, as mensagens CEF são formatadas de acordo com seu padrão pelo omsagent, disponibilizando cada campo em uma coluna própria no Log Analytics, enquanto as mensagens Syslog puro são armazenadas em uma única coluna, o que irá requerer esforço adicional quando necessário realizar a análise destes dados em alguma regra.       Também, se você estiver utilizando o forwarder para ambos os tipos de logs, precisará impedir que mensagens enviadas do tipo CEF sejam armazenadas também como Syslog, o que irá incorrer em custo duplicado para sua workspace.           Quais são os facilities e severidades, assim como tipos de mensagens e fontes que serão encaminhados ao Sentinel?            Envio de dados em excesso ao Sentinel pode gerar alto custo se não filtrados adequadamente.       Considere mapear os cenários de detecção de acordo com o MITRE ATT&amp;CK Matrix Techniques que tem interesse investigar antes de enviar os dados. Desta forma você conseguirá evitar o envio de dados sem um propósito ao seu SIEM, que não lhe trarão nenhum retorno sobre o investimento feito tanto em armazenamento quanto no Sentinel.           Quais são os requisitos de segurança para esta comunicação?            Como descrito no post sobre boas práticas compartilhado por Cristhofer Romeo Muñoz, devemos utilizar TCP como o protocolo padrão para qualquer comunicação devido a sua confiabilidade, a menos que seu appliance apenas suporte UDP ou se necessite de criptografia na comunicação, adotando TLS quando o dado for transmitido pela internet ou se houver dados sensíveis a serem coletados.       Instalando o forwarder próximo da fonte também ajuda a reduzir a complexidade dos protocolos utilizados, assim como evita que tenhamos problemas de performance causados por alta latencia na comunicação entre origem e forwarder.           Instalação  A instalação inicial pode ser facilmente realizada executando o script cef_installer.py, disponível no repositório oficial do Github utilizando a linha de comando abaixo, que pode ser obtida para seu ambiente acessando a página do conector Common Event Format (CEF) no Sentinel ou simplesmente substituir os dados &lt;workspace id&gt; e &lt;workspace secret&gt; pelos de sua workspace.  :bulb: Nota: Se não tiver o python 2.7 na máquina deverá substituir a instrução python por python3 antes de executar a linha abaixo.  sudo wget -O cef_installer.py https://raw.githubusercontent.com/Azure/Azure-Sentinel/master/DataConnectors/CEF/cef_installer.py &amp;&amp; sudo python cef_installer.py &lt;workspace id&gt; &lt;workspace secret&gt;   Se seu forwarder necessita de um proxy para comunicar-se com a Internet, você precisará também atualizar tais configurações modificando o arquivo /etc/opt/microsoft/omsagent/proxy.conf:  proxyconf=&quot;http://user:password@proxyserver:3128&quot; #user:password can be ignored if you proxy doesn&#39;t require authentication sudo echo $proxyconf &gt;&gt;/etc/opt/microsoft/omsagent/proxy.conf sudo chown omsagent:omiusers /etc/opt/microsoft/omsagent/proxy.conf  #restart service sudo /opt/microsoft/omsagent/bin/service_control restart   Este script de instalação realiza as alterações listadas abaixo em seu sistema. A maioria delas necessita de conectividade com o Github uma vez que os assets utilizados estão armazenados no repositório oficial do Azure Sentinel:     Download e instalação do Microsoft Monitoring Agent para Linux.   Configuração do omsagent para ouvir na porta TCP/25226 e realizar o parsing das mensagens CEF a partir da cópia do arquivo security_events.conf dentro do diretório de configuração da workspace (/etc/opt/microsoft/omsagent/&lt;workspaceID&gt;/conf/omsagent.d).   Encaminha as mensagens que contenham ASA ou CEF para a porta TCP/25226 a partir da cópia do arquivo security-config-omsagent.conf para /etc/rsyslog.d/ ou /etc/syslog-ng/conf.d/, dependendo do seu serviço de syslog.   Habilita o serviço syslog para ouvir porta TCP/514 e UDP/514 a partir de edição do arquivo em /etc/rsyslog.conf ou /etc/syslog-ng/syslog-ng.conf.   Com esta configuração você já estará preparado para encaminhar as mensagens CEF para este servidor, que em breve estarão disponíveis na sua workspace de Log Analytics na tabela CommonSecurityLog, mas existem algumas outras alterações aqui descritas das quais poderá se beneficiar para coletar logs Syslog puro, assim como implementar filtros e ajustes na infraestrutura.  Configuração  Como vimos a infraestrutura é baseada no serviço de syslog + omsagent. Uma vez que o rsyslog é um dos mais populares serviços utilizados e já disponível por padrão da maioria das distribuições atualmente, utilizarei todas as configurações aqui descritas para este serviço, embora você possa também ajustá-las para funcionamento com o syslog-ng caso necessário.  Validação da versão e instalação do rsyslog  Como mencionado em documentação, precisamos utilizar o rsyslog versão 8. Para confirmar a versão em execução em seu systema você pode executar o comando rsyslogd -v, que exibirá um output como o exemplo abaixo:  $ rsyslogd -v rsyslogd 8.32.0, compiled with:         PLATFORM:                               x86_64-pc-linux-gnu         PLATFORM (lsb_release -d):         FEATURE_REGEXP:                         Yes         GSSAPI Kerberos 5 support:              Yes         FEATURE_DEBUG (debug build, slow code): No         32bit Atomic operations supported:      Yes         64bit Atomic operations supported:      Yes         memory allocator:                       system default         Runtime Instrumentation (slow code):    No         uuid support:                           Yes         systemd support:                        Yes         Number of Bits in RainerScript integers: 64   De acordo com a documentação do projeto, você não deve ter maiores problemas executando a versão do rsyslog disponível no repositório do mantenedor da distribuição a menos que eles não tenham portado alguma correção para ela. Neste caso você deverá baixar a última build para sua distribuição da página do projeto ou instalar a partir do código fonte.  Aplicando as configurações do rsyslog  Após quaisquer alterações feitas no arquivo de configuração do rsyslog (/etc/rsyslog.conf) ou qualquer outro arquivo por ele importado (normalmente em /etc/rsyslog.d/*.conf) você precisará reiniciar o serviço para que as alterações tenham efeito. Isso pode ser alcançado a partir da execução da linha de comando abaixo:  sudo systemctl restart rsyslog.service   Ajustando os listeners do rsyslog  Embora o cef_installer.py já defina os listeners para TCP/514 e UDP/514, talvez haja a necessidade de validar ou ajustar a sua configuração para criptografar a comunicação via TLS.  Sua configuração atual deve se parecer com o trecho abaixo, que pode ser visto no arquivo /etc/rsyslog.conf:  module(load=&quot;imuxsock&quot;) # provides support for local system logging #module(load=&quot;immark&quot;)  # provides --MARK-- message capability  # provides UDP syslog reception module(load=&quot;imudp&quot;) input(type=&quot;imudp&quot; port=&quot;514&quot;)   # provides TCP syslog reception module(load=&quot;imtcp&quot;) input(type=&quot;imtcp&quot; port=&quot;514&quot;)   A configuração para comunicação via TLS requer alguns itens adicionais, onde é necessário emitir os certificados para servidores e clientes (caso não esteja utilizando uma infra de PKI) assim como alterar o arquivo de configuração do rsyslog para aceitar estas comunicações.  Maiores detalhes e exemplos de configurações podem ser encontrados na documentação oficial neste link, de onde retirei o trecho abaixo para que tenham uma ideia de como esta configuração se parece:  module(load=&quot;imuxsock&quot;) # local messages module(load=&quot;imtcp&quot; # TCP listener     StreamDriver.Name=&quot;gtls&quot;     StreamDriver.Mode=&quot;1&quot; # run driver in TLS-only mode     StreamDriver.Authmode=&quot;anon&quot;     )  # make gtls driver the default and set certificate files global(     DefaultNetstreamDriver=&quot;gtls&quot;     DefaultNetstreamDriverCAFile=&quot;/path/to/contrib/gnutls/ca.pem&quot;     DefaultNetstreamDriverCertFile=&quot;/path/to/contrib/gnutls/cert.pem&quot;     DefaultNetstreamDriverKeyFile=&quot;/path/to/contrib/gnutls/key.pem&quot;     )      # start up listener at port 6514     input(     type=&quot;imtcp&quot;     port=&quot;6514&quot;     )   Evitando registro de eventos remotos em arquivos locais  Um ponto que é sempre questionado pelos clientes é que após configurar máquinas como forwarder para CEF e/ou Syslog os arquivos de log locais (frequentemente /var/log/messages ou /var/log/syslog) são sobrecarregados com mensagens oriundas de servidores remotos, e na maioria das vezes consumindo todo o espaço em disco disponível do volume onde /var/log reside.  Isso ocorre porque as definições padrão do rsyslog, listadas abaixo, enviam alguns facilities e severidades para arquivos locais sem validar a fonte destes eventos (comentários e linhas em branco removidas por simplicidade).  :bulb: Nota: O caminho onde encontrar estas configurações padrão variam de acordo com a distribuição Linux. Para Ubuntu existe um arquivo chamado /etc/rsyslog.d/50-default.conf enquanto para distribuições baseadas em RHEL (RHEL, CentOS, Fedora) está na configuração principal do /etc/rsyslog.conf.  #Extracted from Ubuntu /etc/rsyslog.d/50-default.conf  auth,authpriv.*                 /var/log/auth.log *.*;auth,authpriv.none          -/var/log/syslog kern.*                          -/var/log/kern.log mail.*                          -/var/log/mail.log mail.err                        /var/log/mail.err *.emerg                         :omusrmsg:*   Como podem ver, qualquer mensagem que coincida com alguma severidade contida nesta lista é enviada para um dos arquivos locais. Uma forma rápida de prevenir este comportamento é editar o arquivo de configuração para apenas aceitar mensagens geradas pelo host local (127.0.0.1):  if ($fromhost-ip == &#39;127.0.0.1&#39;) then {     auth,authpriv.*                 /var/log/auth.log     *.*;auth,authpriv.none          -/var/log/syslog     kern.*                          -/var/log/kern.log     mail.*                          -/var/log/mail.log     mail.err                        /var/log/mail.err     *.emerg                         :omusrmsg:* }   Redução de mensagens repetidas  Conforme lembrado pelo meu colega Flavio Honda, o Rsyslog possui uma opção que pode auxiliar com a redução de mensagens repetidas.  Se você sofre com este tipo de problema ou quer prevenir antes mesmo que venha acontecer em seu ambiente, você pode habilitar a configuração abaixo no seu arquivo /etc/rsyslog.conf :smile:.  $RepeatedMsgReduction on   A referência oficial sobre esta feature na documentação do RSyslog pode ser encontrada neste link.  Fluxo de processamento de mensagens  No rsyslog, o primeiro arquivo a ser processado é o rsyslog.conf, que normalmente contém uma instrução para importar todos os arquivos *.conf localizados no diretório /etc/rsyslog.d e os arquivos são processados em ordem alfabética. Quando uma mensagem chega ou é gerada no sistema, é encaminhada e avaliada por cada uma das configurações nesta mesma ordem, a menos que alteremos explicitamente este comportamento.  Na configuração abaixo, vamos considerar que estamos encaminhando mensagens no formato CEF de um appliance que são enviadas com o facility local4.info:       Se nenhuma alteração for realizada no rsyslog.conf ou 50-default.conf para prevenir o registro de mensagens de um host remoto, estas mensagens serão registradas no arquivo /var/log/syslog.   Também, se houver algum match no arquivo 95-omsagent.conf esta mensagem será enviada para a workspace de Log Analytics como Syslog puro.   E por fim, ele coincidirá com as regular expressions contidas no arquivo security-config-omsagent.conf e tratado como mensagem CEF para a tabela CommonSecurityLog.   Isso não apenas resultará no disco cheio, mas também em cobrança duplicada para este mesmo evento, que será armazenado duas vezes no Log Analytics.  Para evitar este comportamento, como Ofer Shezaf compartilhou em um dos Webinars da Comunidade de Segurança (Log Forwarder deep dive | Filtering CEF and Syslog events), vamos renomear o arquivo security-config-omsagent.conf para 60-cef.conf de forma que ele seja processado antes do 95-omsagent.conf.  Adicionalmente, precisamos garantir que uma vez que as mensagens sejam encaminhadas para o TCP/25226 e tratadas como CEF sejam descartadas, o que é alcançado pelo uso da instrução stop. O Stop remove as mensagens do processamento do rsyslog.  :bulb: Nota: Você poderá encontrar outras instruções que utilizem o stop como um til (~). Esta notação veio da syntax legado do syslogd  Esta configuração ficaria da seguinte forma:  $ cat /etc/rsyslog.d/60-cef.conf if ($rawmsg contains &quot;CEF:&quot;) or ($rawmsg contains &quot;ASA-&quot;) then {         *.*     @@127.0.0.1:25226         stop }     Ajustando o 95-omsagent.conf  Após a instalação inicial, o agente do MMA criará um arquivo de configuração no diretório do serviço syslog (/etc/rsyslog.d/95-omsagent.conf) em sincronismo com as configurações definidas no portal do Azure, navegando em sua workspace de Log Analytics &gt; Agents Configuration &gt; Syslog:    Para a configuração acima o seguinte conteúdo será criado no arquivo, conforme abaixo:  # OMS Syslog collection for workspace &lt;workspace id&gt; auth.=alert;auth.=crit;auth.=debug;auth.=emerg;auth.=err;auth.=info;auth.=notice;auth.=warning  @127.0.0.1:25224 authpriv.=alert;authpriv.=crit;authpriv.=debug;authpriv.=emerg;authpriv.=err;authpriv.=info;authpriv.=notice;authpriv.=warning  @127.0.0.1:25224 local3.=alert;local3.=crit;local3.=debug;local3.=emerg;local3.=err;local3.=info;local3.=notice;local3.=warning  @127.0.0.1:25224 local4.=alert;local4.=crit;local4.=debug;local4.=emerg;local4.=err;local4.=info;local4.=notice;local4.=warning  @127.0.0.1:25224   Mesmo que esta configuração seja extremamente simples de se fazer pelo portal, ela se aplica globalmente a todos os dispositivos Linux que possuem o omsagent conectado a esta workspace, ingerindo mais informação de que precisa dentro de sua workspace de Log Analytics se mais tipos de dados são selecionados que o necessário.  Se precisa definir uma configuração diferente para algumas máquinas como os seus forwarders, é recomendado que se edite diretamente o arquivo 95-omsagent.conf adicionando ou removendo facilities e severidades dele, assim como construindo suas condições para que estes dados sejam enviados ao Azure mas precisamos impedir que este arquivo seja sincronizado com as definições no portal.  O comando abaixo “quebra” o vínculo existente entre este arquivo e a configuração da workspace:  sudo su omsagent -c &#39;python /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py --disable&#39;   A única coisa que não pode ser alterada no arquivo 95-omsagent.conf é a instrução de encaminhamento para @127.0.0.1:25224.  :bulb: Nota: Na sintaxe do syslogd uma arroba (@) significa UDP enquanto duas arrobas (@@) significam TCP.  :warning: Atenção: No webinar citado anteriormente sobre um Dep Dive a respeito de CEF forwarder, Ofer também recomendou alterar as configurações do omsagent para aceitar as comunicações também via TCP para Syslog. Se seguir esta recomendação você deverá também ajustar qualquer instrução de encaminhamento para dois arrobas no arquivo 95-omsagent.conf, caso contrário suas mensagens poderão não ser enviadas ao Log Analytics.  Filtrando eventos  Se você ainda estiver notando a ingestão de eventos desnecessários em sua workspace, você pode implementar um filtro na fonte assim como no encaminhador, o que normalmente é mais simples já que muitos appliances não suportam grande granularidade em suas configurações.  Uma forma fácil de configurar esta filtragem é criando um arquivo a ser processando antes do 60-cef.conf e 95-omsagent.conf, neste exemplo chamado de 59-filter-out.conf, mas poderia utilizar qualquer nome que desejar, desde seja processado na ordem correta.    Neste arquivo vamos utilizar novamente a instrução stop, removendo as mensagens que não gostaríamos que fossem encaminhadas seja como Syslog ou CEF. Neste exemplo qualquer mensagem que contenha a palavra “test” e tenha algum dos facilities/severidades mencionados serão removidas.  if ($rawmsg contains &quot;test&quot;) and prifilt(&quot;auth,authpriv.*&quot;) then {         stop }   A documentação do rsyslog é muito rica em recursos mostrando como você pode filtrar estas mensagens, assim como quais propriedades se encontram disponíveis para que possa configurar estas instruções de forma mais avançada, incluindo dicas de conversão das instruções que utilizam sintaxe syslogd para o advanced, também conhecido como RainerScript.  Espero que este conteúdo tenha sido útil para aqueles que estão realizando o seu deployment ou manutenção de CEF/Syslog forwarders no seu ambiente!  Você tem alguma configuração específica ou desafio não discutido aqui? Sinta-se à vontade para compartilhar nos comentários para que possamos complementar o post com mais detalhes, podendo assim auxiliar outros que estejam enfrentando o mesmo! :smile:">
+  <meta name="twitter:domain" content="davicruz.com">
+  <meta name="twitter:url" content="https://davicruz.com/azure-sentinel/2021/03/rsyslog-sentinel-log-forwarder/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://davicruz.com/assets/images/og.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2021-03-29T12:00:00-03:00">
+
+
+
+  <meta property="article:modified_time" content="2021-04-30T16:00:00-03:00">
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://davicruz.com/azure-sentinel/2021/03/rsyslog-sentinel-log-forwarder/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Davi Cruz",
+      "url": "https://davicruz.com/",
+      "sameAs": ["https://twitter.com/zerahzurc","https://www.linkedin.com/in/davicruz","https://github.com/davi-cruz"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="hrWV-PqvbpxEy2HdpVYFQNws2Sz_tROleVyF18s2kWA" />
+
+
+  <meta name="msvalidate.01" content="60B1FA6CDAF15D226AB529AF30386BD8">
+
+
+
+  <meta name="yandex-verification" content="08de8d8c0326420f">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Davi Cruz Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+<!-- Favicon -->
+<link rel="shortcut icon" href="/assets/images/favicon.ico" />
+
+<!-- Multilang tags -->
+
+    
+<link rel="alternate" hreflang="pt-BR" href="/azure-sentinel/2021/03/rsyslog-sentinel-log-forwarder/">
+    
+
+    
+<link rel="alternate" hreflang="en-US" href="/en-US/azure-sentinel/2021/03/rsyslog-sentinel-log-forwarder/">
+    
+
+
+<!-- Cookie Consent - Osano -->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          
+          <a class="site-logo" href="https://davicruz.com"><img src="/assets/images/logo.png" alt="Davi Cruz"></a>
+          
+          <a class="site-title" href="https://davicruz.com">
+            Davi Cruz
+            
+          </a>
+        
+        <ul class="visible-links">
+<li class="masthead__menu-item">
+            <a href="/categorias/">Categorias</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/tags/">Tags</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/sobre/">Sobre</a>
+          </li>
+</ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Buscar</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/assets/images/bio-photo.jpg" alt="Davi Cruz" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Davi Cruz</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Apenas mais um profissional de Cibersegurança</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Acompanhe no</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">São Paulo, BR</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fab fa-linkedin" aria-hidden="true"></i><span class="label">Linkedin</span></a></li>
+          
+        
+          
+            <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+<li>
+  <strong></strong>
+  
+  <a class="link-en" href=""></a>
+  
+</li>
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Azure Sentinel: Configuração do Log Forwarder">
+    <meta itemprop="description" content="Frequentemente apoio clientes no deployment de forwarders (encaminhadores) de logs CEF/Syslog em seus ambientes para coletar informações de appliances de rede e/ou servidores e serviços para o Log Analytics, que consequentemente os disponibiliza para o Azure Sentinel.Embora tenhamos uma diversidade de documentações em como fazer este deployment, assim como recursos de comunidade como o Tech Community e Webinars, compilei todos os pontos que normalmente reviso com meus clientes nestes engajamentos de deployment e revisão neste post para ajudar àqueles que estejam enfrentando algum desafio em seu ambiente.:newspaper: Edits:  30/04/2021 - Incluído seção Redução de mensagens repetidasRequisitosDe acordo com a documentação oficial da Microsoft, os requisitos para este recurso são bastante simples, conforme listado abaixo:  4 CPUs e 8GB RAM, que é capaz de processar cerca de 8500 EPS (eventos por segundo) utilizando o rsyslog, de acordo com a documentação.          Se estiver realizado este deployment no Azure você pode utilizar o SKU Standard_F4s_v2 que é otimizado para processamento e recomendado neste caso.        Uma distribuição Linux em que o Microsoft Monitoring Agent (também conhecido como omsagent) seja suportado.  Python versão 2.7 ou 3.  Um dos serviços de syslog suportados instalado. Na maioria dos cenários que trabalhei utilizei o rsyslog, uma vez que normalmente é o pacote padrão na maioria das distribuições. Abaixo a lista das versões suportadas, também de acordo com a documentação:          Rsyslog v8      Syslog-ng 2.1 - 3.22.1      Arquitetura do ForwarderA arquitetura da solução é bem simples:  É composta por uma ou mais máquinas recebendo os logs em protocolo syslog via UDP, TCP ou TLS. Isso é alcançado a partir da configuração de listeners no rsyslog ou no syslog-ng, assim como quaisquer servidores syslog você tenha ou teve em execução em seu ambiente.  As mensagens recebidas são encaminhadas para os listeners locais que são configurados no omsagent para ingestão como logs puros em Syslog (UDP/25224) ou CEF (TCP/25226).  Mensagens são encaminhadas ao Log Analytics workspace de acordo com a sua configuração, acessíveis também ao Sentinel a partir da ativação da solução.Agora vou orientá-los quando aos detalhes da configuração desta infraestrutura e compartilhar algumas dicas de configurações mais detalhadas para mitigar alguns problemas e reduzir ingestão desnecessária no seu ambiente.Considerações de DesignAntes de realizar o deploy/revisar a infraestrutura do seu forwarder, existem algumas perguntas que precisamos responder que auxiliarão na correta definição das suas configurações:  Este forwarder receberá apenas mensagens CEF, Syslog ou ambos?          Embora ambos os tipos de mensagens sejam recebidos via protocolo syslog, as mensagens CEF são formatadas de acordo com seu padrão pelo omsagent, disponibilizando cada campo em uma coluna própria no Log Analytics, enquanto as mensagens Syslog puro são armazenadas em uma única coluna, o que irá requerer esforço adicional quando necessário realizar a análise destes dados em alguma regra.      Também, se você estiver utilizando o forwarder para ambos os tipos de logs, precisará impedir que mensagens enviadas do tipo CEF sejam armazenadas também como Syslog, o que irá incorrer em custo duplicado para sua workspace.        Quais são os facilities e severidades, assim como tipos de mensagens e fontes que serão encaminhados ao Sentinel?          Envio de dados em excesso ao Sentinel pode gerar alto custo se não filtrados adequadamente.      Considere mapear os cenários de detecção de acordo com o MITRE ATT&amp;CK Matrix Techniques que tem interesse investigar antes de enviar os dados. Desta forma você conseguirá evitar o envio de dados sem um propósito ao seu SIEM, que não lhe trarão nenhum retorno sobre o investimento feito tanto em armazenamento quanto no Sentinel.        Quais são os requisitos de segurança para esta comunicação?          Como descrito no post sobre boas práticas compartilhado por Cristhofer Romeo Muñoz, devemos utilizar TCP como o protocolo padrão para qualquer comunicação devido a sua confiabilidade, a menos que seu appliance apenas suporte UDP ou se necessite de criptografia na comunicação, adotando TLS quando o dado for transmitido pela internet ou se houver dados sensíveis a serem coletados.      Instalando o forwarder próximo da fonte também ajuda a reduzir a complexidade dos protocolos utilizados, assim como evita que tenhamos problemas de performance causados por alta latencia na comunicação entre origem e forwarder.      InstalaçãoA instalação inicial pode ser facilmente realizada executando o script cef_installer.py, disponível no repositório oficial do Github utilizando a linha de comando abaixo, que pode ser obtida para seu ambiente acessando a página do conector Common Event Format (CEF) no Sentinel ou simplesmente substituir os dados &lt;workspace id&gt; e &lt;workspace secret&gt; pelos de sua workspace.:bulb: Nota: Se não tiver o python 2.7 na máquina deverá substituir a instrução python por python3 antes de executar a linha abaixo.sudo wget -O cef_installer.py https://raw.githubusercontent.com/Azure/Azure-Sentinel/master/DataConnectors/CEF/cef_installer.py &amp;&amp; sudo python cef_installer.py &lt;workspace id&gt; &lt;workspace secret&gt;Se seu forwarder necessita de um proxy para comunicar-se com a Internet, você precisará também atualizar tais configurações modificando o arquivo /etc/opt/microsoft/omsagent/proxy.conf:proxyconf=&quot;http://user:password@proxyserver:3128&quot; #user:password can be ignored if you proxy doesn't require authenticationsudo echo $proxyconf &gt;&gt;/etc/opt/microsoft/omsagent/proxy.confsudo chown omsagent:omiusers /etc/opt/microsoft/omsagent/proxy.conf#restart servicesudo /opt/microsoft/omsagent/bin/service_control restartEste script de instalação realiza as alterações listadas abaixo em seu sistema. A maioria delas necessita de conectividade com o Github uma vez que os assets utilizados estão armazenados no repositório oficial do Azure Sentinel:  Download e instalação do Microsoft Monitoring Agent para Linux.  Configuração do omsagent para ouvir na porta TCP/25226 e realizar o parsing das mensagens CEF a partir da cópia do arquivo security_events.conf dentro do diretório de configuração da workspace (/etc/opt/microsoft/omsagent/&lt;workspaceID&gt;/conf/omsagent.d).  Encaminha as mensagens que contenham ASA ou CEF para a porta TCP/25226 a partir da cópia do arquivo security-config-omsagent.conf para /etc/rsyslog.d/ ou /etc/syslog-ng/conf.d/, dependendo do seu serviço de syslog.  Habilita o serviço syslog para ouvir porta TCP/514 e UDP/514 a partir de edição do arquivo em /etc/rsyslog.conf ou /etc/syslog-ng/syslog-ng.conf.Com esta configuração você já estará preparado para encaminhar as mensagens CEF para este servidor, que em breve estarão disponíveis na sua workspace de Log Analytics na tabela CommonSecurityLog, mas existem algumas outras alterações aqui descritas das quais poderá se beneficiar para coletar logs Syslog puro, assim como implementar filtros e ajustes na infraestrutura.ConfiguraçãoComo vimos a infraestrutura é baseada no serviço de syslog + omsagent. Uma vez que o rsyslog é um dos mais populares serviços utilizados e já disponível por padrão da maioria das distribuições atualmente, utilizarei todas as configurações aqui descritas para este serviço, embora você possa também ajustá-las para funcionamento com o syslog-ng caso necessário.Validação da versão e instalação do rsyslogComo mencionado em documentação, precisamos utilizar o rsyslog versão 8. Para confirmar a versão em execução em seu systema você pode executar o comando rsyslogd -v, que exibirá um output como o exemplo abaixo:$ rsyslogd -vrsyslogd 8.32.0, compiled with:        PLATFORM:                               x86_64-pc-linux-gnu        PLATFORM (lsb_release -d):        FEATURE_REGEXP:                         Yes        GSSAPI Kerberos 5 support:              Yes        FEATURE_DEBUG (debug build, slow code): No        32bit Atomic operations supported:      Yes        64bit Atomic operations supported:      Yes        memory allocator:                       system default        Runtime Instrumentation (slow code):    No        uuid support:                           Yes        systemd support:                        Yes        Number of Bits in RainerScript integers: 64De acordo com a documentação do projeto, você não deve ter maiores problemas executando a versão do rsyslog disponível no repositório do mantenedor da distribuição a menos que eles não tenham portado alguma correção para ela. Neste caso você deverá baixar a última build para sua distribuição da página do projeto ou instalar a partir do código fonte.Aplicando as configurações do rsyslogApós quaisquer alterações feitas no arquivo de configuração do rsyslog (/etc/rsyslog.conf) ou qualquer outro arquivo por ele importado (normalmente em /etc/rsyslog.d/*.conf) você precisará reiniciar o serviço para que as alterações tenham efeito. Isso pode ser alcançado a partir da execução da linha de comando abaixo:sudo systemctl restart rsyslog.serviceAjustando os listeners do rsyslogEmbora o cef_installer.py já defina os listeners para TCP/514 e UDP/514, talvez haja a necessidade de validar ou ajustar a sua configuração para criptografar a comunicação via TLS.Sua configuração atual deve se parecer com o trecho abaixo, que pode ser visto no arquivo /etc/rsyslog.conf:module(load=&quot;imuxsock&quot;) # provides support for local system logging#module(load=&quot;immark&quot;)  # provides --MARK-- message capability# provides UDP syslog receptionmodule(load=&quot;imudp&quot;)input(type=&quot;imudp&quot; port=&quot;514&quot;) # provides TCP syslog receptionmodule(load=&quot;imtcp&quot;)input(type=&quot;imtcp&quot; port=&quot;514&quot;)A configuração para comunicação via TLS requer alguns itens adicionais, onde é necessário emitir os certificados para servidores e clientes (caso não esteja utilizando uma infra de PKI) assim como alterar o arquivo de configuração do rsyslog para aceitar estas comunicações.Maiores detalhes e exemplos de configurações podem ser encontrados na documentação oficial neste link, de onde retirei o trecho abaixo para que tenham uma ideia de como esta configuração se parece:module(load=&quot;imuxsock&quot;) # local messagesmodule(load=&quot;imtcp&quot; # TCP listener    StreamDriver.Name=&quot;gtls&quot;    StreamDriver.Mode=&quot;1&quot; # run driver in TLS-only mode    StreamDriver.Authmode=&quot;anon&quot;    )# make gtls driver the default and set certificate filesglobal(    DefaultNetstreamDriver=&quot;gtls&quot;    DefaultNetstreamDriverCAFile=&quot;/path/to/contrib/gnutls/ca.pem&quot;    DefaultNetstreamDriverCertFile=&quot;/path/to/contrib/gnutls/cert.pem&quot;    DefaultNetstreamDriverKeyFile=&quot;/path/to/contrib/gnutls/key.pem&quot;    )    # start up listener at port 6514    input(    type=&quot;imtcp&quot;    port=&quot;6514&quot;    )Evitando registro de eventos remotos em arquivos locaisUm ponto que é sempre questionado pelos clientes é que após configurar máquinas como forwarder para CEF e/ou Syslog os arquivos de log locais (frequentemente /var/log/messages ou /var/log/syslog) são sobrecarregados com mensagens oriundas de servidores remotos, e na maioria das vezes consumindo todo o espaço em disco disponível do volume onde /var/log reside.Isso ocorre porque as definições padrão do rsyslog, listadas abaixo, enviam alguns facilities e severidades para arquivos locais sem validar a fonte destes eventos (comentários e linhas em branco removidas por simplicidade).:bulb: Nota: O caminho onde encontrar estas configurações padrão variam de acordo com a distribuição Linux. Para Ubuntu existe um arquivo chamado /etc/rsyslog.d/50-default.conf enquanto para distribuições baseadas em RHEL (RHEL, CentOS, Fedora) está na configuração principal do /etc/rsyslog.conf.#Extracted from Ubuntu /etc/rsyslog.d/50-default.confauth,authpriv.*                 /var/log/auth.log*.*;auth,authpriv.none          -/var/log/syslogkern.*                          -/var/log/kern.logmail.*                          -/var/log/mail.logmail.err                        /var/log/mail.err*.emerg                         :omusrmsg:*Como podem ver, qualquer mensagem que coincida com alguma severidade contida nesta lista é enviada para um dos arquivos locais. Uma forma rápida de prevenir este comportamento é editar o arquivo de configuração para apenas aceitar mensagens geradas pelo host local (127.0.0.1):if ($fromhost-ip == '127.0.0.1') then {    auth,authpriv.*                 /var/log/auth.log    *.*;auth,authpriv.none          -/var/log/syslog    kern.*                          -/var/log/kern.log    mail.*                          -/var/log/mail.log    mail.err                        /var/log/mail.err    *.emerg                         :omusrmsg:*}Redução de mensagens repetidasConforme lembrado pelo meu colega Flavio Honda, o Rsyslog possui uma opção que pode auxiliar com a redução de mensagens repetidas.Se você sofre com este tipo de problema ou quer prevenir antes mesmo que venha acontecer em seu ambiente, você pode habilitar a configuração abaixo no seu arquivo /etc/rsyslog.conf :smile:.$RepeatedMsgReduction onA referência oficial sobre esta feature na documentação do RSyslog pode ser encontrada neste link.Fluxo de processamento de mensagensNo rsyslog, o primeiro arquivo a ser processado é o rsyslog.conf, que normalmente contém uma instrução para importar todos os arquivos *.conf localizados no diretório /etc/rsyslog.d e os arquivos são processados em ordem alfabética. Quando uma mensagem chega ou é gerada no sistema, é encaminhada e avaliada por cada uma das configurações nesta mesma ordem, a menos que alteremos explicitamente este comportamento.Na configuração abaixo, vamos considerar que estamos encaminhando mensagens no formato CEF de um appliance que são enviadas com o facility local4.info:  Se nenhuma alteração for realizada no rsyslog.conf ou 50-default.conf para prevenir o registro de mensagens de um host remoto, estas mensagens serão registradas no arquivo /var/log/syslog.  Também, se houver algum match no arquivo 95-omsagent.conf esta mensagem será enviada para a workspace de Log Analytics como Syslog puro.  E por fim, ele coincidirá com as regular expressions contidas no arquivo security-config-omsagent.conf e tratado como mensagem CEF para a tabela CommonSecurityLog.Isso não apenas resultará no disco cheio, mas também em cobrança duplicada para este mesmo evento, que será armazenado duas vezes no Log Analytics.Para evitar este comportamento, como Ofer Shezaf compartilhou em um dos Webinars da Comunidade de Segurança (Log Forwarder deep dive | Filtering CEF and Syslog events), vamos renomear o arquivo security-config-omsagent.conf para 60-cef.conf de forma que ele seja processado antes do 95-omsagent.conf.Adicionalmente, precisamos garantir que uma vez que as mensagens sejam encaminhadas para o TCP/25226 e tratadas como CEF sejam descartadas, o que é alcançado pelo uso da instrução stop. O Stop remove as mensagens do processamento do rsyslog.:bulb: Nota: Você poderá encontrar outras instruções que utilizem o stop como um til (~). Esta notação veio da syntax legado do syslogdEsta configuração ficaria da seguinte forma:$ cat /etc/rsyslog.d/60-cef.confif ($rawmsg contains &quot;CEF:&quot;) or ($rawmsg contains &quot;ASA-&quot;) then {        *.*     @@127.0.0.1:25226        stop}Ajustando o 95-omsagent.confApós a instalação inicial, o agente do MMA criará um arquivo de configuração no diretório do serviço syslog (/etc/rsyslog.d/95-omsagent.conf) em sincronismo com as configurações definidas no portal do Azure, navegando em sua workspace de Log Analytics &gt; Agents Configuration &gt; Syslog:Para a configuração acima o seguinte conteúdo será criado no arquivo, conforme abaixo:# OMS Syslog collection for workspace &lt;workspace id&gt;auth.=alert;auth.=crit;auth.=debug;auth.=emerg;auth.=err;auth.=info;auth.=notice;auth.=warning  @127.0.0.1:25224authpriv.=alert;authpriv.=crit;authpriv.=debug;authpriv.=emerg;authpriv.=err;authpriv.=info;authpriv.=notice;authpriv.=warning  @127.0.0.1:25224local3.=alert;local3.=crit;local3.=debug;local3.=emerg;local3.=err;local3.=info;local3.=notice;local3.=warning  @127.0.0.1:25224local4.=alert;local4.=crit;local4.=debug;local4.=emerg;local4.=err;local4.=info;local4.=notice;local4.=warning  @127.0.0.1:25224Mesmo que esta configuração seja extremamente simples de se fazer pelo portal, ela se aplica globalmente a todos os dispositivos Linux que possuem o omsagent conectado a esta workspace, ingerindo mais informação de que precisa dentro de sua workspace de Log Analytics se mais tipos de dados são selecionados que o necessário.Se precisa definir uma configuração diferente para algumas máquinas como os seus forwarders, é recomendado que se edite diretamente o arquivo 95-omsagent.conf adicionando ou removendo facilities e severidades dele, assim como construindo suas condições para que estes dados sejam enviados ao Azure mas precisamos impedir que este arquivo seja sincronizado com as definições no portal.O comando abaixo “quebra” o vínculo existente entre este arquivo e a configuração da workspace:sudo su omsagent -c 'python /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py --disable'A única coisa que não pode ser alterada no arquivo 95-omsagent.conf é a instrução de encaminhamento para @127.0.0.1:25224.:bulb: Nota: Na sintaxe do syslogd uma arroba (@) significa UDP enquanto duas arrobas (@@) significam TCP.:warning: Atenção: No webinar citado anteriormente sobre um Dep Dive a respeito de CEF forwarder, Ofer também recomendou alterar as configurações do omsagent para aceitar as comunicações também via TCP para Syslog. Se seguir esta recomendação você deverá também ajustar qualquer instrução de encaminhamento para dois arrobas no arquivo 95-omsagent.conf, caso contrário suas mensagens poderão não ser enviadas ao Log Analytics.Filtrando eventosSe você ainda estiver notando a ingestão de eventos desnecessários em sua workspace, você pode implementar um filtro na fonte assim como no encaminhador, o que normalmente é mais simples já que muitos appliances não suportam grande granularidade em suas configurações.Uma forma fácil de configurar esta filtragem é criando um arquivo a ser processando antes do 60-cef.conf e 95-omsagent.conf, neste exemplo chamado de 59-filter-out.conf, mas poderia utilizar qualquer nome que desejar, desde seja processado na ordem correta.Neste arquivo vamos utilizar novamente a instrução stop, removendo as mensagens que não gostaríamos que fossem encaminhadas seja como Syslog ou CEF. Neste exemplo qualquer mensagem que contenha a palavra “test” e tenha algum dos facilities/severidades mencionados serão removidas.if ($rawmsg contains &quot;test&quot;) and prifilt(&quot;auth,authpriv.*&quot;) then {        stop}A documentação do rsyslog é muito rica em recursos mostrando como você pode filtrar estas mensagens, assim como quais propriedades se encontram disponíveis para que possa configurar estas instruções de forma mais avançada, incluindo dicas de conversão das instruções que utilizam sintaxe syslogd para o advanced, também conhecido como RainerScript.Espero que este conteúdo tenha sido útil para aqueles que estão realizando o seu deployment ou manutenção de CEF/Syslog forwarders no seu ambiente!Você tem alguma configuração específica ou desafio não discutido aqui? Sinta-se à vontade para compartilhar nos comentários para que possamos complementar o post com mais detalhes, podendo assim auxiliar outros que estejam enfrentando o mesmo! :smile:">
+    <meta itemprop="datePublished" content="2021-03-29T12:00:00-03:00">
+    <meta itemprop="dateModified" content="2021-04-30T16:00:00-03:00">
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Azure Sentinel: Configuração do Log Forwarder
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-03-29T12:00:00-03:00">March 29, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          12 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/azure-sentinel/2021/03/rsyslog-sentinel-log-forwarder/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title">
+<i class="fas fa-file-alt"></i> Nesta página</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#requisitos">Requisitos</a></li>
+  <li>
+<a href="#arquitetura-do-forwarder">Arquitetura do Forwarder</a>
+    <ul>
+      <li><a href="#considera%C3%A7%C3%B5es-de-design">Considerações de Design</a></li>
+    </ul>
+  </li>
+  <li><a href="#instala%C3%A7%C3%A3o">Instalação</a></li>
+  <li>
+<a href="#configura%C3%A7%C3%A3o">Configuração</a>
+    <ul>
+      <li><a href="#valida%C3%A7%C3%A3o-da-vers%C3%A3o-e-instala%C3%A7%C3%A3o-do-rsyslog">Validação da versão e instalação do rsyslog</a></li>
+      <li><a href="#aplicando-as-configura%C3%A7%C3%B5es-do-rsyslog">Aplicando as configurações do rsyslog</a></li>
+      <li><a href="#ajustando-os-listeners-do-rsyslog">Ajustando os listeners do rsyslog</a></li>
+      <li><a href="#evitando-registro-de-eventos-remotos-em-arquivos-locais">Evitando registro de eventos remotos em arquivos locais</a></li>
+      <li><a href="#redu%C3%A7%C3%A3o-de-mensagens-repetidas">Redução de mensagens repetidas</a></li>
+      <li><a href="#fluxo-de-processamento-de-mensagens">Fluxo de processamento de mensagens</a></li>
+      <li><a href="#ajustando-o-95-omsagentconf">Ajustando o 95-omsagent.conf</a></li>
+      <li><a href="#filtrando-eventos">Filtrando eventos</a></li>
+    </ul>
+  </li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <p>Frequentemente apoio clientes no deployment de <em>forwarders</em> (encaminhadores) de logs CEF/Syslog em seus ambientes para coletar informações de appliances de rede e/ou servidores e serviços para o Log Analytics, que consequentemente os disponibiliza para o Azure Sentinel.</p>
+
+<p>Embora tenhamos uma diversidade de documentações em como fazer este deployment, assim como recursos de comunidade como o Tech Community e Webinars, compilei todos os pontos que normalmente reviso com meus clientes nestes engajamentos de deployment e revisão neste post para ajudar àqueles que estejam enfrentando algum desafio em seu ambiente.</p>
+
+<div class="notice--success">
+
+<p><img class="emoji" title=":newspaper:" alt=":newspaper:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f4f0.png" height="20" width="20"> <strong>Edits</strong>:</p>
+
+<ul>
+  <li>
+<strong>30/04/2021</strong> - Incluído seção <a href="#redu%C3%A7%C3%A3o-de-mensagens-repetidas">Redução de mensagens repetidas</a>
+</li>
+</ul>
+
+</div>
+
+<h2 id="requisitos">Requisitos</h2>
+
+<p>De acordo com a <a href="https://docs.microsoft.com/en-us/azure/sentinel/connect-common-event-format">documentação oficial da Microsoft</a>, os requisitos para este recurso são bastante simples, conforme listado abaixo:</p>
+
+<ul>
+  <li>4 CPUs e 8GB RAM, que é capaz de processar cerca de 8500 EPS (eventos por segundo) utilizando o rsyslog, de acordo com a documentação.
+    <ul>
+      <li>Se estiver realizado este deployment no Azure você pode utilizar o SKU <strong>Standard_F4s_v2</strong> que é otimizado para processamento e recomendado neste caso.</li>
+    </ul>
+  </li>
+  <li>Uma distribuição Linux em que o Microsoft Monitoring Agent (também conhecido como omsagent) seja suportado.</li>
+  <li>Python versão 2.7 ou 3.</li>
+  <li>Um dos serviços de syslog suportados instalado. Na maioria dos cenários que trabalhei utilizei o <strong>rsyslog</strong>, uma vez que normalmente é o pacote padrão na maioria das distribuições. Abaixo a lista das versões suportadas, também de acordo com a documentação:
+    <ul>
+      <li>Rsyslog v8</li>
+      <li>Syslog-ng 2.1 - 3.22.1</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="arquitetura-do-forwarder">Arquitetura do Forwarder</h2>
+
+<p><img src="https://i.imgur.com/t2cvlm7.png" alt="Forwarder Architecture"></p>
+
+<p>A arquitetura da solução é bem simples:</p>
+
+<ul>
+  <li>É composta por uma ou mais máquinas recebendo os logs em protocolo syslog via UDP, TCP ou TLS. Isso é alcançado a partir da configuração de listeners no rsyslog ou no syslog-ng, assim como quaisquer servidores syslog você tenha ou teve em execução em seu ambiente.</li>
+  <li>As mensagens recebidas são encaminhadas para os listeners locais que são configurados no omsagent para ingestão como logs puros em Syslog (UDP/25224) ou CEF (TCP/25226).</li>
+  <li>Mensagens são encaminhadas ao Log Analytics workspace de acordo com a sua configuração, acessíveis também ao Sentinel a partir da ativação da solução.</li>
+</ul>
+
+<p>Agora vou orientá-los quando aos detalhes da configuração desta infraestrutura e compartilhar algumas dicas de configurações mais detalhadas para mitigar alguns problemas e reduzir ingestão desnecessária no seu ambiente.</p>
+
+<h3 id="considerações-de-design">Considerações de Design</h3>
+
+<p>Antes de realizar o deploy/revisar a infraestrutura do seu forwarder, existem algumas perguntas que precisamos responder que auxiliarão na correta definição das suas configurações:</p>
+
+<ul>
+  <li>
+<strong>Este forwarder receberá apenas mensagens CEF, Syslog ou ambos?</strong>
+    <ul>
+      <li>Embora ambos os tipos de mensagens sejam recebidos via protocolo syslog, as mensagens CEF são formatadas de acordo com seu padrão pelo omsagent, disponibilizando cada campo em uma coluna própria no Log Analytics, enquanto as mensagens Syslog puro são armazenadas em uma única coluna, o que irá requerer esforço adicional quando necessário realizar a análise destes dados em alguma regra.</li>
+      <li>Também, se você estiver utilizando o forwarder para ambos os tipos de logs, precisará impedir que mensagens enviadas do tipo CEF sejam armazenadas também como Syslog, o que irá incorrer em <strong>custo duplicado</strong> para sua workspace.</li>
+    </ul>
+  </li>
+  <li>
+<strong>Quais são os facilities e severidades, assim como tipos de mensagens e fontes que serão encaminhados ao Sentinel?</strong>
+    <ul>
+      <li>Envio de dados em excesso ao Sentinel pode gerar alto custo se não filtrados adequadamente.</li>
+      <li>Considere mapear os cenários de detecção de acordo com o <a href="https://attack.mitre.org/matrices/enterprise/">MITRE ATT&amp;CK Matrix Techniques</a> que tem interesse investigar antes de enviar os dados. Desta forma você conseguirá evitar o envio de dados sem um propósito ao seu SIEM, que não lhe trarão nenhum retorno sobre o investimento feito tanto em armazenamento quanto no Sentinel.</li>
+    </ul>
+  </li>
+  <li>
+<strong>Quais são os requisitos de segurança para esta comunicação?</strong>
+    <ul>
+      <li>Como descrito no post sobre <a href="https://techcommunity.microsoft.com/t5/azure-sentinel/best-practices-for-common-event-format-cef-collection-in-azure/ba-p/969990">boas práticas</a> compartilhado por Cristhofer Romeo Muñoz, <strong>devemos utilizar TCP como o protocolo padrão</strong> para qualquer comunicação devido a sua confiabilidade, a menos que seu appliance apenas suporte UDP ou se necessite de criptografia na comunicação, adotando TLS quando o dado for transmitido pela internet ou se houver dados sensíveis a serem coletados.</li>
+      <li>Instalando o forwarder próximo da fonte também ajuda a reduzir a complexidade dos protocolos utilizados, assim como evita que tenhamos problemas de performance causados por alta latencia na comunicação entre origem e forwarder.</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="instalação">Instalação</h2>
+
+<p>A instalação inicial pode ser facilmente realizada executando o script <code class="language-plaintext highlighter-rouge">cef_installer.py</code>, disponível no <a href="https://github.com/Azure/Azure-Sentinel/blob/master/DataConnectors/CEF/cef_installer.py">repositório oficial do Github</a> utilizando a linha de comando abaixo, que pode ser obtida para seu ambiente acessando a página do conector <strong>Common Event Format (CEF)</strong> no Sentinel ou simplesmente substituir os dados <code class="language-plaintext highlighter-rouge">&lt;workspace id&gt;</code> e <code class="language-plaintext highlighter-rouge">&lt;workspace secret&gt;</code> pelos de sua workspace.</p>
+
+<p class="notice--info"><img class="emoji" title=":bulb:" alt=":bulb:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f4a1.png" height="20" width="20"> <strong>Nota</strong>: Se não tiver o python 2.7 na máquina deverá substituir a instrução <code class="language-plaintext highlighter-rouge">python</code> por <code class="language-plaintext highlighter-rouge">python3</code> antes de executar a linha abaixo.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>wget <span class="nt">-O</span> cef_installer.py https://raw.githubusercontent.com/Azure/Azure-Sentinel/master/DataConnectors/CEF/cef_installer.py <span class="o">&amp;&amp;</span> <span class="nb">sudo </span>python cef_installer.py &lt;workspace <span class="nb">id</span><span class="o">&gt;</span> &lt;workspace secret&gt;
+</code></pre></div></div>
+
+<p>Se seu forwarder necessita de um proxy para comunicar-se com a Internet, você precisará também atualizar tais configurações modificando o arquivo <code class="language-plaintext highlighter-rouge">/etc/opt/microsoft/omsagent/proxy.conf</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">proxyconf</span><span class="o">=</span><span class="s2">"http://user:password@proxyserver:3128"</span> <span class="c">#user:password can be ignored if you proxy doesn't require authentication</span>
+<span class="nb">sudo echo</span> <span class="nv">$proxyconf</span> <span class="o">&gt;&gt;</span>/etc/opt/microsoft/omsagent/proxy.conf
+<span class="nb">sudo chown </span>omsagent:omiusers /etc/opt/microsoft/omsagent/proxy.conf
+
+<span class="c">#restart service</span>
+<span class="nb">sudo</span> /opt/microsoft/omsagent/bin/service_control restart
+</code></pre></div></div>
+
+<p>Este script de instalação realiza as alterações listadas abaixo em seu sistema. A maioria delas necessita de conectividade com o Github uma vez que os assets utilizados estão armazenados no <a href="https://github.com/Azure/Azure-Sentinel">repositório oficial do Azure Sentinel</a>:</p>
+
+<ul>
+  <li>Download e instalação do Microsoft Monitoring Agent para Linux.</li>
+  <li>Configuração do omsagent para ouvir na porta TCP/25226 e realizar o parsing das mensagens CEF a partir da cópia do arquivo <code class="language-plaintext highlighter-rouge">security_events.conf</code> dentro do diretório de configuração da workspace (<code class="language-plaintext highlighter-rouge">/etc/opt/microsoft/omsagent/&lt;workspaceID&gt;/conf/omsagent.d</code>).</li>
+  <li>Encaminha as mensagens que contenham ASA ou CEF para a porta TCP/25226 a partir da cópia do arquivo <code class="language-plaintext highlighter-rouge">security-config-omsagent.conf</code> para <code class="language-plaintext highlighter-rouge">/etc/rsyslog.d/</code> ou <code class="language-plaintext highlighter-rouge">/etc/syslog-ng/conf.d/</code>, dependendo do seu serviço de syslog.</li>
+  <li>Habilita o serviço syslog para ouvir porta TCP/514 e UDP/514 a partir de edição do arquivo em <code class="language-plaintext highlighter-rouge">/etc/rsyslog.conf</code> ou <code class="language-plaintext highlighter-rouge">/etc/syslog-ng/syslog-ng.conf</code>.</li>
+</ul>
+
+<p>Com esta configuração você já estará preparado para encaminhar as mensagens CEF para este servidor, que em breve estarão disponíveis na sua workspace de Log Analytics na tabela <code class="language-plaintext highlighter-rouge">CommonSecurityLog</code>, mas existem algumas outras alterações aqui descritas das quais poderá se beneficiar para coletar logs Syslog puro, assim como implementar filtros e ajustes na infraestrutura.</p>
+
+<h2 id="configuração">Configuração</h2>
+
+<p>Como vimos a infraestrutura é baseada no serviço de syslog + omsagent. Uma vez que o <strong>rsyslog</strong> é um dos mais populares serviços utilizados e já disponível por padrão da maioria das distribuições atualmente, utilizarei todas as configurações aqui descritas para este serviço, embora você possa também ajustá-las para funcionamento com o syslog-ng caso necessário.</p>
+
+<h3 id="validação-da-versão-e-instalação-do-rsyslog">Validação da versão e instalação do rsyslog</h3>
+
+<p>Como mencionado em documentação, precisamos utilizar o rsyslog versão 8. Para confirmar a versão em execução em seu systema você pode executar o comando <code class="language-plaintext highlighter-rouge">rsyslogd -v</code>, que exibirá um output como o exemplo abaixo:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>rsyslogd <span class="nt">-v</span>
+rsyslogd 8.32.0, compiled with:
+        PLATFORM:                               x86_64-pc-linux-gnu
+        PLATFORM <span class="o">(</span>lsb_release <span class="nt">-d</span><span class="o">)</span>:
+        FEATURE_REGEXP:                         Yes
+        GSSAPI Kerberos 5 support:              Yes
+        FEATURE_DEBUG <span class="o">(</span>debug build, slow code<span class="o">)</span>: No
+        32bit Atomic operations supported:      Yes
+        64bit Atomic operations supported:      Yes
+        memory allocator:                       system default
+        Runtime Instrumentation <span class="o">(</span>slow code<span class="o">)</span>:    No
+        uuid support:                           Yes
+        systemd support:                        Yes
+        Number of Bits <span class="k">in </span>RainerScript integers: 64
+</code></pre></div></div>
+
+<p>De acordo com a <a href="https://www.rsyslog.com/doc/v8-stable/installation/index.html">documentação do projeto</a>, você não deve ter maiores problemas executando a versão do rsyslog disponível no repositório do mantenedor da distribuição a menos que eles não tenham portado alguma correção para ela. Neste caso você deverá baixar a última build para sua distribuição da página do projeto ou instalar a partir do código fonte.</p>
+
+<h3 id="aplicando-as-configurações-do-rsyslog">Aplicando as configurações do rsyslog</h3>
+
+<p>Após quaisquer alterações feitas no arquivo de configuração do rsyslog (<code class="language-plaintext highlighter-rouge">/etc/rsyslog.conf</code>) ou qualquer outro arquivo por ele importado (normalmente em <code class="language-plaintext highlighter-rouge">/etc/rsyslog.d/*.conf</code>) você precisará reiniciar o serviço para que as alterações tenham efeito. Isso pode ser alcançado a partir da execução da linha de comando abaixo:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>systemctl restart rsyslog.service
+</code></pre></div></div>
+
+<h3 id="ajustando-os-listeners-do-rsyslog">Ajustando os listeners do rsyslog</h3>
+
+<p>Embora o <code class="language-plaintext highlighter-rouge">cef_installer.py</code> já defina os listeners para TCP/514 e UDP/514, talvez haja a necessidade de validar ou ajustar a sua configuração para criptografar a comunicação via TLS.</p>
+
+<p>Sua configuração atual deve se parecer com o trecho abaixo, que pode ser visto no arquivo <code class="language-plaintext highlighter-rouge">/etc/rsyslog.conf</code>:</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">module(</span><span class="py">load</span><span class="p">=</span><span class="s">"imuxsock") # provides support for local system logging</span>
+<span class="c">#module(load="immark")  # provides --MARK-- message capability
+</span>
+<span class="c"># provides UDP syslog reception
+</span><span class="err">module(</span><span class="py">load</span><span class="p">=</span><span class="s">"imudp")</span>
+<span class="err">input(</span><span class="py">type</span><span class="p">=</span><span class="s">"imudp"</span> <span class="s">port="514") </span>
+
+<span class="c"># provides TCP syslog reception
+</span><span class="err">module(</span><span class="py">load</span><span class="p">=</span><span class="s">"imtcp")</span>
+<span class="err">input(</span><span class="py">type</span><span class="p">=</span><span class="s">"imtcp"</span> <span class="s">port="514")</span>
+</code></pre></div></div>
+
+<p>A configuração para comunicação via TLS requer alguns itens adicionais, onde é necessário emitir os certificados para servidores e clientes (caso não esteja utilizando uma infra de PKI) assim como alterar o arquivo de configuração do rsyslog para aceitar estas comunicações.</p>
+
+<p>Maiores detalhes e exemplos de configurações podem ser encontrados na documentação oficial <a href="https://www.rsyslog.com/doc/v8-stable/tutorials/tls_cert_summary.html">neste link</a>, de onde retirei o trecho abaixo para que tenham uma ideia de como esta configuração se parece:</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">module(</span><span class="py">load</span><span class="p">=</span><span class="s">"imuxsock") # local messages</span>
+<span class="err">module(</span><span class="py">load</span><span class="p">=</span><span class="s">"imtcp"</span> <span class="c"># TCP listener
+</span>    <span class="s">StreamDriver.Name="gtls"</span>
+    <span class="py">StreamDriver.Mode</span><span class="p">=</span><span class="s">"1"</span> <span class="c"># run driver in TLS-only mode
+</span>    <span class="s">StreamDriver.Authmode="anon"</span>
+    <span class="err">)</span>
+
+<span class="c"># make gtls driver the default and set certificate files
+</span><span class="err">global(</span>
+    <span class="py">DefaultNetstreamDriver</span><span class="p">=</span><span class="s">"gtls"</span>
+    <span class="py">DefaultNetstreamDriverCAFile</span><span class="p">=</span><span class="s">"/path/to/contrib/gnutls/ca.pem"</span>
+    <span class="py">DefaultNetstreamDriverCertFile</span><span class="p">=</span><span class="s">"/path/to/contrib/gnutls/cert.pem"</span>
+    <span class="py">DefaultNetstreamDriverKeyFile</span><span class="p">=</span><span class="s">"/path/to/contrib/gnutls/key.pem"</span>
+    <span class="err">)</span>
+
+    <span class="c"># start up listener at port 6514
+</span>    <span class="err">input(</span>
+    <span class="py">type</span><span class="p">=</span><span class="s">"imtcp"</span>
+    <span class="py">port</span><span class="p">=</span><span class="s">"6514"</span>
+    <span class="err">)</span>
+</code></pre></div></div>
+
+<h3 id="evitando-registro-de-eventos-remotos-em-arquivos-locais">Evitando registro de eventos remotos em arquivos locais</h3>
+
+<p>Um ponto que é sempre questionado pelos clientes é que após configurar máquinas como forwarder para CEF e/ou Syslog os arquivos de log locais (frequentemente <code class="language-plaintext highlighter-rouge">/var/log/messages</code> ou <code class="language-plaintext highlighter-rouge">/var/log/syslog</code>) são sobrecarregados com mensagens oriundas de servidores remotos, e na maioria das vezes consumindo todo o espaço em disco disponível do volume onde <code class="language-plaintext highlighter-rouge">/var/log</code> reside.</p>
+
+<p>Isso ocorre porque as definições padrão do rsyslog, listadas abaixo, enviam alguns facilities e severidades para arquivos locais sem validar a fonte destes eventos (comentários e linhas em branco removidas por simplicidade).</p>
+
+<p class="notice--info"><img class="emoji" title=":bulb:" alt=":bulb:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f4a1.png" height="20" width="20"> <strong>Nota</strong>: O caminho onde encontrar estas configurações padrão variam de acordo com a distribuição Linux. Para Ubuntu existe um arquivo chamado <code class="language-plaintext highlighter-rouge">/etc/rsyslog.d/50-default.conf</code> enquanto para distribuições baseadas em RHEL (RHEL, CentOS, Fedora) está na configuração principal do <code class="language-plaintext highlighter-rouge">/etc/rsyslog.conf</code>.</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#Extracted from Ubuntu /etc/rsyslog.d/50-default.conf
+</span>
+<span class="err">auth,authpriv.*</span>                 <span class="err">/var/log/auth.log</span>
+<span class="err">*.*</span><span class="c">;auth,authpriv.none          -/var/log/syslog
+</span><span class="err">kern.*</span>                          <span class="err">-/var/log/kern.log</span>
+<span class="err">mail.*</span>                          <span class="err">-/var/log/mail.log</span>
+<span class="err">mail.err</span>                        <span class="err">/var/log/mail.err</span>
+<span class="err">*.emerg</span>                         <span class="err">:omusrmsg:*</span>
+</code></pre></div></div>
+
+<p>Como podem ver, qualquer mensagem que coincida com alguma severidade contida nesta lista é enviada para um dos arquivos locais. Uma forma rápida de prevenir este comportamento é editar o arquivo de configuração para apenas aceitar mensagens geradas pelo host local (<code class="language-plaintext highlighter-rouge">127.0.0.1</code>):</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">if</span> <span class="err">($</span><span class="py">fromhost-ip</span> <span class="p">=</span><span class="s">= '127.0.0.1') then {</span>
+    <span class="err">auth,authpriv.*</span>                 <span class="err">/var/log/auth.log</span>
+    <span class="err">*.*</span><span class="c">;auth,authpriv.none          -/var/log/syslog
+</span>    <span class="err">kern.*</span>                          <span class="err">-/var/log/kern.log</span>
+    <span class="err">mail.*</span>                          <span class="err">-/var/log/mail.log</span>
+    <span class="err">mail.err</span>                        <span class="err">/var/log/mail.err</span>
+    <span class="err">*.emerg</span>                         <span class="err">:omusrmsg:*</span>
+<span class="err">}</span>
+</code></pre></div></div>
+
+<h3 id="redução-de-mensagens-repetidas">Redução de mensagens repetidas</h3>
+
+<p>Conforme lembrado pelo meu colega <a href="https://www.linkedin.com/in/flavio-honda/">Flavio Honda</a>, o Rsyslog possui uma opção que pode auxiliar com a redução de mensagens repetidas.</p>
+
+<p>Se você sofre com este tipo de problema ou quer prevenir antes mesmo que venha acontecer em seu ambiente, você pode habilitar a configuração abaixo no seu arquivo <code class="language-plaintext highlighter-rouge">/etc/rsyslog.conf</code> <img class="emoji" title=":smile:" alt=":smile:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f604.png" height="20" width="20">.</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">$RepeatedMsgReduction</span> <span class="err">on</span>
+</code></pre></div></div>
+
+<p>A referência oficial sobre esta feature na documentação do RSyslog pode ser encontrada <a href="https://www.rsyslog.com/doc/master/configuration/action/rsconf1_repeatedmsgreduction.html">neste link</a>.</p>
+
+<h3 id="fluxo-de-processamento-de-mensagens">Fluxo de processamento de mensagens</h3>
+
+<p>No rsyslog, o primeiro arquivo a ser processado é o <code class="language-plaintext highlighter-rouge">rsyslog.conf</code>, que normalmente contém uma instrução para importar todos os arquivos <code class="language-plaintext highlighter-rouge">*.conf</code> localizados no diretório <code class="language-plaintext highlighter-rouge">/etc/rsyslog.d</code> e os arquivos são processados em ordem <strong>alfabética</strong>. Quando uma mensagem chega ou é gerada no sistema, é encaminhada e avaliada por cada uma das configurações nesta mesma ordem, a menos que alteremos explicitamente este comportamento.</p>
+
+<p>Na configuração abaixo, vamos considerar que estamos encaminhando mensagens no formato CEF de um appliance que são enviadas com o facility <code class="language-plaintext highlighter-rouge">local4.info</code>:</p>
+
+<p><img src="https://i.imgur.com/IFykwc2.png" alt="processing - initial configuration" style="zoom:80%;" class="align-center"></p>
+
+<ul>
+  <li>Se nenhuma alteração for realizada no <code class="language-plaintext highlighter-rouge">rsyslog.conf</code> ou <code class="language-plaintext highlighter-rouge">50-default.conf</code> para prevenir o registro de mensagens de um host remoto, estas mensagens serão registradas no arquivo <code class="language-plaintext highlighter-rouge">/var/log/syslog</code>.</li>
+  <li>Também, se houver algum match no arquivo <code class="language-plaintext highlighter-rouge">95-omsagent.conf</code> esta mensagem será enviada para a workspace de Log Analytics como Syslog puro.</li>
+  <li>E por fim, ele coincidirá com as regular expressions contidas no arquivo <code class="language-plaintext highlighter-rouge">security-config-omsagent.conf</code> e tratado como mensagem CEF para a tabela <code class="language-plaintext highlighter-rouge">CommonSecurityLog</code>.</li>
+</ul>
+
+<p>Isso não apenas resultará no disco cheio, mas também em cobrança duplicada para este mesmo evento, que será armazenado duas vezes no Log Analytics.</p>
+
+<p>Para evitar este comportamento, como Ofer Shezaf compartilhou em um dos <a href="https://aka.ms/securitywebinars">Webinars da Comunidade de Segurança</a> (<em>Log Forwarder deep dive | Filtering CEF and Syslog events</em>), vamos renomear o arquivo <code class="language-plaintext highlighter-rouge">security-config-omsagent.conf</code> para <code class="language-plaintext highlighter-rouge">60-cef.conf</code> de forma que ele seja processado <strong>antes</strong> do <code class="language-plaintext highlighter-rouge">95-omsagent.conf</code>.</p>
+
+<p>Adicionalmente, precisamos garantir que uma vez que as mensagens sejam encaminhadas para o TCP/25226 e tratadas como CEF sejam descartadas, o que é alcançado pelo uso da instrução <code class="language-plaintext highlighter-rouge">stop</code>. O <strong>Stop</strong> remove as mensagens do processamento do rsyslog.</p>
+
+<p class="notice--info"><img class="emoji" title=":bulb:" alt=":bulb:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f4a1.png" height="20" width="20"> <strong>Nota</strong>: Você poderá encontrar outras instruções que utilizem o stop como um til (<code class="language-plaintext highlighter-rouge">~</code>). Esta notação veio da syntax legado do syslogd</p>
+
+<p>Esta configuração ficaria da seguinte forma:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cat</span> /etc/rsyslog.d/60-cef.conf
+<span class="k">if</span> <span class="o">(</span><span class="nv">$rawmsg</span> contains <span class="s2">"CEF:"</span><span class="o">)</span> or <span class="o">(</span><span class="nv">$rawmsg</span> contains <span class="s2">"ASA-"</span><span class="o">)</span> <span class="k">then</span> <span class="o">{</span>
+        <span class="k">*</span>.<span class="k">*</span>     @@127.0.0.1:25226
+        stop
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><img src="https://i.imgur.com/cPteGGK.png" alt="processing - reordering" style="zoom:80%;" class="align-center"></p>
+
+<h3 id="ajustando-o-95-omsagentconf">Ajustando o <code class="language-plaintext highlighter-rouge">95-omsagent.conf</code>
+</h3>
+
+<p>Após a instalação inicial, o agente do MMA criará um arquivo de configuração no diretório do serviço syslog (<code class="language-plaintext highlighter-rouge">/etc/rsyslog.d/95-omsagent.conf</code>) em sincronismo com as configurações definidas no portal do Azure, navegando em sua workspace de Log Analytics &gt; Agents Configuration &gt; Syslog:</p>
+
+<p><img src="https://i.imgur.com/UesHmCS.png" alt="Log Analytics Agent Configurations - Syslog"></p>
+
+<p>Para a configuração acima o seguinte conteúdo será criado no arquivo, conforme abaixo:</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># OMS Syslog collection for workspace &lt;workspace id&gt;
+</span><span class="py">auth.</span><span class="p">=</span><span class="s">alert;auth.=crit;auth.=debug;auth.=emerg;auth.=err;auth.=info;auth.=notice;auth.=warning  @127.0.0.1:25224</span>
+<span class="py">authpriv.</span><span class="p">=</span><span class="s">alert;authpriv.=crit;authpriv.=debug;authpriv.=emerg;authpriv.=err;authpriv.=info;authpriv.=notice;authpriv.=warning  @127.0.0.1:25224</span>
+<span class="py">local3.</span><span class="p">=</span><span class="s">alert;local3.=crit;local3.=debug;local3.=emerg;local3.=err;local3.=info;local3.=notice;local3.=warning  @127.0.0.1:25224</span>
+<span class="py">local4.</span><span class="p">=</span><span class="s">alert;local4.=crit;local4.=debug;local4.=emerg;local4.=err;local4.=info;local4.=notice;local4.=warning  @127.0.0.1:25224</span>
+</code></pre></div></div>
+
+<p>Mesmo que esta configuração seja extremamente simples de se fazer pelo portal, ela se aplica globalmente a todos os dispositivos Linux que possuem o omsagent conectado a esta workspace, ingerindo mais informação de que precisa dentro de sua workspace de Log Analytics se mais tipos de dados são selecionados que o necessário.</p>
+
+<p>Se precisa definir uma configuração diferente para algumas máquinas como os seus forwarders, é recomendado que se edite diretamente o arquivo <code class="language-plaintext highlighter-rouge">95-omsagent.conf</code> adicionando ou removendo facilities e severidades dele, assim como construindo suas condições para que estes dados sejam enviados ao Azure mas precisamos impedir que este arquivo seja sincronizado com as definições no portal.</p>
+
+<p>O comando abaixo “quebra” o vínculo existente entre este arquivo e a configuração da workspace:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>su omsagent <span class="nt">-c</span> <span class="s1">'python /opt/microsoft/omsconfig/Scripts/OMS_MetaConfigHelper.py --disable'</span>
+</code></pre></div></div>
+
+<p>A única coisa que não pode ser alterada no arquivo <code class="language-plaintext highlighter-rouge">95-omsagent.conf</code> é a instrução de encaminhamento para <code class="language-plaintext highlighter-rouge">@127.0.0.1:25224</code>.</p>
+
+<p class="notice--info"><img class="emoji" title=":bulb:" alt=":bulb:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f4a1.png" height="20" width="20"> <strong>Nota</strong>: Na sintaxe do syslogd uma arroba (<code class="language-plaintext highlighter-rouge">@</code>) significa UDP enquanto duas arrobas (<code class="language-plaintext highlighter-rouge">@@</code>) significam TCP.</p>
+
+<p class="notice--warning"><img class="emoji" title=":warning:" alt=":warning:" src="https://github.githubassets.com/images/icons/emoji/unicode/26a0.png" height="20" width="20"> <strong>Atenção</strong>: No webinar citado anteriormente sobre um Dep Dive a respeito de CEF forwarder, Ofer também recomendou alterar as configurações do omsagent para aceitar as comunicações também via TCP para Syslog. Se seguir esta recomendação você deverá também ajustar qualquer instrução de encaminhamento para dois arrobas no arquivo <code class="language-plaintext highlighter-rouge">95-omsagent.conf</code>, caso contrário suas mensagens poderão não ser enviadas ao Log Analytics.</p>
+
+<h3 id="filtrando-eventos">Filtrando eventos</h3>
+
+<p>Se você ainda estiver notando a ingestão de eventos desnecessários em sua workspace, você pode implementar um filtro na fonte assim como no encaminhador, o que normalmente é mais simples já que muitos appliances não suportam grande granularidade em suas configurações.</p>
+
+<p>Uma forma fácil de configurar esta filtragem é criando um arquivo a ser processando antes do <code class="language-plaintext highlighter-rouge">60-cef.conf</code> e <code class="language-plaintext highlighter-rouge">95-omsagent.conf</code>, neste exemplo chamado de <code class="language-plaintext highlighter-rouge">59-filter-out.conf</code>, mas poderia utilizar qualquer nome que desejar, desde seja processado na ordem correta.</p>
+
+<p><img src="https://i.imgur.com/tNsVYea.png" alt="filtering out messages" style="zoom:80%;" class="align-center"></p>
+
+<p>Neste arquivo vamos utilizar novamente a instrução <code class="language-plaintext highlighter-rouge">stop</code>, removendo as mensagens que não gostaríamos que fossem encaminhadas seja como Syslog ou CEF. Neste exemplo qualquer mensagem que contenha a palavra “test” e tenha algum dos facilities/severidades mencionados serão removidas.</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">if</span> <span class="err">($rawmsg</span> <span class="err">contains</span> <span class="err">"test")</span> <span class="err">and</span> <span class="err">prifilt("auth,authpriv.*")</span> <span class="err">then</span> <span class="err">{</span>
+        <span class="err">stop</span>
+<span class="err">}</span>
+</code></pre></div></div>
+
+<p>A documentação do rsyslog é muito rica em recursos mostrando <a href="https://www.rsyslog.com/doc/master/configuration/filters.html">como você pode filtrar</a> estas mensagens, assim como <a href="https://www.rsyslog.com/doc/master/configuration/properties.html">quais propriedades</a> se encontram disponíveis para que possa configurar estas instruções de forma mais avançada, incluindo dicas de <a href="https://www.rsyslog.com/doc/v8-stable/configuration/converting_to_new_format.html">conversão das instruções</a> que utilizam sintaxe syslogd para o advanced, também conhecido como <strong>RainerScript</strong>.</p>
+
+<p>Espero que este conteúdo tenha sido útil para aqueles que estão realizando o seu deployment ou manutenção de CEF/Syslog forwarders no seu ambiente!</p>
+
+<p>Você tem alguma configuração específica ou desafio não discutido aqui? Sinta-se à vontade para compartilhar nos comentários para que possamos complementar o post com mais detalhes, podendo assim auxiliar outros que estejam enfrentando o mesmo! <img class="emoji" title=":smile:" alt=":smile:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f604.png" height="20" width="20"></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/tags/#cef" class="page__taxonomy-item" rel="tag">CEF</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#collector" class="page__taxonomy-item" rel="tag">Collector</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#forwarder" class="page__taxonomy-item" rel="tag">Forwarder</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#linux" class="page__taxonomy-item" rel="tag">Linux</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#rsyslog" class="page__taxonomy-item" rel="tag">Rsyslog</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#sentinel" class="page__taxonomy-item" rel="tag">Sentinel</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#syslog" class="page__taxonomy-item" rel="tag">Syslog</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categorias: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/categorias/#azure-sentinel" class="page__taxonomy-item" rel="tag">Azure Sentinel</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Atualizado em:</strong> <time datetime="2021-04-30">April 30, 2021</time></p>
+
+
+      </footer>
+
+      <section id="sharelinks" class="page__share">
+  
+    <h4 class="page__share-title">Compartilhe</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=zerahzurc&amp;text=Azure+Sentinel%3A+Configura%C3%A7%C3%A3o+do+Log+Forwarder%20https%3A%2F%2Fdavicruz.com%2Fazure-sentinel%2F2021%2F03%2Frsyslog-sentinel-log-forwarder%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdavicruz.com%2Fazure-sentinel%2F2021%2F03%2Frsyslog-sentinel-log-forwarder%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Fdavicruz.com%2Fazure-sentinel%2F2021%2F03%2Frsyslog-sentinel-log-forwarder%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+
+  <a href="whatsapp://send?text=https%3A%2F%2Fdavicruz.com%2Fazure-sentinel%2F2021%2F03%2Frsyslog-sentinel-log-forwarder%2F" data-action="share/whatsapp/share" class="btn btn--whatsapp" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Whatsapp"><i class="fab fa-fw fa-whatsapp" aria-hidden="true"></i><span> Whatsapp</span></a>
+
+  <a href="https://telegram.me/share/url?url=https%3A%2F%2Fdavicruz.com%2Fazure-sentinel%2F2021%2F03%2Frsyslog-sentinel-log-forwarder%2F&amp;text=Azure+Sentinel%3A+Configura%C3%A7%C3%A3o+do+Log+Forwarder" class="btn btn--telegram" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Telegram"><i class="fab fa-fw fa-telegram-plane" aria-hidden="true"></i><span> Telegram</span></a>
+
+
+</section>
+
+
+      
+  <nav class="pagination">
+    
+    
+      <a href="/writeup/2021/03/htb-luanne/" class="pagination--pager" title="Hackthebox write-up: Luanne
+">Anterior</a>
+    
+    
+    
+      
+        <a href="/azure-arc/2021/04/install-update-azure-arc-windows-configmgr/" class="pagination--pager" title="Azure Arc enabled Servers: Instalação e Atualização via Configuration Manager
+">Próxima</a>
+        
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Deixe um comentário</h4>
+      <section id="utterances-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">Talvez você também goste</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/BmkB4rb.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/06/htb-tenet/" rel="permalink">Hackthebox write-up: Tenet
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-12T13:00:00-03:00">June 12, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          7 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/azure-sentinel/2021/03/rsyslog-sentinel-log-forwarder/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Tenet, outra máquina Linux classificada como mediana do Hack The Box, criada por egotisticalSW.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/wHnMfBz.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/06/htb-scriptkiddie/" rel="permalink">Hackthebox write-up: ScriptKiddie
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-05T13:00:00-03:00">June 5, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          4 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/azure-sentinel/2021/03/rsyslog-sentinel-log-forwarder/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será ScriptKiddie, outra máquina Linux classificada como fácil do Hack The Box, criada por 0xdf.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/FTjLM76.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/05/htb-delivery/" rel="permalink">Hackthebox write-up: Delivery
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-22T13:00:00-03:00">May 22, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          8 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/azure-sentinel/2021/03/rsyslog-sentinel-log-forwarder/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Delivery, outra máquina Linux classificada como fácil do Hack The Box, criada por ippsec.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/R2EVM1J.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/05/htb-ready/" rel="permalink">Hackthebox write-up: Ready
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-15T13:00:00-03:00">May 15, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          6 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/azure-sentinel/2021/03/rsyslog-sentinel-log-forwarder/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Ready, outra máquina Linux classificada como mediana do Hack The Box, criada por bertolis.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap">
+<form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Pesquisar...">
+  </form>
+  <div id="results" class="results"></div>
+</div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- Osano - consent -->
+<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+
+    
+    <li><strong>Acompanhe no</strong></li>
+    
+
+    
+    
+    
+    <li><a href="https://www.linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i> Linkedin</a></li>
+    
+    
+    
+    <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+    <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    
+    <!-- Terms and Privacy -->
+    <li><a href="https://davicruz.com/termos-e-privacidade" rel="nofollow noopener noreferrer">
+        <i class="fas fa-user-shield" aria-hidden="true"></i> Termos de uso e Política Privacidade</a></li>
+    <!-- end Terms and Privacy -->
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<!-- Start Read in other languages-->
+<div class="page__footer-follow">
+  <ul>
+    
+    
+      
+    
+    
+    <li><a href="https://davicruz.com/en-US">Also available in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></li>
+    
+
+    
+
+    
+
+      
+      
+  </ul>
+</div>
+<!-- End Read in other languages-->
+
+<div class="page__footer-copyright">© 2021 Davi Cruz. Desenvolvido com <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <!-- start custom analytics snippet -->
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-54883666-1"></script>
+<script>
+  function EnableGTAGonConsent(){
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-54883666-1', { 'anonymize_ip': true});
+  }
+</script>
+
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+  function EnableMSClarityonConsent(){
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "5dnbfjo108");
+  }
+</script>
+
+<!-- end custom analytics snippet -->
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function() {
+    var commentContainer = document.querySelector('#utterances-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://utteranc.es/client.js');
+    script.setAttribute('repo', 'davi-cruz/davi-cruz.github.io');
+    script.setAttribute('issue-term', 'rsyslog-sentinel-log-forwarder');
+    script.setAttribute('theme', 'github-dark');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+
+  
+
+
+
+
+    
+<!-- Cookie Consent Management -->
+<script>
+    var strMessage = "Este website utiliza cookies para garantir a você uma melhor experiência";
+    var strDismiss = "Entendi!";
+    var strAllow = "Permitir Cookies";
+    var strDeny = "Não, obrigado!";
+    var strLink = "Saiba Mais";
+    var strHref = "https://davicruz.com/termos-e-privacidade/";
+
+    window.cookieconsent.initialise({
+        "palette": {
+            "popup": {
+                "background": "#252e39"
+            },
+            "button": {
+                "background": "transparent",
+                "text": "#008288",
+                "border": "#008288"
+            }
+        },
+        "position": "bottom-left",
+        "type": "opt-in",
+        "content": {
+            "message": strMessage,
+            "dismiss": strDismiss,
+            "allow": strAllow,
+            "deny": strDeny,
+            "link": strLink,
+            "href": strHref
+        },
+        onInitialise: function (status) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onStatusChange: function (status, chosenBefore) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onRevokeChoice: function () {
+            var type = this.options.type;
+            if (type == 'opt-in') {
+                // disable cookies
+            }
+            if (type == 'opt-out') {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+        }
+    });
+</script>
+<!-- End of Cookie Consent Management -->
+
+  </body>
+</html>

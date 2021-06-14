@@ -1,0 +1,1147 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.21.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Azure Arc enabled Servers: Service-level proxy configuration on Linux | Davi Cruz</title>
+<meta name="description" content="Sometimes, when engaged to customers, I use to be asked to help them to configure proxy for internet services in some specific services, and this is not different with Azure Arc  In this post I’ll guide you on how to configure this for Linux, without configuring system wide.  Default configuration  By default, when we specify a proxy server during the Azure Arc agent installation in a Linux Server, there’s a utility which handles all these requests, which is azcmagent_proxy, as below:  dcruz@vmlx02:~$ sudo azcmagent_proxy Usage:  azcmagent_proxy add &lt;URL&gt; - to add URL as the proxy         azcmagent_proxy remove - to delete configured proxy dcruz@vmlx02:~$   When we define the proxy using it, two files are changed, as we can see in the example below:  dcruz@vmlx02:~$ sudo azcmagent_proxy add http://vmlx01:3128     No proxy previously configured Removing proxy environment variable from file:  /opt/azcmagent/bin/azcmagent     No proxy previously configured Setting proxy environment variable to file:  /lib/systemd/system.conf.d/proxy.conf Adding proxy environment variable to file:  /opt/azcmagent/bin/azcmagent dcruz@vmlx02:~$   The first file, /lib/systemd/system.conf.d/proxy.conf, defines the proxy to all systemd daemons globally, while the /opt/azcmagent/bin/azcmagent is the wrapper for the Azure Arc command line utility.  Changing proxy settings only for Azure Arc  In order to configure the services to have connectivity needed to perform all management tasks, without enabling it system wide, is necessary to change each of the systemd unity files, as described below;          If you have already configured proxy using azcmagent_proxy during the setup and desires to rollback its configurations, is necessary to run it again to do the task:      sudo azcmagent_proxy remove                Also, for each service unity used by Azure Arc for Linux Servers (himdsd.service ,gcad.service ,extd.service) located at /lib/systemd/system, we need to add a variable in the section [Service] defining https_proxy, as the example below and can also be seen in the official systemd Documentation:      [Service] # [...] Environment=https_proxy=http://vmlx01:3128                After changing all the three mentioned files, run the commands below to reload daemons and restart the services      sudo systemctl daemon-reexec sudo systemctl restart extd.service himdsd.service gcad.service                Also is necessary to add the proxy to the azcmagent wrapper, in order to make the command azcmagent connect work properly in the system. This is achieved y adding a line export https_proxy=&lt;proxyserver&gt; right below the commented message that a specific line should not be removed in the file located at /opt/azcmagent/bin/azcmagent, as the sample below:      [...]    # Do not remove this line ==== place Environment Variables below ====== export https_proxy=http://vmlx01:3128    [...]           After making these changes, you should see the following line on your logs, which is proof that the service is using the correct proxy configuration inside the  /var/opt/azcmagent/log/himds.log  time=&quot;yyyy-MM-dd02T17:34:07Z&quot; level=debug msg=&quot;Using Https Proxy: http://vmlx01:3128&quot;   At this point you’re ready to manage this endpoint using Azure Arc or connect it using the command azcmagent connect in case it is a new install.  Script  To simplify configuration, I’ve created one script inspired on azcmagent_proxy to automate this configuration for Linux distributions using systemd, available at Security/azcmagent_proxydaemon.sh at main · davi-cruz/Security (github.com).  This could be useful to you not only to define proxy settings for Azure Arc enabled Linux Servers but also for any service unities you run in your workloads :smile:  :warning: Alert: As these changes are not global, other services installed by using Azure Extensions (Native or Custom ones) might require additional changes in order to make then work with the default proxy or to also make the same configuration to their services.  HTH!">
+
+
+  <meta name="author" content="Davi Cruz">
+  
+  <meta property="article:author" content="Davi Cruz">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Davi Cruz">
+<meta property="og:title" content="Azure Arc enabled Servers: Service-level proxy configuration on Linux">
+<meta property="og:url" content="https://davicruz.com/azure-arc/2021/03/azure-arc-enabled-servers-service-level-proxy-configuration-on-linux/">
+
+
+  <meta property="og:description" content="Sometimes, when engaged to customers, I use to be asked to help them to configure proxy for internet services in some specific services, and this is not different with Azure Arc  In this post I’ll guide you on how to configure this for Linux, without configuring system wide.  Default configuration  By default, when we specify a proxy server during the Azure Arc agent installation in a Linux Server, there’s a utility which handles all these requests, which is azcmagent_proxy, as below:  dcruz@vmlx02:~$ sudo azcmagent_proxy Usage:  azcmagent_proxy add &lt;URL&gt; - to add URL as the proxy         azcmagent_proxy remove - to delete configured proxy dcruz@vmlx02:~$   When we define the proxy using it, two files are changed, as we can see in the example below:  dcruz@vmlx02:~$ sudo azcmagent_proxy add http://vmlx01:3128     No proxy previously configured Removing proxy environment variable from file:  /opt/azcmagent/bin/azcmagent     No proxy previously configured Setting proxy environment variable to file:  /lib/systemd/system.conf.d/proxy.conf Adding proxy environment variable to file:  /opt/azcmagent/bin/azcmagent dcruz@vmlx02:~$   The first file, /lib/systemd/system.conf.d/proxy.conf, defines the proxy to all systemd daemons globally, while the /opt/azcmagent/bin/azcmagent is the wrapper for the Azure Arc command line utility.  Changing proxy settings only for Azure Arc  In order to configure the services to have connectivity needed to perform all management tasks, without enabling it system wide, is necessary to change each of the systemd unity files, as described below;          If you have already configured proxy using azcmagent_proxy during the setup and desires to rollback its configurations, is necessary to run it again to do the task:      sudo azcmagent_proxy remove                Also, for each service unity used by Azure Arc for Linux Servers (himdsd.service ,gcad.service ,extd.service) located at /lib/systemd/system, we need to add a variable in the section [Service] defining https_proxy, as the example below and can also be seen in the official systemd Documentation:      [Service] # [...] Environment=https_proxy=http://vmlx01:3128                After changing all the three mentioned files, run the commands below to reload daemons and restart the services      sudo systemctl daemon-reexec sudo systemctl restart extd.service himdsd.service gcad.service                Also is necessary to add the proxy to the azcmagent wrapper, in order to make the command azcmagent connect work properly in the system. This is achieved y adding a line export https_proxy=&lt;proxyserver&gt; right below the commented message that a specific line should not be removed in the file located at /opt/azcmagent/bin/azcmagent, as the sample below:      [...]    # Do not remove this line ==== place Environment Variables below ====== export https_proxy=http://vmlx01:3128    [...]           After making these changes, you should see the following line on your logs, which is proof that the service is using the correct proxy configuration inside the  /var/opt/azcmagent/log/himds.log  time=&quot;yyyy-MM-dd02T17:34:07Z&quot; level=debug msg=&quot;Using Https Proxy: http://vmlx01:3128&quot;   At this point you’re ready to manage this endpoint using Azure Arc or connect it using the command azcmagent connect in case it is a new install.  Script  To simplify configuration, I’ve created one script inspired on azcmagent_proxy to automate this configuration for Linux distributions using systemd, available at Security/azcmagent_proxydaemon.sh at main · davi-cruz/Security (github.com).  This could be useful to you not only to define proxy settings for Azure Arc enabled Linux Servers but also for any service unities you run in your workloads :smile:  :warning: Alert: As these changes are not global, other services installed by using Azure Extensions (Native or Custom ones) might require additional changes in order to make then work with the default proxy or to also make the same configuration to their services.  HTH!">
+
+
+
+  <meta property="og:image" content="https://davicruz.com/assets/images/og.png">
+
+
+
+  <meta name="twitter:site" content="@zerahzurc">
+  <meta name="twitter:title" content="Azure Arc enabled Servers: Service-level proxy configuration on Linux">
+  <meta name="twitter:description" content="Sometimes, when engaged to customers, I use to be asked to help them to configure proxy for internet services in some specific services, and this is not different with Azure Arc  In this post I’ll guide you on how to configure this for Linux, without configuring system wide.  Default configuration  By default, when we specify a proxy server during the Azure Arc agent installation in a Linux Server, there’s a utility which handles all these requests, which is azcmagent_proxy, as below:  dcruz@vmlx02:~$ sudo azcmagent_proxy Usage:  azcmagent_proxy add &lt;URL&gt; - to add URL as the proxy         azcmagent_proxy remove - to delete configured proxy dcruz@vmlx02:~$   When we define the proxy using it, two files are changed, as we can see in the example below:  dcruz@vmlx02:~$ sudo azcmagent_proxy add http://vmlx01:3128     No proxy previously configured Removing proxy environment variable from file:  /opt/azcmagent/bin/azcmagent     No proxy previously configured Setting proxy environment variable to file:  /lib/systemd/system.conf.d/proxy.conf Adding proxy environment variable to file:  /opt/azcmagent/bin/azcmagent dcruz@vmlx02:~$   The first file, /lib/systemd/system.conf.d/proxy.conf, defines the proxy to all systemd daemons globally, while the /opt/azcmagent/bin/azcmagent is the wrapper for the Azure Arc command line utility.  Changing proxy settings only for Azure Arc  In order to configure the services to have connectivity needed to perform all management tasks, without enabling it system wide, is necessary to change each of the systemd unity files, as described below;          If you have already configured proxy using azcmagent_proxy during the setup and desires to rollback its configurations, is necessary to run it again to do the task:      sudo azcmagent_proxy remove                Also, for each service unity used by Azure Arc for Linux Servers (himdsd.service ,gcad.service ,extd.service) located at /lib/systemd/system, we need to add a variable in the section [Service] defining https_proxy, as the example below and can also be seen in the official systemd Documentation:      [Service] # [...] Environment=https_proxy=http://vmlx01:3128                After changing all the three mentioned files, run the commands below to reload daemons and restart the services      sudo systemctl daemon-reexec sudo systemctl restart extd.service himdsd.service gcad.service                Also is necessary to add the proxy to the azcmagent wrapper, in order to make the command azcmagent connect work properly in the system. This is achieved y adding a line export https_proxy=&lt;proxyserver&gt; right below the commented message that a specific line should not be removed in the file located at /opt/azcmagent/bin/azcmagent, as the sample below:      [...]    # Do not remove this line ==== place Environment Variables below ====== export https_proxy=http://vmlx01:3128    [...]           After making these changes, you should see the following line on your logs, which is proof that the service is using the correct proxy configuration inside the  /var/opt/azcmagent/log/himds.log  time=&quot;yyyy-MM-dd02T17:34:07Z&quot; level=debug msg=&quot;Using Https Proxy: http://vmlx01:3128&quot;   At this point you’re ready to manage this endpoint using Azure Arc or connect it using the command azcmagent connect in case it is a new install.  Script  To simplify configuration, I’ve created one script inspired on azcmagent_proxy to automate this configuration for Linux distributions using systemd, available at Security/azcmagent_proxydaemon.sh at main · davi-cruz/Security (github.com).  This could be useful to you not only to define proxy settings for Azure Arc enabled Linux Servers but also for any service unities you run in your workloads :smile:  :warning: Alert: As these changes are not global, other services installed by using Azure Extensions (Native or Custom ones) might require additional changes in order to make then work with the default proxy or to also make the same configuration to their services.  HTH!">
+  <meta name="twitter:domain" content="davicruz.com">
+  <meta name="twitter:url" content="https://davicruz.com/azure-arc/2021/03/azure-arc-enabled-servers-service-level-proxy-configuration-on-linux/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://davicruz.com/assets/images/og.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2021-03-02T15:00:00-03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://davicruz.com/azure-arc/2021/03/azure-arc-enabled-servers-service-level-proxy-configuration-on-linux/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Davi Cruz",
+      "url": "https://davicruz.com/",
+      "sameAs": ["https://twitter.com/zerahzurc","https://www.linkedin.com/in/davicruz","https://github.com/davi-cruz"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="hrWV-PqvbpxEy2HdpVYFQNws2Sz_tROleVyF18s2kWA" />
+
+
+  <meta name="msvalidate.01" content="60B1FA6CDAF15D226AB529AF30386BD8">
+
+
+
+  <meta name="yandex-verification" content="08de8d8c0326420f">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Davi Cruz Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+<!-- Favicon -->
+<link rel="shortcut icon" href="/assets/images/favicon.ico" />
+
+<!-- Multilang tags -->
+
+    
+<link rel="alternate" hreflang="pt-BR" href="/azure-arc/2021/03/azure-arc-enabled-servers-service-level-proxy-configuration-on-linux/">
+    
+
+    
+<link rel="alternate" hreflang="en-US" href="/en-US/azure-arc/2021/03/azure-arc-enabled-servers-service-level-proxy-configuration-on-linux/">
+    
+
+
+<!-- Cookie Consent - Osano -->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          
+          <a class="site-logo" href="https://davicruz.com/en-US"><img src="/assets/images/logo.png" alt=""></a>
+          
+          <a class="site-title" href="https://davicruz.com/en-US">
+            Davi Cruz
+            
+          </a>
+        
+        <ul class="visible-links">
+<li class="masthead__menu-item">
+            <a href="/en-US/categories/">Categories</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/en-US/tag/">Tags</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/en-US/about/">About</a>
+          </li>
+</ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/assets/images/bio-photo.jpg" alt="Davi Cruz" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Davi Cruz</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Just another Cybersecurity professional</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">São Paulo, BR</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fab fa-linkedin" aria-hidden="true"></i><span class="label">Linkedin</span></a></li>
+          
+        
+          
+            <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+<li>
+  <strong></strong>
+  
+  <a class="link-br" href=""></a>
+  
+</li>
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Azure Arc enabled Servers: Service-level proxy configuration on Linux">
+    <meta itemprop="description" content='Sometimes, when engaged to customers, I use to be asked to help them to configure proxy for internet services in some specific services, and this is not different with Azure ArcIn this post I’ll guide you on how to configure this for Linux, without configuring system wide.Default configurationBy default, when we specify a proxy server during the Azure Arc agent installation in a Linux Server, there’s a utility which handles all these requests, which is azcmagent_proxy, as below:dcruz@vmlx02:~$ sudo azcmagent_proxyUsage:  azcmagent_proxy add &lt;URL&gt; - to add URL as the proxy        azcmagent_proxy remove - to delete configured proxydcruz@vmlx02:~$When we define the proxy using it, two files are changed, as we can see in the example below:dcruz@vmlx02:~$ sudo azcmagent_proxy add http://vmlx01:3128    No proxy previously configuredRemoving proxy environment variable from file:  /opt/azcmagent/bin/azcmagent    No proxy previously configuredSetting proxy environment variable to file:  /lib/systemd/system.conf.d/proxy.confAdding proxy environment variable to file:  /opt/azcmagent/bin/azcmagentdcruz@vmlx02:~$The first file, /lib/systemd/system.conf.d/proxy.conf, defines the proxy to all systemd daemons globally, while the /opt/azcmagent/bin/azcmagent is the wrapper for the Azure Arc command line utility.Changing proxy settings only for Azure ArcIn order to configure the services to have connectivity needed to perform all management tasks, without enabling it system wide, is necessary to change each of the systemd unity files, as described below;      If you have already configured proxy using azcmagent_proxy during the setup and desires to rollback its configurations, is necessary to run it again to do the task:    sudo azcmagent_proxy remove            Also, for each service unity used by Azure Arc for Linux Servers (himdsd.service ,gcad.service ,extd.service) located at /lib/systemd/system, we need to add a variable in the section [Service] defining https_proxy, as the example below and can also be seen in the official systemd Documentation:    [Service]# [...]Environment=https_proxy=http://vmlx01:3128            After changing all the three mentioned files, run the commands below to reload daemons and restart the services    sudo systemctl daemon-reexecsudo systemctl restart extd.service himdsd.service gcad.service            Also is necessary to add the proxy to the azcmagent wrapper, in order to make the command azcmagent connect work properly in the system. This is achieved y adding a line export https_proxy=&lt;proxyserver&gt; right below the commented message that a specific line should not be removed in the file located at /opt/azcmagent/bin/azcmagent, as the sample below:    [...]  # Do not remove this line ==== place Environment Variables below ======export https_proxy=http://vmlx01:3128  [...]      After making these changes, you should see the following line on your logs, which is proof that the service is using the correct proxy configuration inside the  /var/opt/azcmagent/log/himds.logtime="yyyy-MM-dd02T17:34:07Z" level=debug msg="Using Https Proxy: http://vmlx01:3128"At this point you’re ready to manage this endpoint using Azure Arc or connect it using the command azcmagent connect in case it is a new install.ScriptTo simplify configuration, I’ve created one script inspired on azcmagent_proxy to automate this configuration for Linux distributions using systemd, available at Security/azcmagent_proxydaemon.sh at main · davi-cruz/Security (github.com).This could be useful to you not only to define proxy settings for Azure Arc enabled Linux Servers but also for any service unities you run in your workloads :smile::warning: Alert:As these changes are not global, other services installed by using Azure Extensions (Native or Custom ones) might require additional changes in order to make then work with the default proxy or to also make the same configuration to their services.HTH!'>
+    <meta itemprop="datePublished" content="2021-03-02T15:00:00-03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Azure Arc enabled Servers: Service-level proxy configuration on Linux
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-03-02T15:00:00-03:00">March 2, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          2 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/azure-arc/2021/03/azure-arc-enabled-servers-service-level-proxy-configuration-on-linux/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Sometimes, when engaged to customers, I use to be asked to help them to configure proxy for internet services in some specific services, and this is not different with Azure Arc</p>
+
+<p>In this post I’ll guide you on how to configure this for Linux, without configuring system wide.</p>
+
+<h2 id="default-configuration">Default configuration</h2>
+
+<p>By default, when we specify a proxy server during the Azure Arc agent installation in a Linux Server, there’s a utility which handles all these requests, which is <code class="language-plaintext highlighter-rouge">azcmagent_proxy</code>, as below:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dcruz@vmlx02:~<span class="nv">$ </span><span class="nb">sudo </span>azcmagent_proxy
+Usage:  azcmagent_proxy add &lt;URL&gt; - to add URL as the proxy
+        azcmagent_proxy remove - to delete configured proxy
+dcruz@vmlx02:~<span class="err">$</span>
+</code></pre></div></div>
+
+<p>When we define the proxy using it, two files are changed, as we can see in the example below:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dcruz@vmlx02:~<span class="nv">$ </span><span class="nb">sudo </span>azcmagent_proxy add http://vmlx01:3128
+    No proxy previously configured
+Removing proxy environment variable from file:  /opt/azcmagent/bin/azcmagent
+    No proxy previously configured
+Setting proxy environment variable to file:  /lib/systemd/system.conf.d/proxy.conf
+Adding proxy environment variable to file:  /opt/azcmagent/bin/azcmagent
+dcruz@vmlx02:~<span class="err">$</span>
+</code></pre></div></div>
+
+<p>The first file, <code class="language-plaintext highlighter-rouge">/lib/systemd/system.conf.d/proxy.conf</code>, defines the proxy to all systemd daemons globally, while the <code class="language-plaintext highlighter-rouge">/opt/azcmagent/bin/azcmagent</code> is the wrapper for the Azure Arc command line utility.</p>
+
+<h2 id="changing-proxy-settings-only-for-azure-arc">Changing proxy settings only for Azure Arc</h2>
+
+<p>In order to configure the services to have connectivity needed to perform all management tasks, without enabling it system wide, is necessary to change each of the <strong>systemd</strong> unity files, as described below;</p>
+
+<ul>
+  <li>
+    <p>If you have already configured proxy using <code class="language-plaintext highlighter-rouge">azcmagent_proxy</code> during the setup and desires to rollback its configurations, is necessary to run it again to do the task:</p>
+
+    <div class="language-bash highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>azcmagent_proxy remove
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Also, for each service unity used by Azure Arc for Linux Servers (<code class="language-plaintext highlighter-rouge">himdsd.service</code> ,<code class="language-plaintext highlighter-rouge">gcad.service</code> ,<code class="language-plaintext highlighter-rouge">extd.service</code>) located at <code class="language-plaintext highlighter-rouge">/lib/systemd/system</code>, we need to add a variable in the section <code class="language-plaintext highlighter-rouge">[Service]</code> defining <strong>https_proxy</strong>, as the example below and can also be seen in the official <a href="https://www.freedesktop.org/software/systemd/man/systemd.service.html"><strong>systemd</strong> Documentation</a>:</p>
+
+    <div class="language-ini highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="nn">[Service]</span>
+<span class="c"># [...]
+</span><span class="py">Environment</span><span class="p">=</span><span class="s">https_proxy=http://vmlx01:3128</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>After changing all the three mentioned files, run the commands below to reload daemons and restart the services</p>
+
+    <div class="language-bash highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>systemctl daemon-reexec
+<span class="nb">sudo </span>systemctl restart extd.service himdsd.service gcad.service
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Also is necessary to add the proxy to the <code class="language-plaintext highlighter-rouge">azcmagent</code> wrapper, in order to make the command <code class="language-plaintext highlighter-rouge">azcmagent connect</code> work properly in the system. This is achieved y adding a line <code class="language-plaintext highlighter-rouge">export https_proxy=&lt;proxyserver&gt;</code> right below the commented message that a specific line should not be removed in the file located at <code class="language-plaintext highlighter-rouge">/opt/azcmagent/bin/azcmagent</code>, as the sample below:</p>
+
+    <div class="language-bash highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="o">[</span>...]
+  
+<span class="c"># Do not remove this line ==== place Environment Variables below ======</span>
+<span class="nb">export </span><span class="nv">https_proxy</span><span class="o">=</span>http://vmlx01:3128
+  
+<span class="o">[</span>...]
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>After making these changes, you should see the following line on your logs, which is proof that the service is using the correct proxy configuration inside the  <code class="language-plaintext highlighter-rouge">/var/opt/azcmagent/log/himds.log</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>time="yyyy-MM-dd02T17:34:07Z" level=debug msg="Using Https Proxy: http://vmlx01:3128"
+</code></pre></div></div>
+
+<p>At this point you’re ready to manage this endpoint using Azure Arc or connect it using the command <code class="language-plaintext highlighter-rouge">azcmagent connect</code> in case it is a new install.</p>
+
+<h3 id="script">Script</h3>
+
+<p>To simplify configuration, I’ve created one script inspired on <code class="language-plaintext highlighter-rouge">azcmagent_proxy</code> to automate this configuration for Linux distributions using <strong>systemd</strong>, available at <a href="https://github.com/davi-cruz/Security/blob/main/AzureArc/azcmagent_proxydaemon.sh">Security/azcmagent_proxydaemon.sh at main · davi-cruz/Security (github.com)</a>.</p>
+
+<p>This could be useful to you not only to define proxy settings for Azure Arc enabled Linux Servers but also for any service unities you run in your workloads <img class="emoji" title=":smile:" alt=":smile:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f604.png" height="20" width="20"></p>
+
+<p class="notice--warning"><img class="emoji" title=":warning:" alt=":warning:" src="https://github.githubassets.com/images/icons/emoji/unicode/26a0.png" height="20" width="20"> <strong>Alert</strong>:
+As these changes are not global, other services installed by using Azure Extensions (Native or Custom ones) might require additional changes in order to make then work with the default proxy or to also make the same configuration to their services.</p>
+
+<p>HTH!</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/en-US/tag/#arc" class="page__taxonomy-item" rel="tag">Arc</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/en-US/tag/#azure" class="page__taxonomy-item" rel="tag">Azure</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/en-US/tag/#linux" class="page__taxonomy-item" rel="tag">Linux</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/en-US/categories/#azure-arc" class="page__taxonomy-item" rel="tag">Azure Arc</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2021-03-02T15:00:00-03:00">March 2, 2021</time></p>
+
+
+      </footer>
+
+      <section id="sharelinks" class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=zerahzurc&amp;text=Azure+Arc+enabled+Servers%3A+Service-level+proxy+configuration+on+Linux%20https%3A%2F%2Fdavicruz.com%2Fazure-arc%2F2021%2F03%2Fazure-arc-enabled-servers-service-level-proxy-configuration-on-linux%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdavicruz.com%2Fazure-arc%2F2021%2F03%2Fazure-arc-enabled-servers-service-level-proxy-configuration-on-linux%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Fdavicruz.com%2Fazure-arc%2F2021%2F03%2Fazure-arc-enabled-servers-service-level-proxy-configuration-on-linux%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+
+  <a href="whatsapp://send?text=https%3A%2F%2Fdavicruz.com%2Fazure-arc%2F2021%2F03%2Fazure-arc-enabled-servers-service-level-proxy-configuration-on-linux%2F" data-action="share/whatsapp/share" class="btn btn--whatsapp" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Whatsapp"><i class="fab fa-fw fa-whatsapp" aria-hidden="true"></i><span> Whatsapp</span></a>
+
+  <a href="https://telegram.me/share/url?url=https%3A%2F%2Fdavicruz.com%2Fazure-arc%2F2021%2F03%2Fazure-arc-enabled-servers-service-level-proxy-configuration-on-linux%2F&amp;text=Azure+Arc+enabled+Servers%3A+Service-level+proxy+configuration+on+Linux" class="btn btn--telegram" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Telegram"><i class="fab fa-fw fa-telegram-plane" aria-hidden="true"></i><span> Telegram</span></a>
+
+
+</section>
+
+
+      
+  <nav class="pagination">
+    
+    
+      <a href="/en-US/writeup/2021/02/htb-academy/" class="pagination--pager" title="Hackthebox write-up: Academy
+">Previous</a>
+    
+    
+    
+      
+        <a href="/en-US/writeup/2021/03/htb-passage/" class="pagination--pager" title="Hackthebox write-up: Passage
+">Next</a>
+        
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Leave a comment</h4>
+      <section id="utterances-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You may also enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/BmkB4rb.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+      
+      
+      <a href="https://davicruz.com/en-US/writeup/2021/06/htb-tenet/" rel="permalink">Hackthebox write-up: Tenet
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-12T13:00:00-03:00">June 12, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          7 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/azure-arc/2021/03/azure-arc-enabled-servers-service-level-proxy-configuration-on-linux/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Hello guys!
+
+This week’s machine will be Tenet, another medium-rated Linux box from Hack The Box, created by egotisticalSW.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/wHnMfBz.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+      
+      
+      <a href="https://davicruz.com/en-US/writeup/2021/06/htb-scriptkiddie/" rel="permalink">Hackthebox write-up: ScriptKiddie
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-05T13:00:00-03:00">June 5, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          5 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/azure-arc/2021/03/azure-arc-enabled-servers-service-level-proxy-configuration-on-linux/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Hello guys!
+
+This week’s machine will be ScriptKiddie, another easy-rated Linux box from Hack The Box, created by 0xdf.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/FTjLM76.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+      
+      
+      <a href="https://davicruz.com/en-US/writeup/2021/05/htb-delivery/" rel="permalink">Hackthebox write-up: Delivery
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-22T13:00:00-03:00">May 22, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          8 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/azure-arc/2021/03/azure-arc-enabled-servers-service-level-proxy-configuration-on-linux/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Hello guys!
+
+This week’s machine will be Delivery, another easy-rated machine from Hack The Box, created by ippsec.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/R2EVM1J.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+      
+      
+      <a href="https://davicruz.com/en-US/writeup/2021/05/htb-ready/" rel="permalink">Hackthebox write-up: Ready
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-15T13:00:00-03:00">May 15, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          6 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/azure-arc/2021/03/azure-arc-enabled-servers-service-level-proxy-configuration-on-linux/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Hello guys!
+
+This week’s machine will be Ready, another median-rated machine from Hack The Box, created by bertolis.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap">
+<form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term...">
+  </form>
+  <div id="results" class="results"></div>
+</div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- Osano - consent -->
+<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+
+    
+    <li><strong>Follow:</strong></li>
+    
+
+    
+    
+    
+    <li><a href="https://www.linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i> Linkedin</a></li>
+    
+    
+    
+    <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+    <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    
+    <!-- Terms and Privacy -->
+    <li><a href="https://davicruz.com/en-US/terms-and-privacy/" rel="nofollow noopener noreferrer">
+        <i class="fas fa-user-shield" aria-hidden="true"></i> Terms of Service and Privacy Policy</a></li>
+    <!-- end Terms and Privacy -->
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<!-- Start Read in other languages-->
+<div class="page__footer-follow">
+  <ul>
+    
+    
+    
+    <li><a href="https://davicruz.com">Disponível também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></li>
+    
+
+    
+
+    
+
+      
+      
+    
+      
+  </ul>
+</div>
+<!-- End Read in other languages-->
+
+<div class="page__footer-copyright">© 2021 Davi Cruz. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <!-- start custom analytics snippet -->
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-54883666-1"></script>
+<script>
+  function EnableGTAGonConsent(){
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-54883666-1', { 'anonymize_ip': true});
+  }
+</script>
+
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+  function EnableMSClarityonConsent(){
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "5dnbfjo108");
+  }
+</script>
+
+<!-- end custom analytics snippet -->
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function() {
+    var commentContainer = document.querySelector('#utterances-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://utteranc.es/client.js');
+    script.setAttribute('repo', 'davi-cruz/davi-cruz.github.io');
+    script.setAttribute('issue-term', 'azure-arc-enabled-servers-service-level-proxy-configuration-on-linux');
+    script.setAttribute('theme', 'github-dark');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+
+  
+
+
+
+
+    
+<!-- Cookie Consent Management -->
+<script>
+    var strMessage = "This website uses cookies to ensure you get the best experience";
+    var strDismiss = "Got it!";
+    var strAllow = "Allow cookies";
+    var strDeny = "No, thanks!";
+    var strLink = "Learn More";
+    var strHref = "https://davicruz.com/en-US/terms-and-privacy/";
+
+    window.cookieconsent.initialise({
+        "palette": {
+            "popup": {
+                "background": "#252e39"
+            },
+            "button": {
+                "background": "transparent",
+                "text": "#008288",
+                "border": "#008288"
+            }
+        },
+        "position": "bottom-left",
+        "type": "opt-in",
+        "content": {
+            "message": strMessage,
+            "dismiss": strDismiss,
+            "allow": strAllow,
+            "deny": strDeny,
+            "link": strLink,
+            "href": strHref
+        },
+        onInitialise: function (status) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onStatusChange: function (status, chosenBefore) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onRevokeChoice: function () {
+            var type = this.options.type;
+            if (type == 'opt-in') {
+                // disable cookies
+            }
+            if (type == 'opt-out') {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+        }
+    });
+</script>
+<!-- End of Cookie Consent Management -->
+
+  </body>
+</html>

@@ -1,0 +1,1314 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.21.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Azure Arc enabled Servers: Deployment and Update using Configuration Manager | Davi Cruz</title>
+<meta name="description" content="In this post I’ll be guiding you through the process of deploying and updating Azure Arc for Servers (Windows) via Microsoft Endpoint Manager Configuration Manager - MECM (aka SCCM).  The process is pretty simple, but some small tips are shared to help you to take the most of this powerful configuration management solution for this task :smile:.  :information_source: Note: The scripts shared in this post can also be used from other configuration management tools, but they might require some changes to work.  Azure Arc enabled Servers  Azure Arc allows the management of physical and virtual servers not hosted on Azure to be managed though the Azure Portal console, allowing you to manage extensions, updates, and guest policies in a consistent manner, just like you can do for native Azure Virtual Machines.  Azure Arc is an important asset so you can benefit from features like Azure Defender Vulnerability Assessment, as well as deploying and managing other extensions like Microsoft Monitoring Agent (MMA) e the new Azure Monitor Agent (AMA).  Pricing  According to Azure Arc – Azure Management | Microsoft Azure, features related to Azure control plane (installing extensions, ARM Templates, etc.) can be used at no cost, as well as the Azure Update Management.  Features related to Azure Policy Guest Configurations (Automation, Inventory, State Configuration) and other services you may be able to connect to using Arc (Azure Defender and Azure Monitor, for example) are charged according to its respective pricing table, which can be checked directly from Azure Pricing Calculator.  Pre-requisites  Some pre-requisites need to be observed to make this install possible, where details can be check on the link Overview of the Connected Machine agent - Azure Arc | Microsoft Docs:     A supported Operating System.   Azure Arc URLs allowed for communication, vide above mentioned link            Depending on your environment, defining a proxy server might be required.       Some extensions you install from Arc might need additional URLs to ensure their proper functioning.           Provisioning of a Service Principal to onboard clients to Arc silently. Details of how to provision this object is described in Connect hybrid machines to Azure at scale - Azure Arc | Microsoft Docs.   Enable Microsoft.HybridCompute and Microsoft.GuestConfiguration resource providers, according to Connect hybrid machine with Azure Arc enabled servers - Azure Arc | Microsoft Docs.   Management via Configuration Manager  If your organization already uses Configuration Manager for device management, it can be also used to install and update Azure Machine Connected Agent, which is used by Azure Arc.  Agent Install  Using Configuration Manager Applications, we can ensure that this agent is installed properly in the devices we aim to manage, getting a better control of the results of the install process.  Below I describe de instructions on how to create this resource:          Download the latest release of Arc installer for Windows: The binary can be downloaded directly from the shortened URL https://aka.ms/AzureConnectedMachineAgent. Powershell command below can be used to download and store it to a specified location.             The file needs to be stored in a File Share accessible by MECM to be used as content source.           $destinationPath = &quot;c:\path\to\file&quot; Invoke-WebRequest -Uri https://aka.ms/AzureConnectedMachineAgent -OutFile &quot;$destinationPath\AzureConnectedMachineAgent.msi&quot;                Download and edit the Install-AzureArcMECM.ps1 script filling the variables just like the sample below. This script needs to be placed in the same directory as the *.msi we’ve just downloaded.             If your servers require a proxy for Internet communication, fill the variable $proxyUrl with its path, otherwise leave it blank.       The shared script, besides installing the agent, also configures proxy (if informed) and connects the agent to Arc service using the credentials specified:           ## Variables $installLogFile = &quot;c:\Windows\Temp\AzureArcSetup.log&quot;    $tenantID = &quot;7482a3c1-7102-4a0d-9dfb-0aa2186ce450&quot; $subscriptionID = &quot;48a0ab65-bd82-4aac-9283-99344f387d9b&quot; $ResourceGroupName = &quot;rg-azurearc-windows&quot; $serviceprincipalAppID = &quot;909e06f7-577c-45b9-b49e-eff9e6560ef6&quot; $serviceprincipalSecret = &quot;f53f0a59-6db3-4ac7-b861-e760d29240d8&quot; $resourceLocation = &quot;eastus&quot; $proxyUrl = &quot;&quot; # Format: http[s]://server.fqdn:port    ### Sample data provided for illustration purposes                Create the Application from MECM console accessing Software Library &gt; Application Management &gt; Applications and selecting the option Create Application in the ribbon or on context menu from Application.           Select the UNC path for the downloaded *.msi and click Next.        Click Next to proceed after validating the information shown about the installer used.             In General Information, replace the preconfigured command line with the one provided below, so the install process will happen from PowerShell and hit Next.      %windir%\System32\WindowsPowerShell\v1.0\powershell.exe -File .\Install-AzureArcMECM.ps1           :bulb: Tip: Fill in the other requested information for this application, which will enrich the application catalog and make it easier to administer it later.           Review all the provided information and click Next to create the resource.        After completion, the select Close for this success message.     After creating this application, we need to adjust a few details so it can work in a more adequate way:     Access the deployment type settings by navigating to the application &gt; Deployment Types tab &gt; right click the existing deployment and select Properties.        Under Detection Method tab, select the option Use a custom script to detect the presence of this deployment type and click Edit.             Select the PowerShell script type and paste the snipped provided below, hitting OK to confirm.             This detection script will check not only if the agent is installed but also if it’s connected to Arc before and after the install process.             :warning: Alert: Is important that this script only return an output if the software is installed. Any output is interpreted by ConfigMgr as installed.  # Detection Method: Returns the installed version if properly installed  try{     $agentDetails = &amp; &quot;$env:ProgramW6432\AzureConnectedMachineAgent\azcmagent.exe&quot; show     $agentStatus = ($agentDetails | Where-Object {$_ -like &#39;*Agent Status*&#39;}).Split(&quot;: &quot;)[-1]      if($agentStatus -eq &#39;Connected&#39; ){       Write-Output ($agentDetails | Where-Object {$_ -like &#39;*Agent Version*&#39;}).Split(&quot;: &quot;)[-1]     } } catch{   # Returns nothing if not installed }       On Requirements tab we need also to define the supported Operating System versions we’re targeting. This also avoids accidental deployments installing Arc Agent on unsupported devices, like Windows Clients.        After these final adjustments, click OK to finish the configuration.   At this moment, the Application is ready to be deployed to your servers and the process involved in this task is described in this official Microsoft reference.  Updating the agent  According to the docs, Azure Arc can be updated manually or using WSUS for Windows Operating Systems.  In this case we can leverage ConfigMgr in both ways:          Creating another application for the newer version:             This mechanism requires more administration effort from ConfigMgr but can be achieved by duplicating the application and replacing the installation binaries.                    If you desire to proceed with this, your detection method will need to be enhanced by looking for a specific Arc Version.                       Is also important that, if you go through this path, a supersedence relation be created between these apps, as you can learn more in this link. It allows that, for the existing deployments of older versions, the latest app available be used, as well as allowing you to set the behavior for the devices where the app already installed, that can be update or uninstall.                Add products and classifications to Software Update Catalog and manage using Software Update Management (recommended): This approach leverages the existing process in your organization using Configuration Manager to also update Azure Arc.                      The following products and classifications need to be selected and synchronized in your Software Update Point. The details on how to enable them is available on this link:                                                 Setting               Value to be selected                                                               Products               Microsoft &gt; Azure Connected Machine Agent                                         Classification               Critical Updates                                                   Conclusion  As we could see in this post, the process of using Configuration Manager for deploying and updating Azure Arc is quite simple, needing a few adjustments to do not only the install process but also the onboarding.  In the official documentation we have other deployment methods available, which can be seen in their respective articles:     Install Connected Machine agent using Windows PowerShell DSC - Azure Arc | Microsoft Docs   Connect hybrid machines to Azure from Windows Admin Center - Azure Arc | Microsoft Docs   Connect hybrid machines to Azure by using PowerShell - Azure Arc | Microsoft Docs   Hope that the shared information be useful to you, making easier to deploy Azure Arc from ConfigMgr.  See you in the next post! :smile:">
+
+
+  <meta name="author" content="Davi Cruz">
+  
+  <meta property="article:author" content="Davi Cruz">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Davi Cruz">
+<meta property="og:title" content="Azure Arc enabled Servers: Deployment and Update using Configuration Manager">
+<meta property="og:url" content="https://davicruz.com/azure-arc/2021/04/install-update-azure-arc-windows-configmgr/">
+
+
+  <meta property="og:description" content="In this post I’ll be guiding you through the process of deploying and updating Azure Arc for Servers (Windows) via Microsoft Endpoint Manager Configuration Manager - MECM (aka SCCM).  The process is pretty simple, but some small tips are shared to help you to take the most of this powerful configuration management solution for this task :smile:.  :information_source: Note: The scripts shared in this post can also be used from other configuration management tools, but they might require some changes to work.  Azure Arc enabled Servers  Azure Arc allows the management of physical and virtual servers not hosted on Azure to be managed though the Azure Portal console, allowing you to manage extensions, updates, and guest policies in a consistent manner, just like you can do for native Azure Virtual Machines.  Azure Arc is an important asset so you can benefit from features like Azure Defender Vulnerability Assessment, as well as deploying and managing other extensions like Microsoft Monitoring Agent (MMA) e the new Azure Monitor Agent (AMA).  Pricing  According to Azure Arc – Azure Management | Microsoft Azure, features related to Azure control plane (installing extensions, ARM Templates, etc.) can be used at no cost, as well as the Azure Update Management.  Features related to Azure Policy Guest Configurations (Automation, Inventory, State Configuration) and other services you may be able to connect to using Arc (Azure Defender and Azure Monitor, for example) are charged according to its respective pricing table, which can be checked directly from Azure Pricing Calculator.  Pre-requisites  Some pre-requisites need to be observed to make this install possible, where details can be check on the link Overview of the Connected Machine agent - Azure Arc | Microsoft Docs:     A supported Operating System.   Azure Arc URLs allowed for communication, vide above mentioned link            Depending on your environment, defining a proxy server might be required.       Some extensions you install from Arc might need additional URLs to ensure their proper functioning.           Provisioning of a Service Principal to onboard clients to Arc silently. Details of how to provision this object is described in Connect hybrid machines to Azure at scale - Azure Arc | Microsoft Docs.   Enable Microsoft.HybridCompute and Microsoft.GuestConfiguration resource providers, according to Connect hybrid machine with Azure Arc enabled servers - Azure Arc | Microsoft Docs.   Management via Configuration Manager  If your organization already uses Configuration Manager for device management, it can be also used to install and update Azure Machine Connected Agent, which is used by Azure Arc.  Agent Install  Using Configuration Manager Applications, we can ensure that this agent is installed properly in the devices we aim to manage, getting a better control of the results of the install process.  Below I describe de instructions on how to create this resource:          Download the latest release of Arc installer for Windows: The binary can be downloaded directly from the shortened URL https://aka.ms/AzureConnectedMachineAgent. Powershell command below can be used to download and store it to a specified location.             The file needs to be stored in a File Share accessible by MECM to be used as content source.           $destinationPath = &quot;c:\path\to\file&quot; Invoke-WebRequest -Uri https://aka.ms/AzureConnectedMachineAgent -OutFile &quot;$destinationPath\AzureConnectedMachineAgent.msi&quot;                Download and edit the Install-AzureArcMECM.ps1 script filling the variables just like the sample below. This script needs to be placed in the same directory as the *.msi we’ve just downloaded.             If your servers require a proxy for Internet communication, fill the variable $proxyUrl with its path, otherwise leave it blank.       The shared script, besides installing the agent, also configures proxy (if informed) and connects the agent to Arc service using the credentials specified:           ## Variables $installLogFile = &quot;c:\Windows\Temp\AzureArcSetup.log&quot;    $tenantID = &quot;7482a3c1-7102-4a0d-9dfb-0aa2186ce450&quot; $subscriptionID = &quot;48a0ab65-bd82-4aac-9283-99344f387d9b&quot; $ResourceGroupName = &quot;rg-azurearc-windows&quot; $serviceprincipalAppID = &quot;909e06f7-577c-45b9-b49e-eff9e6560ef6&quot; $serviceprincipalSecret = &quot;f53f0a59-6db3-4ac7-b861-e760d29240d8&quot; $resourceLocation = &quot;eastus&quot; $proxyUrl = &quot;&quot; # Format: http[s]://server.fqdn:port    ### Sample data provided for illustration purposes                Create the Application from MECM console accessing Software Library &gt; Application Management &gt; Applications and selecting the option Create Application in the ribbon or on context menu from Application.           Select the UNC path for the downloaded *.msi and click Next.        Click Next to proceed after validating the information shown about the installer used.             In General Information, replace the preconfigured command line with the one provided below, so the install process will happen from PowerShell and hit Next.      %windir%\System32\WindowsPowerShell\v1.0\powershell.exe -File .\Install-AzureArcMECM.ps1           :bulb: Tip: Fill in the other requested information for this application, which will enrich the application catalog and make it easier to administer it later.           Review all the provided information and click Next to create the resource.        After completion, the select Close for this success message.     After creating this application, we need to adjust a few details so it can work in a more adequate way:     Access the deployment type settings by navigating to the application &gt; Deployment Types tab &gt; right click the existing deployment and select Properties.        Under Detection Method tab, select the option Use a custom script to detect the presence of this deployment type and click Edit.             Select the PowerShell script type and paste the snipped provided below, hitting OK to confirm.             This detection script will check not only if the agent is installed but also if it’s connected to Arc before and after the install process.             :warning: Alert: Is important that this script only return an output if the software is installed. Any output is interpreted by ConfigMgr as installed.  # Detection Method: Returns the installed version if properly installed  try{     $agentDetails = &amp; &quot;$env:ProgramW6432\AzureConnectedMachineAgent\azcmagent.exe&quot; show     $agentStatus = ($agentDetails | Where-Object {$_ -like &#39;*Agent Status*&#39;}).Split(&quot;: &quot;)[-1]      if($agentStatus -eq &#39;Connected&#39; ){       Write-Output ($agentDetails | Where-Object {$_ -like &#39;*Agent Version*&#39;}).Split(&quot;: &quot;)[-1]     } } catch{   # Returns nothing if not installed }       On Requirements tab we need also to define the supported Operating System versions we’re targeting. This also avoids accidental deployments installing Arc Agent on unsupported devices, like Windows Clients.        After these final adjustments, click OK to finish the configuration.   At this moment, the Application is ready to be deployed to your servers and the process involved in this task is described in this official Microsoft reference.  Updating the agent  According to the docs, Azure Arc can be updated manually or using WSUS for Windows Operating Systems.  In this case we can leverage ConfigMgr in both ways:          Creating another application for the newer version:             This mechanism requires more administration effort from ConfigMgr but can be achieved by duplicating the application and replacing the installation binaries.                    If you desire to proceed with this, your detection method will need to be enhanced by looking for a specific Arc Version.                       Is also important that, if you go through this path, a supersedence relation be created between these apps, as you can learn more in this link. It allows that, for the existing deployments of older versions, the latest app available be used, as well as allowing you to set the behavior for the devices where the app already installed, that can be update or uninstall.                Add products and classifications to Software Update Catalog and manage using Software Update Management (recommended): This approach leverages the existing process in your organization using Configuration Manager to also update Azure Arc.                      The following products and classifications need to be selected and synchronized in your Software Update Point. The details on how to enable them is available on this link:                                                 Setting               Value to be selected                                                               Products               Microsoft &gt; Azure Connected Machine Agent                                         Classification               Critical Updates                                                   Conclusion  As we could see in this post, the process of using Configuration Manager for deploying and updating Azure Arc is quite simple, needing a few adjustments to do not only the install process but also the onboarding.  In the official documentation we have other deployment methods available, which can be seen in their respective articles:     Install Connected Machine agent using Windows PowerShell DSC - Azure Arc | Microsoft Docs   Connect hybrid machines to Azure from Windows Admin Center - Azure Arc | Microsoft Docs   Connect hybrid machines to Azure by using PowerShell - Azure Arc | Microsoft Docs   Hope that the shared information be useful to you, making easier to deploy Azure Arc from ConfigMgr.  See you in the next post! :smile:">
+
+
+
+  <meta property="og:image" content="https://i.imgur.com/dBG1AZY.png">
+
+
+
+  <meta name="twitter:site" content="@zerahzurc">
+  <meta name="twitter:title" content="Azure Arc enabled Servers: Deployment and Update using Configuration Manager">
+  <meta name="twitter:description" content="In this post I’ll be guiding you through the process of deploying and updating Azure Arc for Servers (Windows) via Microsoft Endpoint Manager Configuration Manager - MECM (aka SCCM).  The process is pretty simple, but some small tips are shared to help you to take the most of this powerful configuration management solution for this task :smile:.  :information_source: Note: The scripts shared in this post can also be used from other configuration management tools, but they might require some changes to work.  Azure Arc enabled Servers  Azure Arc allows the management of physical and virtual servers not hosted on Azure to be managed though the Azure Portal console, allowing you to manage extensions, updates, and guest policies in a consistent manner, just like you can do for native Azure Virtual Machines.  Azure Arc is an important asset so you can benefit from features like Azure Defender Vulnerability Assessment, as well as deploying and managing other extensions like Microsoft Monitoring Agent (MMA) e the new Azure Monitor Agent (AMA).  Pricing  According to Azure Arc – Azure Management | Microsoft Azure, features related to Azure control plane (installing extensions, ARM Templates, etc.) can be used at no cost, as well as the Azure Update Management.  Features related to Azure Policy Guest Configurations (Automation, Inventory, State Configuration) and other services you may be able to connect to using Arc (Azure Defender and Azure Monitor, for example) are charged according to its respective pricing table, which can be checked directly from Azure Pricing Calculator.  Pre-requisites  Some pre-requisites need to be observed to make this install possible, where details can be check on the link Overview of the Connected Machine agent - Azure Arc | Microsoft Docs:     A supported Operating System.   Azure Arc URLs allowed for communication, vide above mentioned link            Depending on your environment, defining a proxy server might be required.       Some extensions you install from Arc might need additional URLs to ensure their proper functioning.           Provisioning of a Service Principal to onboard clients to Arc silently. Details of how to provision this object is described in Connect hybrid machines to Azure at scale - Azure Arc | Microsoft Docs.   Enable Microsoft.HybridCompute and Microsoft.GuestConfiguration resource providers, according to Connect hybrid machine with Azure Arc enabled servers - Azure Arc | Microsoft Docs.   Management via Configuration Manager  If your organization already uses Configuration Manager for device management, it can be also used to install and update Azure Machine Connected Agent, which is used by Azure Arc.  Agent Install  Using Configuration Manager Applications, we can ensure that this agent is installed properly in the devices we aim to manage, getting a better control of the results of the install process.  Below I describe de instructions on how to create this resource:          Download the latest release of Arc installer for Windows: The binary can be downloaded directly from the shortened URL https://aka.ms/AzureConnectedMachineAgent. Powershell command below can be used to download and store it to a specified location.             The file needs to be stored in a File Share accessible by MECM to be used as content source.           $destinationPath = &quot;c:\path\to\file&quot; Invoke-WebRequest -Uri https://aka.ms/AzureConnectedMachineAgent -OutFile &quot;$destinationPath\AzureConnectedMachineAgent.msi&quot;                Download and edit the Install-AzureArcMECM.ps1 script filling the variables just like the sample below. This script needs to be placed in the same directory as the *.msi we’ve just downloaded.             If your servers require a proxy for Internet communication, fill the variable $proxyUrl with its path, otherwise leave it blank.       The shared script, besides installing the agent, also configures proxy (if informed) and connects the agent to Arc service using the credentials specified:           ## Variables $installLogFile = &quot;c:\Windows\Temp\AzureArcSetup.log&quot;    $tenantID = &quot;7482a3c1-7102-4a0d-9dfb-0aa2186ce450&quot; $subscriptionID = &quot;48a0ab65-bd82-4aac-9283-99344f387d9b&quot; $ResourceGroupName = &quot;rg-azurearc-windows&quot; $serviceprincipalAppID = &quot;909e06f7-577c-45b9-b49e-eff9e6560ef6&quot; $serviceprincipalSecret = &quot;f53f0a59-6db3-4ac7-b861-e760d29240d8&quot; $resourceLocation = &quot;eastus&quot; $proxyUrl = &quot;&quot; # Format: http[s]://server.fqdn:port    ### Sample data provided for illustration purposes                Create the Application from MECM console accessing Software Library &gt; Application Management &gt; Applications and selecting the option Create Application in the ribbon or on context menu from Application.           Select the UNC path for the downloaded *.msi and click Next.        Click Next to proceed after validating the information shown about the installer used.             In General Information, replace the preconfigured command line with the one provided below, so the install process will happen from PowerShell and hit Next.      %windir%\System32\WindowsPowerShell\v1.0\powershell.exe -File .\Install-AzureArcMECM.ps1           :bulb: Tip: Fill in the other requested information for this application, which will enrich the application catalog and make it easier to administer it later.           Review all the provided information and click Next to create the resource.        After completion, the select Close for this success message.     After creating this application, we need to adjust a few details so it can work in a more adequate way:     Access the deployment type settings by navigating to the application &gt; Deployment Types tab &gt; right click the existing deployment and select Properties.        Under Detection Method tab, select the option Use a custom script to detect the presence of this deployment type and click Edit.             Select the PowerShell script type and paste the snipped provided below, hitting OK to confirm.             This detection script will check not only if the agent is installed but also if it’s connected to Arc before and after the install process.             :warning: Alert: Is important that this script only return an output if the software is installed. Any output is interpreted by ConfigMgr as installed.  # Detection Method: Returns the installed version if properly installed  try{     $agentDetails = &amp; &quot;$env:ProgramW6432\AzureConnectedMachineAgent\azcmagent.exe&quot; show     $agentStatus = ($agentDetails | Where-Object {$_ -like &#39;*Agent Status*&#39;}).Split(&quot;: &quot;)[-1]      if($agentStatus -eq &#39;Connected&#39; ){       Write-Output ($agentDetails | Where-Object {$_ -like &#39;*Agent Version*&#39;}).Split(&quot;: &quot;)[-1]     } } catch{   # Returns nothing if not installed }       On Requirements tab we need also to define the supported Operating System versions we’re targeting. This also avoids accidental deployments installing Arc Agent on unsupported devices, like Windows Clients.        After these final adjustments, click OK to finish the configuration.   At this moment, the Application is ready to be deployed to your servers and the process involved in this task is described in this official Microsoft reference.  Updating the agent  According to the docs, Azure Arc can be updated manually or using WSUS for Windows Operating Systems.  In this case we can leverage ConfigMgr in both ways:          Creating another application for the newer version:             This mechanism requires more administration effort from ConfigMgr but can be achieved by duplicating the application and replacing the installation binaries.                    If you desire to proceed with this, your detection method will need to be enhanced by looking for a specific Arc Version.                       Is also important that, if you go through this path, a supersedence relation be created between these apps, as you can learn more in this link. It allows that, for the existing deployments of older versions, the latest app available be used, as well as allowing you to set the behavior for the devices where the app already installed, that can be update or uninstall.                Add products and classifications to Software Update Catalog and manage using Software Update Management (recommended): This approach leverages the existing process in your organization using Configuration Manager to also update Azure Arc.                      The following products and classifications need to be selected and synchronized in your Software Update Point. The details on how to enable them is available on this link:                                                 Setting               Value to be selected                                                               Products               Microsoft &gt; Azure Connected Machine Agent                                         Classification               Critical Updates                                                   Conclusion  As we could see in this post, the process of using Configuration Manager for deploying and updating Azure Arc is quite simple, needing a few adjustments to do not only the install process but also the onboarding.  In the official documentation we have other deployment methods available, which can be seen in their respective articles:     Install Connected Machine agent using Windows PowerShell DSC - Azure Arc | Microsoft Docs   Connect hybrid machines to Azure from Windows Admin Center - Azure Arc | Microsoft Docs   Connect hybrid machines to Azure by using PowerShell - Azure Arc | Microsoft Docs   Hope that the shared information be useful to you, making easier to deploy Azure Arc from ConfigMgr.  See you in the next post! :smile:">
+  <meta name="twitter:domain" content="davicruz.com">
+  <meta name="twitter:url" content="https://davicruz.com/azure-arc/2021/04/install-update-azure-arc-windows-configmgr/">
+
+  
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://i.imgur.com/dBG1AZY.png">
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2021-04-01T09:00:00-03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://davicruz.com/azure-arc/2021/04/install-update-azure-arc-windows-configmgr/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Davi Cruz",
+      "url": "https://davicruz.com/",
+      "sameAs": ["https://twitter.com/zerahzurc","https://www.linkedin.com/in/davicruz","https://github.com/davi-cruz"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="hrWV-PqvbpxEy2HdpVYFQNws2Sz_tROleVyF18s2kWA" />
+
+
+  <meta name="msvalidate.01" content="60B1FA6CDAF15D226AB529AF30386BD8">
+
+
+
+  <meta name="yandex-verification" content="08de8d8c0326420f">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Davi Cruz Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+<!-- Favicon -->
+<link rel="shortcut icon" href="/assets/images/favicon.ico" />
+
+<!-- Multilang tags -->
+
+    
+<link rel="alternate" hreflang="pt-BR" href="/azure-arc/2021/04/install-update-azure-arc-windows-configmgr/">
+    
+
+    
+<link rel="alternate" hreflang="en-US" href="/en-US/azure-arc/2021/04/install-update-azure-arc-windows-configmgr/">
+    
+
+
+<!-- Cookie Consent - Osano -->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          
+          <a class="site-logo" href="https://davicruz.com/en-US"><img src="/assets/images/logo.png" alt=""></a>
+          
+          <a class="site-title" href="https://davicruz.com/en-US">
+            Davi Cruz
+            
+          </a>
+        
+        <ul class="visible-links">
+<li class="masthead__menu-item">
+            <a href="/en-US/categories/">Categories</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/en-US/tag/">Tags</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/en-US/about/">About</a>
+          </li>
+</ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/assets/images/bio-photo.jpg" alt="Davi Cruz" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Davi Cruz</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Just another Cybersecurity professional</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">São Paulo, BR</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fab fa-linkedin" aria-hidden="true"></i><span class="label">Linkedin</span></a></li>
+          
+        
+          
+            <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+<li>
+  <strong></strong>
+  
+  <a class="link-br" href=""></a>
+  
+</li>
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Azure Arc enabled Servers: Deployment and Update using Configuration Manager">
+    <meta itemprop="description" content="In this post I’ll be guiding you through the process of deploying and updating Azure Arc for Servers (Windows) via Microsoft Endpoint Manager Configuration Manager - MECM (aka SCCM).The process is pretty simple, but some small tips are shared to help you to take the most of this powerful configuration management solution for this task :smile:.:information_source: Note: The scripts shared in this post can also be used from other configuration management tools, but they might require some changes to work.Azure Arc enabled ServersAzure Arc allows the management of physical and virtual servers not hosted on Azure to be managed though the Azure Portal console, allowing you to manage extensions, updates, and guest policies in a consistent manner, just like you can do for native Azure Virtual Machines.Azure Arc is an important asset so you can benefit from features like Azure Defender Vulnerability Assessment, as well as deploying and managing other extensions like Microsoft Monitoring Agent (MMA) e the new Azure Monitor Agent (AMA).PricingAccording to Azure Arc – Azure Management | Microsoft Azure, features related to Azure control plane (installing extensions, ARM Templates, etc.) can be used at no cost, as well as the Azure Update Management.Features related to Azure Policy Guest Configurations (Automation, Inventory, State Configuration) and other services you may be able to connect to using Arc (Azure Defender and Azure Monitor, for example) are charged according to its respective pricing table, which can be checked directly from Azure Pricing Calculator.Pre-requisitesSome pre-requisites need to be observed to make this install possible, where details can be check on the link Overview of the Connected Machine agent - Azure Arc | Microsoft Docs:  A supported Operating System.  Azure Arc URLs allowed for communication, vide above mentioned link          Depending on your environment, defining a proxy server might be required.      Some extensions you install from Arc might need additional URLs to ensure their proper functioning.        Provisioning of a Service Principal to onboard clients to Arc silently. Details of how to provision this object is described in Connect hybrid machines to Azure at scale - Azure Arc | Microsoft Docs.  Enable Microsoft.HybridCompute and Microsoft.GuestConfiguration resource providers, according to Connect hybrid machine with Azure Arc enabled servers - Azure Arc | Microsoft Docs.Management via Configuration ManagerIf your organization already uses Configuration Manager for device management, it can be also used to install and update Azure Machine Connected Agent, which is used by Azure Arc.Agent InstallUsing Configuration Manager Applications, we can ensure that this agent is installed properly in the devices we aim to manage, getting a better control of the results of the install process.Below I describe de instructions on how to create this resource:      Download the latest release of Arc installer for Windows: The binary can be downloaded directly from the shortened URL https://aka.ms/AzureConnectedMachineAgent. Powershell command below can be used to download and store it to a specified location.          The file needs to be stored in a File Share accessible by MECM to be used as content source.        $destinationPath = &quot;c:\path\to\file&quot;Invoke-WebRequest -Uri https://aka.ms/AzureConnectedMachineAgent -OutFile &quot;$destinationPath\AzureConnectedMachineAgent.msi&quot;            Download and edit the Install-AzureArcMECM.ps1 script filling the variables just like the sample below. This script needs to be placed in the same directory as the *.msi we’ve just downloaded.          If your servers require a proxy for Internet communication, fill the variable $proxyUrl with its path, otherwise leave it blank.      The shared script, besides installing the agent, also configures proxy (if informed) and connects the agent to Arc service using the credentials specified:        ## Variables$installLogFile = &quot;c:\Windows\Temp\AzureArcSetup.log&quot;  $tenantID = &quot;7482a3c1-7102-4a0d-9dfb-0aa2186ce450&quot;$subscriptionID = &quot;48a0ab65-bd82-4aac-9283-99344f387d9b&quot;$ResourceGroupName = &quot;rg-azurearc-windows&quot;$serviceprincipalAppID = &quot;909e06f7-577c-45b9-b49e-eff9e6560ef6&quot;$serviceprincipalSecret = &quot;f53f0a59-6db3-4ac7-b861-e760d29240d8&quot;$resourceLocation = &quot;eastus&quot;$proxyUrl = &quot;&quot; # Format: http[s]://server.fqdn:port  ### Sample data provided for illustration purposes            Create the Application from MECM console accessing Software Library &gt; Application Management &gt; Applications and selecting the option Create Application in the ribbon or on context menu from Application.    Select the UNC path for the downloaded *.msi and click Next.  Click Next to proceed after validating the information shown about the installer used.      In General Information, replace the preconfigured command line with the one provided below, so the install process will happen from PowerShell and hit Next.    %windir%\System32\WindowsPowerShell\v1.0\powershell.exe -File .\Install-AzureArcMECM.ps1        :bulb: Tip: Fill in the other requested information for this application, which will enrich the application catalog and make it easier to administer it later.    Review all the provided information and click Next to create the resource.  After completion, the select Close for this success message.After creating this application, we need to adjust a few details so it can work in a more adequate way:  Access the deployment type settings by navigating to the application &gt; Deployment Types tab &gt; right click the existing deployment and select Properties.  Under Detection Method tab, select the option Use a custom script to detect the presence of this deployment type and click Edit.      Select the PowerShell script type and paste the snipped provided below, hitting OK to confirm.          This detection script will check not only if the agent is installed but also if it’s connected to Arc before and after the install process.      :warning: Alert: Is important that this script only return an output if the software is installed. Any output is interpreted by ConfigMgr as installed.# Detection Method: Returns the installed version if properly installedtry{    $agentDetails = &amp; &quot;$env:ProgramW6432\AzureConnectedMachineAgent\azcmagent.exe&quot; show    $agentStatus = ($agentDetails | Where-Object {$_ -like '*Agent Status*'}).Split(&quot;: &quot;)[-1]    if($agentStatus -eq 'Connected' ){      Write-Output ($agentDetails | Where-Object {$_ -like '*Agent Version*'}).Split(&quot;: &quot;)[-1]    }}catch{  # Returns nothing if not installed}   On Requirements tab we need also to define the supported Operating System versions we’re targeting. This also avoids accidental deployments installing Arc Agent on unsupported devices, like Windows Clients.  After these final adjustments, click OK to finish the configuration.At this moment, the Application is ready to be deployed to your servers and the process involved in this task is described in this official Microsoft reference.Updating the agentAccording to the docs, Azure Arc can be updated manually or using WSUS for Windows Operating Systems.In this case we can leverage ConfigMgr in both ways:      Creating another application for the newer version:          This mechanism requires more administration effort from ConfigMgr but can be achieved by duplicating the application and replacing the installation binaries.                  If you desire to proceed with this, your detection method will need to be enhanced by looking for a specific Arc Version.                    Is also important that, if you go through this path, a supersedence relation be created between these apps, as you can learn more in this link. It allows that, for the existing deployments of older versions, the latest app available be used, as well as allowing you to set the behavior for the devices where the app already installed, that can be update or uninstall.            Add products and classifications to Software Update Catalog and manage using Software Update Management (recommended): This approach leverages the existing process in your organization using Configuration Manager to also update Azure Arc.                  The following products and classifications need to be selected and synchronized in your Software Update Point. The details on how to enable them is available on this link:                                            Setting              Value to be selected                                                          Products              Microsoft &gt; Azure Connected Machine Agent                                      Classification              Critical Updates                                          ConclusionAs we could see in this post, the process of using Configuration Manager for deploying and updating Azure Arc is quite simple, needing a few adjustments to do not only the install process but also the onboarding.In the official documentation we have other deployment methods available, which can be seen in their respective articles:  Install Connected Machine agent using Windows PowerShell DSC - Azure Arc | Microsoft Docs  Connect hybrid machines to Azure from Windows Admin Center - Azure Arc | Microsoft Docs  Connect hybrid machines to Azure by using PowerShell - Azure Arc | Microsoft DocsHope that the shared information be useful to you, making easier to deploy Azure Arc from ConfigMgr.See you in the next post! :smile:">
+    <meta itemprop="datePublished" content="2021-04-01T09:00:00-03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Azure Arc enabled Servers: Deployment and Update using Configuration Manager
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-04-01T09:00:00-03:00">April 1, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          6 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/azure-arc/2021/04/install-update-azure-arc-windows-configmgr/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>In this post I’ll be guiding you through the process of deploying and updating Azure Arc for Servers (Windows) via Microsoft Endpoint Manager Configuration Manager - MECM (aka SCCM).</p>
+
+<p>The process is pretty simple, but some small tips are shared to help you to take the most of this powerful configuration management solution for this task <img class="emoji" title=":smile:" alt=":smile:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f604.png" height="20" width="20">.</p>
+
+<p class="notice--info"><img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Note</strong>: The scripts shared in this post can also be used from other configuration management tools, but they might require some changes to work.</p>
+
+<h2 id="azure-arc-enabled-servers">Azure Arc enabled Servers</h2>
+
+<p>Azure Arc allows the management of physical and virtual servers not hosted on Azure to be managed though the Azure Portal console, allowing you to manage extensions, updates, and guest policies in a consistent manner, just like you can do for native Azure Virtual Machines.</p>
+
+<p>Azure Arc is an important asset so you can benefit from features like Azure Defender Vulnerability Assessment, as well as deploying and managing other extensions like Microsoft Monitoring Agent (MMA) e the new Azure Monitor Agent (AMA).</p>
+
+<h3 id="pricing">Pricing</h3>
+
+<p>According to <a href="https://azure.microsoft.com/en-us/pricing/details/azure-arc/">Azure Arc – Azure Management | Microsoft Azure</a>, features related to Azure control plane (installing extensions, ARM Templates, etc.) <strong>can be used at no cost</strong>, as well as the Azure Update Management.</p>
+
+<p>Features related to Azure Policy Guest Configurations (Automation, Inventory, State Configuration) and other services you may be able to connect to using Arc (Azure Defender and Azure Monitor, for example) are charged according to its respective pricing table, which can be checked directly from <a href="https://azure.microsoft.com/en-us/pricing/calculator/">Azure Pricing Calculator</a>.</p>
+
+<h3 id="pre-requisites">Pre-requisites</h3>
+
+<p>Some pre-requisites need to be observed to make this install possible, where details can be check on the link <a href="https://docs.microsoft.com/en-us/azure/azure-arc/servers/agent-overview#prerequisites">Overview of the Connected Machine agent - Azure Arc | Microsoft Docs</a>:</p>
+
+<ul>
+  <li>A supported Operating System.</li>
+  <li>Azure Arc URLs allowed for communication, vide above mentioned link
+    <ul>
+      <li>Depending on your environment, defining a proxy server might be required.</li>
+      <li>Some extensions you install from Arc might need additional URLs to ensure their proper functioning.</li>
+    </ul>
+  </li>
+  <li>Provisioning of a Service Principal to onboard clients to Arc silently. Details of how to provision this object is described in <a href="https://docs.microsoft.com/en-us/azure/azure-arc/servers/onboard-service-principal">Connect hybrid machines to Azure at scale - Azure Arc | Microsoft Docs</a>.</li>
+  <li>Enable <strong>Microsoft.HybridCompute</strong> and <strong>Microsoft.GuestConfiguration</strong> resource providers, according to <a href="https://docs.microsoft.com/en-us/azure/azure-arc/servers/learn/quick-enable-hybrid-vm#register-azure-resource-providers">Connect hybrid machine with Azure Arc enabled servers - Azure Arc | Microsoft Docs</a>.</li>
+</ul>
+
+<h2 id="management-via-configuration-manager">Management via Configuration Manager</h2>
+
+<p>If your organization already uses Configuration Manager for device management, it can be also used to install and update Azure Machine Connected Agent, which is used by Azure Arc.</p>
+
+<h3 id="agent-install">Agent Install</h3>
+
+<p>Using <a href="https://docs.microsoft.com/en-us/mem/configmgr/apps/deploy-use/create-applications">Configuration Manager Applications</a>, we can ensure that this agent is installed properly in the devices we aim to manage, getting a better control of the results of the install process.</p>
+
+<p>Below I describe de instructions on how to create this resource:</p>
+
+<ul>
+  <li>
+    <p>Download the latest release of Arc installer for Windows: The binary can be downloaded directly from the shortened URL <code class="language-plaintext highlighter-rouge">https://aka.ms/AzureConnectedMachineAgent</code>. Powershell command below can be used to download and store it to a specified location.</p>
+
+    <ul>
+      <li>The file needs to be stored in a File Share accessible by MECM to be used as content source.</li>
+    </ul>
+
+    <div class="language-powershell highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="nv">$destinationPath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"c:\path\to\file"</span><span class="w">
+</span><span class="n">Invoke-WebRequest</span><span class="w"> </span><span class="nt">-Uri</span><span class="w"> </span><span class="nx">https://aka.ms/AzureConnectedMachineAgent</span><span class="w"> </span><span class="nt">-OutFile</span><span class="w"> </span><span class="s2">"</span><span class="nv">$destinationPath</span><span class="s2">\AzureConnectedMachineAgent.msi"</span><span class="w">
+</span></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Download and edit the <a href="https://github.com/davi-cruz/Security/blob/main/AzureArc/Windows/Install-AzureArcMECM.ps1">Install-AzureArcMECM.ps1</a> script filling the variables just like the sample below. This script needs to be placed in the same directory as the *.msi we’ve just downloaded.</p>
+
+    <ul>
+      <li>If your servers require a proxy for Internet communication, fill the variable <code class="language-plaintext highlighter-rouge">$proxyUrl</code> with its path, otherwise leave it <strong>blank</strong>.</li>
+      <li>The shared script, besides installing the agent, also configures proxy (if informed) and connects the agent to Arc service using the credentials specified:</li>
+    </ul>
+
+    <div class="language-powershell highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="c">## Variables</span><span class="w">
+</span><span class="nv">$installLogFile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"c:\Windows\Temp\AzureArcSetup.log"</span><span class="w">
+  
+</span><span class="nv">$tenantID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"7482a3c1-7102-4a0d-9dfb-0aa2186ce450"</span><span class="w">
+</span><span class="nv">$subscriptionID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"48a0ab65-bd82-4aac-9283-99344f387d9b"</span><span class="w">
+</span><span class="nv">$ResourceGroupName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"rg-azurearc-windows"</span><span class="w">
+</span><span class="nv">$serviceprincipalAppID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"909e06f7-577c-45b9-b49e-eff9e6560ef6"</span><span class="w">
+</span><span class="nv">$serviceprincipalSecret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"f53f0a59-6db3-4ac7-b861-e760d29240d8"</span><span class="w">
+</span><span class="nv">$resourceLocation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"eastus"</span><span class="w">
+</span><span class="nv">$proxyUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">""</span><span class="w"> </span><span class="c"># Format: http[s]://server.fqdn:port</span><span class="w">
+  
+</span><span class="c">### Sample data provided for illustration purposes</span><span class="w">
+</span></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Create the Application from MECM console accessing <em>Software Library</em> &gt; <em>Application Management</em> &gt; <em>Applications</em> and selecting the option <em>Create Application</em> in the ribbon or on context menu from <em>Application</em>.</p>
+  </li>
+</ul>
+
+<p><img src="https://i.imgur.com/UTfhvOv.png" alt="Creating an Application on MECM" class="align-center"></p>
+
+<ul>
+  <li>Select the UNC path for the downloaded <code class="language-plaintext highlighter-rouge">*.msi</code> and click <em>Next</em>.</li>
+</ul>
+
+<p><img src="https://i.imgur.com/dE4HPPW.png" alt="Create Application Wizard - General" class="align-center"></p>
+
+<ul>
+  <li>Click <em>Next</em> to proceed after validating the information shown about the installer used.</li>
+</ul>
+
+<p><img src="https://i.imgur.com/RIHhWc0.png" alt="Create Application Wizard - Important Information" class="align-center"></p>
+
+<ul>
+  <li>
+    <p>In <em>General Information</em>, replace the preconfigured command line with the one provided below, so the install process will happen from PowerShell and hit <em>Next</em>.</p>
+
+    <div class="language-bash highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>%windir%<span class="se">\S</span>ystem32<span class="se">\W</span>indowsPowerShell<span class="se">\v</span>1.0<span class="se">\p</span>owershell.exe <span class="nt">-File</span> .<span class="se">\I</span>nstall-AzureArcMECM.ps1
+</code></pre></div>    </div>
+
+    <p class="notice--primary"><img class="emoji" title=":bulb:" alt=":bulb:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f4a1.png" height="20" width="20"> <strong>Tip</strong>: Fill in the other requested information for this application, which will enrich the application catalog and make it easier to administer it later.</p>
+  </li>
+</ul>
+
+<p><img src="https://i.imgur.com/V6qUH4B.png" alt="Create Application Wizard - General Information" class="align-center"></p>
+
+<ul>
+  <li>Review all the provided information and click <em>Next</em> to create the resource.</li>
+</ul>
+
+<p><img src="https://i.imgur.com/tYcMhvu.png" alt="Create Application Wizard - Summary" class="align-center"></p>
+
+<ul>
+  <li>After completion, the select <em>Close</em> for this success message.</li>
+</ul>
+
+<p><img src="https://i.imgur.com/93fBtqs.png" alt="Create Application Wizard - Completion" class="align-center"></p>
+
+<p>After creating this application, we need to adjust a few details so it can work in a more adequate way:</p>
+
+<ul>
+  <li>Access the deployment type settings by navigating to the application &gt; <em>Deployment Types</em> tab &gt; right click the existing deployment and select <em>Properties</em>.</li>
+</ul>
+
+<p><img src="https://i.imgur.com/an2pGmr.png" alt="ConfigMgr Console - Deployment Type Properties" class="align-center"></p>
+
+<ul>
+  <li>Under <em>Detection Method</em> tab, select the option <em>Use a custom script to detect the presence of this deployment type</em> and click <em>Edit</em>.</li>
+</ul>
+
+<p><img src="https://i.imgur.com/QkRIfhc.png" alt="Deployment Type Properties - Detection Method" class="align-center"></p>
+
+<ul>
+  <li>
+    <p>Select the PowerShell script type and paste the snipped provided below, hitting <em>OK</em> to confirm.</p>
+
+    <ul>
+      <li>This detection script will check not only if the agent is installed but also if it’s connected to Arc before and after the install process.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><img src="https://i.imgur.com/BWSfWnQ.png" alt="Detection Method - Script Editor" class="align-center"></p>
+
+<p class="notice--warning"><img class="emoji" title=":warning:" alt=":warning:" src="https://github.githubassets.com/images/icons/emoji/unicode/26a0.png" height="20" width="20"> <strong>Alert</strong>: Is important that this script only return an output if the software is installed. Any output is interpreted by ConfigMgr as installed.</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Detection Method: Returns the installed version if properly installed</span><span class="w">
+
+</span><span class="kr">try</span><span class="p">{</span><span class="w">
+    </span><span class="nv">$agentDetails</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="s2">"</span><span class="nv">$</span><span class="nn">env</span><span class="p">:</span><span class="nv">ProgramW6432</span><span class="s2">\AzureConnectedMachineAgent\azcmagent.exe"</span><span class="w"> </span><span class="n">show</span><span class="w">
+    </span><span class="nv">$agentStatus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nv">$agentDetails</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">Where-Object</span><span class="w"> </span><span class="p">{</span><span class="bp">$_</span><span class="w"> </span><span class="o">-like</span><span class="w"> </span><span class="s1">'*Agent Status*'</span><span class="p">})</span><span class="o">.</span><span class="nf">Split</span><span class="p">(</span><span class="s2">": "</span><span class="p">)[</span><span class="nt">-1</span><span class="p">]</span><span class="w">
+
+    </span><span class="kr">if</span><span class="p">(</span><span class="nv">$agentStatus</span><span class="w"> </span><span class="o">-eq</span><span class="w"> </span><span class="s1">'Connected'</span><span class="w"> </span><span class="p">){</span><span class="w">
+      </span><span class="n">Write-Output</span><span class="w"> </span><span class="p">(</span><span class="nv">$agentDetails</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">Where-Object</span><span class="w"> </span><span class="p">{</span><span class="bp">$_</span><span class="w"> </span><span class="o">-like</span><span class="w"> </span><span class="s1">'*Agent Version*'</span><span class="p">})</span><span class="o">.</span><span class="nf">Split</span><span class="p">(</span><span class="s2">": "</span><span class="p">)[</span><span class="nt">-1</span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span><span class="kr">catch</span><span class="p">{</span><span class="w">
+  </span><span class="c"># Returns nothing if not installed</span><span class="w">
+</span><span class="p">}</span><span class="w"> 
+</span></code></pre></div></div>
+
+<ul>
+  <li>On <em>Requirements</em> tab we need also to define the supported Operating System versions we’re targeting. This also avoids accidental deployments installing Arc Agent on unsupported devices, like Windows Clients.</li>
+</ul>
+
+<p><img src="https://i.imgur.com/TMATvrP.png" alt="Deployment Type Properties - Requirements - Create Requirement" class="align-center"></p>
+
+<ul>
+  <li>After these final adjustments, click <em>OK</em> to finish the configuration.</li>
+</ul>
+
+<p>At this moment, the Application is ready to be deployed to your servers and the process involved in this task is described in this <a href="https://docs.microsoft.com/en-us/mem/configmgr/apps/deploy-use/deploy-applications">official Microsoft reference</a>.</p>
+
+<h3 id="updating-the-agent">Updating the agent</h3>
+
+<p>According to the <a href="https://docs.microsoft.com/en-us/azure/azure-arc/servers/manage-agent#upgrading-agent">docs</a>, Azure Arc can be updated manually or using WSUS for Windows Operating Systems.</p>
+
+<p>In this case we can leverage ConfigMgr in both ways:</p>
+
+<ul>
+  <li>
+    <p><strong>Creating another application for the newer version</strong>:</p>
+
+    <ul>
+      <li>This mechanism requires more administration effort from ConfigMgr but can be achieved by duplicating the application and replacing the installation binaries.
+        <ul>
+          <li>If you desire to proceed with this, your detection method will need to be enhanced by looking for a specific Arc Version.</li>
+        </ul>
+      </li>
+      <li>Is also important that, if you go through this path, a <strong>supersedence relation</strong> be created between these apps, as you can learn more in <a href="https://docs.microsoft.com/en-us/mem/configmgr/apps/deploy-use/revise-and-supersede-applications#supersedence">this link</a>. It allows that, for the existing deployments of older versions, the latest app available be used, as well as allowing you to set the behavior for the devices where the app already installed, that can be update or uninstall.</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Add products and classifications to Software Update Catalog and manage using Software Update Management (recommended)</strong>: This approach leverages the existing process in your organization using Configuration Manager to also update Azure Arc.</p>
+
+    <ul>
+      <li>
+        <p>The following products and classifications need to be selected and synchronized in your Software Update Point. The details on how to enable them is available on <a href="https://docs.microsoft.com/en-us/mem/configmgr/sum/get-started/configure-classifications-and-products">this link</a>:</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Setting</th>
+              <th>Value to be selected</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Products</td>
+              <td>Microsoft &gt; Azure Connected Machine Agent</td>
+            </tr>
+            <tr>
+              <td>Classification</td>
+              <td>Critical Updates</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>As we could see in this post, the process of using Configuration Manager for deploying and updating Azure Arc is quite simple, needing a few adjustments to do not only the install process but also the onboarding.</p>
+
+<p>In the official documentation we have other deployment methods available, which can be seen in their respective articles:</p>
+
+<ul>
+  <li><a href="https://docs.microsoft.com/en-us/azure/azure-arc/servers/onboard-dsc">Install Connected Machine agent using Windows PowerShell DSC - Azure Arc | Microsoft Docs</a></li>
+  <li><a href="https://docs.microsoft.com/en-us/azure/azure-arc/servers/onboard-windows-admin-center">Connect hybrid machines to Azure from Windows Admin Center - Azure Arc | Microsoft Docs</a></li>
+  <li><a href="https://docs.microsoft.com/en-us/azure/azure-arc/servers/onboard-powershell">Connect hybrid machines to Azure by using PowerShell - Azure Arc | Microsoft Docs</a></li>
+</ul>
+
+<p>Hope that the shared information be useful to you, making easier to deploy Azure Arc from ConfigMgr.</p>
+
+<p>See you in the next post! <img class="emoji" title=":smile:" alt=":smile:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f604.png" height="20" width="20"></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/en-US/tag/#arc" class="page__taxonomy-item" rel="tag">Arc</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/en-US/tag/#azure" class="page__taxonomy-item" rel="tag">Azure</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/en-US/tag/#configmgr" class="page__taxonomy-item" rel="tag">ConfigMgr</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/en-US/tag/#mecm" class="page__taxonomy-item" rel="tag">MECM</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/en-US/tag/#mem" class="page__taxonomy-item" rel="tag">MEM</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/en-US/tag/#windows" class="page__taxonomy-item" rel="tag">Windows</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/en-US/categories/#azure-arc" class="page__taxonomy-item" rel="tag">Azure Arc</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2021-04-01T09:00:00-03:00">April 1, 2021</time></p>
+
+
+      </footer>
+
+      <section id="sharelinks" class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=zerahzurc&amp;text=Azure+Arc+enabled+Servers%3A+Deployment+and+Update+using+Configuration+Manager%20https%3A%2F%2Fdavicruz.com%2Fazure-arc%2F2021%2F04%2Finstall-update-azure-arc-windows-configmgr%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdavicruz.com%2Fazure-arc%2F2021%2F04%2Finstall-update-azure-arc-windows-configmgr%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Fdavicruz.com%2Fazure-arc%2F2021%2F04%2Finstall-update-azure-arc-windows-configmgr%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+
+  <a href="whatsapp://send?text=https%3A%2F%2Fdavicruz.com%2Fazure-arc%2F2021%2F04%2Finstall-update-azure-arc-windows-configmgr%2F" data-action="share/whatsapp/share" class="btn btn--whatsapp" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Whatsapp"><i class="fab fa-fw fa-whatsapp" aria-hidden="true"></i><span> Whatsapp</span></a>
+
+  <a href="https://telegram.me/share/url?url=https%3A%2F%2Fdavicruz.com%2Fazure-arc%2F2021%2F04%2Finstall-update-azure-arc-windows-configmgr%2F&amp;text=Azure+Arc+enabled+Servers%3A+Deployment+and+Update+using+Configuration+Manager" class="btn btn--telegram" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Telegram"><i class="fab fa-fw fa-telegram-plane" aria-hidden="true"></i><span> Telegram</span></a>
+
+
+</section>
+
+
+      
+  <nav class="pagination">
+    
+    
+      <a href="/en-US/azure-sentinel/2021/03/rsyslog-sentinel-log-forwarder/" class="pagination--pager" title="Azure Sentinel: Log Forwarder Configuration
+">Previous</a>
+    
+    
+    
+      
+        <a href="/en-US/writeup/2021/04/htb-time/" class="pagination--pager" title="Hackthebox write-up: Time
+">Next</a>
+        
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Leave a comment</h4>
+      <section id="utterances-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You may also enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/BmkB4rb.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+      
+      
+      <a href="https://davicruz.com/en-US/writeup/2021/06/htb-tenet/" rel="permalink">Hackthebox write-up: Tenet
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-12T13:00:00-03:00">June 12, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          7 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/azure-arc/2021/04/install-update-azure-arc-windows-configmgr/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Hello guys!
+
+This week’s machine will be Tenet, another medium-rated Linux box from Hack The Box, created by egotisticalSW.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/wHnMfBz.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+      
+      
+      <a href="https://davicruz.com/en-US/writeup/2021/06/htb-scriptkiddie/" rel="permalink">Hackthebox write-up: ScriptKiddie
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-05T13:00:00-03:00">June 5, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          5 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/azure-arc/2021/04/install-update-azure-arc-windows-configmgr/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Hello guys!
+
+This week’s machine will be ScriptKiddie, another easy-rated Linux box from Hack The Box, created by 0xdf.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/FTjLM76.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+      
+      
+      <a href="https://davicruz.com/en-US/writeup/2021/05/htb-delivery/" rel="permalink">Hackthebox write-up: Delivery
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-22T13:00:00-03:00">May 22, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          8 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/azure-arc/2021/04/install-update-azure-arc-windows-configmgr/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Hello guys!
+
+This week’s machine will be Delivery, another easy-rated machine from Hack The Box, created by ippsec.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/R2EVM1J.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+      
+      
+      <a href="https://davicruz.com/en-US/writeup/2021/05/htb-ready/" rel="permalink">Hackthebox write-up: Ready
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-15T13:00:00-03:00">May 15, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          6 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/azure-arc/2021/04/install-update-azure-arc-windows-configmgr/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Hello guys!
+
+This week’s machine will be Ready, another median-rated machine from Hack The Box, created by bertolis.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap">
+<form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term...">
+  </form>
+  <div id="results" class="results"></div>
+</div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- Osano - consent -->
+<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+
+    
+    <li><strong>Follow:</strong></li>
+    
+
+    
+    
+    
+    <li><a href="https://www.linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i> Linkedin</a></li>
+    
+    
+    
+    <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+    <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    
+    <!-- Terms and Privacy -->
+    <li><a href="https://davicruz.com/en-US/terms-and-privacy/" rel="nofollow noopener noreferrer">
+        <i class="fas fa-user-shield" aria-hidden="true"></i> Terms of Service and Privacy Policy</a></li>
+    <!-- end Terms and Privacy -->
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<!-- Start Read in other languages-->
+<div class="page__footer-follow">
+  <ul>
+    
+    
+    
+    <li><a href="https://davicruz.com">Disponível também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></li>
+    
+
+    
+
+    
+
+      
+      
+    
+      
+  </ul>
+</div>
+<!-- End Read in other languages-->
+
+<div class="page__footer-copyright">© 2021 Davi Cruz. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <!-- start custom analytics snippet -->
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-54883666-1"></script>
+<script>
+  function EnableGTAGonConsent(){
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-54883666-1', { 'anonymize_ip': true});
+  }
+</script>
+
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+  function EnableMSClarityonConsent(){
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "5dnbfjo108");
+  }
+</script>
+
+<!-- end custom analytics snippet -->
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function() {
+    var commentContainer = document.querySelector('#utterances-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://utteranc.es/client.js');
+    script.setAttribute('repo', 'davi-cruz/davi-cruz.github.io');
+    script.setAttribute('issue-term', 'install-update-azure-arc-windows-configmgr');
+    script.setAttribute('theme', 'github-dark');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+
+  
+
+
+
+
+    
+<!-- Cookie Consent Management -->
+<script>
+    var strMessage = "This website uses cookies to ensure you get the best experience";
+    var strDismiss = "Got it!";
+    var strAllow = "Allow cookies";
+    var strDeny = "No, thanks!";
+    var strLink = "Learn More";
+    var strHref = "https://davicruz.com/en-US/terms-and-privacy/";
+
+    window.cookieconsent.initialise({
+        "palette": {
+            "popup": {
+                "background": "#252e39"
+            },
+            "button": {
+                "background": "transparent",
+                "text": "#008288",
+                "border": "#008288"
+            }
+        },
+        "position": "bottom-left",
+        "type": "opt-in",
+        "content": {
+            "message": strMessage,
+            "dismiss": strDismiss,
+            "allow": strAllow,
+            "deny": strDeny,
+            "link": strLink,
+            "href": strHref
+        },
+        onInitialise: function (status) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onStatusChange: function (status, chosenBefore) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onRevokeChoice: function () {
+            var type = this.options.type;
+            if (type == 'opt-in') {
+                // disable cookies
+            }
+            if (type == 'opt-out') {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+        }
+    });
+</script>
+<!-- End of Cookie Consent Management -->
+
+  </body>
+</html>

